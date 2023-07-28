@@ -1,0 +1,5 @@
+# @format
+
+provider: generic
+url: https://example.com/auto-updates
+updaterCacheDirName: devbox-updater

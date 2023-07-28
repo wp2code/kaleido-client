@@ -1,0 +1,36 @@
+  .appMain-container{
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 1001;
+    width: $appMainWidth !important;
+    height: 100%;
+    overflow: hidden;
+    // background-color: red;
+    transition: width 0.28s;
+  }
+  .app-main {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: $appMainWidth !important;
+    height: 100%;
+    display: flex;
+    .am-left {
+      width: $appMainLeftWidth !important;
+      border: 1px solid var(--el-border-color);
+      .title{
+          font-size: large;
+          font-weight: 600;
+          padding: 0 10px;
+      }
+    }
+    .am-right {
+      width: calc(100% - $appMainLeftWidth);
+      height: 100%;
+      // background-color: blue;
+      border: 1px solid var(--el-border-color);
+    }
+  }

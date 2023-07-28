@@ -1,0 +1,37 @@
+{
+  "extends": "@electron-toolkit/tsconfig/tsconfig.web.json",
+  "compilerOptions": {
+    "target": "esnext",
+    "useDefineForClassFields": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "strict": true,
+    "jsx": "preserve",
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "lib": ["esnext","es5", "dom", "es2015","es2015.promise"],
+    "baseUrl": "./",
+    "allowJs": true,
+    "paths": {
+      "@/*": ["src/renderer/src/*"],
+      "~/*": ["src/*"]
+    },
+    "types": ["vite/client", "element-plus/global", "unplugin-icons/types/vue"],
+    "skipLibCheck": true /* Skip type checking all .d.ts files. */,
+    "allowSyntheticDefaultImports": true /* 允许默认导入 */,
+    "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */
+  },
+  "include": [
+    "src/renderer/src/env.d.ts",
+    "src/renderer/src/**/*",
+    "src/renderer/src/**/*.vue",
+    "src/preload/*.d.ts",
+    "src/renderer/*.d.ts",
+    "src/settings.ts",
+    "src/renderer/auto-imports.d.ts"
+  ],
+  "exclude": ["node_modules", "out", "**/*.js"]
+}
