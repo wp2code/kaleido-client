@@ -2,12 +2,10 @@
   "extends": "@electron-toolkit/tsconfig/tsconfig.node.json",
   "compilerOptions": {
     "composite": true,
-    "module": "ESNext",
-    "moduleResolution": "Node",
-    "allowSyntheticDefaultImports": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "types": [ "element-plus/global"]
+    "strict": false,
+    "experimentalDecorators": true, 
+    "emitDecoratorMetadata": true 
   },
-  "include": ["electron.vite.config.*","src/main/*", "src/preload/*","src/settings.ts","src/renderer/auto-imports.d.ts"]
+  "include": ["electron.vite.config.*","src/main/*", "src/preload/*","src/settings.ts","src/repositories/**/*"],
+  "exclude": ["node_modules", "out"]
 }

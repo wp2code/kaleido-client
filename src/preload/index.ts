@@ -1,8 +1,6 @@
-/** @format */
-
 import { contextBridge, ipcRenderer } from "electron";
 import { electronAPI } from "@electron-toolkit/preload";
-
+import * as db from "../repositories";
 // Custom APIs for renderer
 const api = {
   setTitle: (title) => ipcRenderer.send("set-title", title),
@@ -15,6 +13,7 @@ if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld("electron", electronAPI);
     contextBridge.exposeInMainWorld("api", api);
+    contextBridge.exposeInMainWorld("db", db);
   } catch (error) {
     console.error(error);
   }
@@ -23,4 +22,7 @@ if (process.contextIsolated) {
   window.electron = electronAPI;
   // @ts-ignore (define in dts)
   window.api = api;
+  //@ts-ignore (define in dts)
+  window.db = db;
 }
+export default { electronAPI, api, db };

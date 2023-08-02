@@ -1,20 +1,20 @@
 {
   "extends": "@electron-toolkit/tsconfig/tsconfig.web.json",
   "compilerOptions": {
+    "incremental": true,
     "target": "esnext",
     "useDefineForClassFields": true,
     "module": "esnext",
     "moduleResolution": "node",
-    "strict": true,
+    "strict": false,
     "jsx": "preserve",
-    "sourceMap": true,
+    "sourceMap": false,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "lib": ["esnext","es5", "dom", "es2015","es2015.promise"],
+    "lib": ["esnext","ES5","ES6", "dom", "es2015","es2015.promise"],
     "baseUrl": "./",
     "allowJs": true,
+    "checkJs": true,
     "paths": {
       "@/*": ["src/renderer/src/*"],
       "~/*": ["src/*"]
@@ -29,9 +29,10 @@
     "src/renderer/src/**/*",
     "src/renderer/src/**/*.vue",
     "src/preload/*.d.ts",
-    "src/renderer/*.d.ts",
     "src/settings.ts",
+    "src/renderer/*.d.ts",
+    "src/repositories/**/*",
     "src/renderer/auto-imports.d.ts"
   ],
-  "exclude": ["node_modules", "out", "**/*.js"]
+  "exclude": ["node_modules", "out"]
 }
