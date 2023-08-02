@@ -1,11 +1,9 @@
-/** @format */
-
-import { ElectronAPI } from "@electron-toolkit/preload";
-import { Api } from "./index.ts";
-//全局声明对象 例如  window.api.setTitle(title)
+import { electronAPI, api, db } from "./index.ts";
+//全局声明对象 
 declare global {
   interface Window {
-    electron: ElectronAPI;
-    api: Api;
+    electron: electronAPI;
+    api: api;
+    db: db;
   }
 }

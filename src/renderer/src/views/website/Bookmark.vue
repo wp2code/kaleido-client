@@ -1,5 +1,10 @@
 <template>
-  <el-input v-model="filterText" :prefix-icon="`Search`" placeholder="搜索" />
+  <el-input
+    class="search"
+    v-model="filterText"
+    :prefix-icon="`Search`"
+    placeholder="搜索"
+  />
   <el-tree
     ref="treeRef"
     class="filter-tree"
@@ -12,7 +17,10 @@
       <div class="bookMark-box">
         <div>
           <span v-if="data.icon" style="margin-right: 5px; vertical-align: -4px"
-            ><img :src="data.icon" style="width: 16px; height: 16px" alt=""
+            ><img
+              :src="getAssetsImge(data.icon)"
+              style="width: 16px; height: 16px"
+              alt=""
           /></span>
           <span>{{ node.label }}</span>
         </div>
@@ -38,86 +46,158 @@
       </div>
     </template>
   </el-tree>
+  <el-dialog v-model="dialogVisible" :title="dialogTitle" :before-close="resetForm">
+    <el-form
+      ref="bookmarkDataRef"
+      :model="bookmarkData"
+      :rules="rules"
+      label-width="auto"
+      label-position="right"
+    >
+      <el-form-item prop="label">
+        <el-input
+          v-model="bookmarkData.label"
+          autocomplete="off"
+          :placeholder="bookmarkData.type == 'website' ? '输入网址' : '填写目录名称'"
+        >
+          <template v-if="bookmarkData.type == 'website'" #prepend>
+            <el-select v-model="website.protocol" style="width: 80px">
+              <el-option label="http" value="http" />
+              <el-option label="https" value="https" />
+            </el-select>
+          </template>
+        </el-input>
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="dialogClose">取消</el-button>
+        <el-button type="primary" @click="submitForm"> 保存 </el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 <script lang="ts" setup>
 import { getAssetsImge } from "@/utils";
-import { ElTree, DropdownInstance } from "element-plus";
-import BookmarkApi from "@/repository/bookmark";
+import { ElTree, DropdownInstance, ElForm, FormInstance, FormRules } from "element-plus";
 // import SvgIcon from "@/components/SvgIcon/index.vue";
 import type Node from "element-plus/es/components/tree/src/model/node";
-interface Tree {
-  [key: string]: any;
+import { Bookmark } from "~/repositories/entity/Bookmark";
+interface BookmarkFrom {
+  label: string;
+  type: string;
 }
 interface MoreMenu {
   [key: string]: any;
 }
-
+const dialogVisible = ref(false);
+const dialogTitle = ref("");
 const morMenuInstance = ref<DropdownInstance>();
 const filterText = ref("");
+const bookmarkData = reactive<BookmarkFrom>({
+  label: "",
+  type: "",
+});
+const website = reactive({
+  protocol: "http",
+});
+const dataSource: Ref<Bookmark[]> = ref([]);
 const treeRef = ref<InstanceType<typeof ElTree>>();
-
+const { proxy } = getCurrentInstance();
+const rules = reactive<FormRules<BookmarkFrom>>({
+  label: { required: true, message: "请填写", trigger: "blur" },
+});
 const morMenuList: MoreMenu[] = [
   {
-    id: 1,
+    id: "delete",
     name: "删除",
     icon: "Delete",
     type: "all",
-    command: (node: Node, data: Tree) => {
+    command: (node: Node, data: Bookmark) => {
       return deleteItem(node, data);
     },
   },
   {
-    id: 1,
+    id: "edit",
     name: "编辑",
     icon: "Edit",
     type: "all",
-    command: (node: Node, data: Tree) => {
+    command: (node: Node, data: Bookmark) => {
       return editItem(node, data);
     },
   },
   {
-    id: 2,
+    id: "addWebsite",
     name: "添加网址",
     icon: "CirclePlus",
     type: "dir",
-    command: (node: Node, data: Tree) => {
+    command: (node: Node, data: Bookmark) => {
       return addWebsite(node, data);
     },
   },
   {
-    id: 3,
+    id: "addSubDir",
     name: "添加子目录",
     icon: "CirclePlus",
     type: "dir",
-    command: (node: Node, data: Tree) => {
+    command: (node: Node, data: Bookmark) => {
       return addSubDir(node, data);
     },
   },
 ];
+onMounted(async () => {
+  const bookmarks = await window.db.bookmark.listAll();
+  dataSource.value = bookmarks;
+});
 
-const deleteItem = (node: Node, data: Tree) => {
+const resetForm = (done: () => void) => {
+  dialogClose();
+  done();
+};
+const dialogClose = () => {
+  const formEl = proxy.$refs["bookmarkDataRef"];
+  (formEl as FormInstance).resetFields();
+  dialogVisible.value = false;
+};
+const submitForm = async () => {
+  const formEl = proxy.$refs["bookmarkDataRef"];
+  if (!formEl) return;
+  await (formEl as FormInstance).validate((valid, fields) => {
+    if (valid) {
+      console.log("submit!");
+    } else {
+      console.log("error submit!", fields);
+    }
+  });
+};
+
+const deleteItem = (node: Node, data: Bookmark) => {
   console.log("deleteItem");
-  console.log(node);
-  console.log(data);
 };
-const editItem = (node: Node, data: Tree) => {
+const editItem = (node: Node, data: Bookmark) => {
   console.log("editItem");
-  console.log(node);
-  console.log(data);
 };
-const addWebsite = (node: Node, data: Tree) => {
+const addWebsite = (node: Node, data: Bookmark) => {
   console.log("addWebsite");
-  console.log(data);
+  dialogVisible.value = true;
+  dialogTitle.value = "添加网址";
+  bookmarkData.type = "website";
 };
-const addSubDir = (node: Node, data: Tree) => {
+const addSubDir = (node: Node, data: Bookmark) => {
   console.log("addSubDir");
-  console.log(data);
-  BookmarkApi.add({ icon: "测试", lable: "HelpFilled" });
+  dialogVisible.value = true;
+  dialogTitle.value = "添加子目录";
+  bookmarkData.type = "dir";
 };
-const filterMorrMenu = (data: Tree) => {
-  return morMenuList.filter((v) => v.type == "all" || (v.type == "dir" && data.children));
+
+const filterMorrMenu = (data: Bookmark) => {
+  return morMenuList.filter(
+    (v) =>
+      (v.type == "all" && (v.id != "delete" || data.parent)) ||
+      (v.type == "dir" && data.children)
+  );
 };
-let id = 1000;
+// let id = 1000;
 watch(filterText, (val) => {
   treeRef.value!.filter(val);
 });
@@ -134,119 +214,81 @@ const handleClikMore = () => {
 const handleCommand = (obj) => {
   obj.item.command(obj.node, obj.data);
 };
-const append = (dataSource: Tree) => {
-  const newChild = { id: id++, label: "testtest", children: [] };
-  if (!dataSource.children) {
-    dataSource.children = [];
-  }
-  dataSource.children.push(newChild);
-  dataSource.value = [...dataSource.value];
-};
+// const append = (dataSource: Tree) => {
+//   const newChild = { label: "testtest", children: [] };
+//   if (!dataSource.children) {
+//     dataSource.children = [];
+//   }
+//   dataSource.children.push(newChild);
+//   dataSource.value = [...dataSource.value];
+// };
 
-const remove = (node: Node, dataSource: Tree) => {
-  const parent = node.parent;
-  const children: Tree[] = parent.data.children || parent.data;
-  const index = children.findIndex((d) => d.id === dataSource.id);
-  children.splice(index, 1);
-  dataSource.value = [...dataSource.value];
-};
-const renderContent = (
-  h,
-  {
-    node,
-    data,
-    store,
-  }: {
-    node: Node;
-    data: Tree;
-    store: Node["store"];
-  }
-) => {
-  return h(
-    "span",
-    {
-      class: "custom-tree-node",
-    },
-    h("span", null, node.label),
-    h(
-      "span",
-      null,
-      h(
-        "a",
-        {
-          onClick: () => append(data),
-        },
-        "Append "
-      ),
-      h(
-        "a",
-        {
-          style: "margin-left: 8px",
-          onClick: () => remove(node, data),
-        },
-        "Delete"
-      )
-    )
-  );
-};
-const dataSource: Tree[] = [
-  {
-    id: 0,
-    label: "Level one 0",
-    icon: getAssetsImge("item.png"),
-  },
-  {
-    id: 1,
-    label: "Level one 1",
-    children: [
-      {
-        id: 4,
-        label: "Level two 1-1",
-        children: [
-          {
-            id: 9,
-            label: "Level three 1-1-1",
-          },
-          {
-            id: 10,
-            label: "Level three 1-1-2",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 2,
-    label: "Level one 2",
+// const remove = (node: Node, dataSource: Tree) => {
+//   const parent = node.parent;
+//   const children: Tree[] = parent.data.children || parent.data;
+//   const index = children.findIndex((d) => d.id === dataSource.id);
+//   children.splice(index, 1);
+//   dataSource.value = [...dataSource.value];
+// };
 
-    children: [
-      {
-        id: 5,
-        label: "Level two 2-1",
-        icon: getAssetsImge("item.png"),
-      },
-      {
-        id: 6,
-        label: "Level two 2-2",
-        icon: getAssetsImge("item.png"),
-      },
-    ],
-  },
-  {
-    id: 3,
-    label: "Level one 3",
-    children: [
-      {
-        id: 7,
-        label: "Level two 3-1",
-      },
-      {
-        id: 8,
-        label: "Level two 3-2",
-      },
-    ],
-  },
-];
+// const dataSource2: Tree[] = [
+//   {
+//     id: 0,
+//     label: "Level one 0",
+//     icon: getAssetsImge("item.png"),
+//   },
+//   {
+//     id: 1,
+//     label: "Level one 1",
+//     children: [
+//       {
+//         id: 4,
+//         label: "Level two 1-1",
+//         children: [
+//           {
+//             id: 9,
+//             label: "Level three 1-1-1",
+//           },
+//           {
+//             id: 10,
+//             label: "Level three 1-1-2",
+//           },
+//         ],
+//       },
+//     ],
+//   },
+//   {
+//     id: 2,
+//     label: "Level one 2",
+
+//     children: [
+//       {
+//         id: 5,
+//         label: "Level two 2-1",
+//         icon: getAssetsImge("item.png"),
+//       },
+//       {
+//         id: 6,
+//         label: "Level two 2-2",
+//         icon: getAssetsImge("item.png"),
+//       },
+//     ],
+//   },
+//   {
+//     id: 3,
+//     label: "Level one 3",
+//     children: [
+//       {
+//         id: 7,
+//         label: "Level two 3-1",
+//       },
+//       {
+//         id: 8,
+//         label: "Level two 3-2",
+//       },
+//     ],
+//   },
+// ];
 </script>
 <style lang="scss" scoped>
 .bookmark-tree {
@@ -261,7 +303,7 @@ const dataSource: Tree[] = [
   outline: none;
   width: 100%;
 }
-.el-input {
+.search {
   padding: 0 20px 10px 20px;
 }
 ::v-deep .el-tree-node__content {
