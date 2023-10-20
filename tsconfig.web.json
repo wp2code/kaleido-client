@@ -19,7 +19,7 @@
       "@/*": ["src/renderer/src/*"],
       "~/*": ["src/*"]
     },
-    "types": ["vite/client", "element-plus/global", "unplugin-icons/types/vue"],
+    "types": ["vite/client", "element-plus/global.d.ts", "unplugin-icons/types/vue"],
     "skipLibCheck": true /* Skip type checking all .d.ts files. */,
     "allowSyntheticDefaultImports": true /* 允许默认导入 */,
     "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */
@@ -32,7 +32,8 @@
     "src/settings.ts",
     "src/renderer/*.d.ts",
     "src/repositories/**/*",
-    "src/renderer/auto-imports.d.ts"
+    "src/renderer/auto-imports.d.ts",
+    "src/renderer/global.d.ts"
   ],
   "exclude": ["node_modules", "out"]
 }

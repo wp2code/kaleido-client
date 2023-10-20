@@ -1,18 +1,18 @@
 <script lang="ts" setup>
-import { isExternal } from "@/utils/index";
-import { useRouter } from "vue-router";
+import { isExternal } from '@/utils/index'
+import { useRouter } from 'vue-router'
 const props = defineProps({
   to: {
     type: String,
     required: true,
   },
-});
+})
 
-const router = useRouter();
+const router = useRouter()
 function push() {
   router.push(props.to).catch((err) => {
-    console.error(err);
-  });
+    console.error(err)
+  })
 }
 </script>
 

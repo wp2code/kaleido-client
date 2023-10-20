@@ -1,12 +1,12 @@
 /** @format */
 
-import router from "@/router";
-import { useUserStoreHook } from "@/store/modules/user";
+import router from '@/router'
+import { useUserStoreHook } from '@/store/modules/user'
 // import { usePermissionStoreHook } from '@renderer/store/modules/permission'
 
-import NProgress from "nprogress";
-import "nprogress/nprogress.css";
-NProgress.configure({ showSpinner: false }); // 进度条
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
+NProgress.configure({ showSpinner: false }) // 进度条
 
 // const permissionStore = usePermissionStoreHook()
 
@@ -14,12 +14,12 @@ NProgress.configure({ showSpinner: false }); // 进度条
 // const whiteList = ['/login']
 
 router.beforeEach(async (to, from, next) => {
-  NProgress.start();
-  console.log(to);
-  console.log(from);
-  const userStore = useUserStoreHook();
-  console.log(userStore);
-  next();
+  NProgress.start()
+  console.log(to)
+  console.log(from)
+  const userStore = useUserStoreHook()
+  console.log(userStore)
+  next()
   // const hasToken = localStorage.getItem("accessToken");
   // if (hasToken) {
   //   if (to.path === "/login") {
@@ -61,8 +61,8 @@ router.beforeEach(async (to, from, next) => {
   //     NProgress.done();
   //   }
   // }
-});
+})
 
 router.afterEach(() => {
-  NProgress.done();
-});
+  NProgress.done()
+})

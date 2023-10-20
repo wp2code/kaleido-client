@@ -1,52 +1,52 @@
+.sidebar-container {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1001;
+  width: $sideBarWidth !important;
+  height: 100%;
+  overflow: hidden;
+  background-color: $menuBg;
+  transition: width 0.28s;
+  padding: 5px 0px;
+  // reset element-ui css
+  // reset element-ui css
+  .horizontal-collapse-transition {
+    transition: 0s width ease-in-out, 0s padding-left ease-in-out,
+      0s padding-right ease-in-out;
+  }
 
-  .sidebar-container {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 1001;
-    width: $sideBarWidth !important;
+  // reset element-ui css
+  .horizontal-collapse-transition {
+    transition: 0s width ease-in-out, 0s padding-left ease-in-out,
+      0s padding-right ease-in-out;
+  }
+
+  .scrollbar-wrapper {
+    overflow-x: hidden !important;
+  }
+
+  .el-scrollbar__bar.is-vertical {
+    right: 0;
+  }
+
+  .el-menu {
+    width: 100% !important;
     height: 100%;
-    overflow: hidden;
-    background-color: $menuBg;
-    transition: width 0.28s;
-    padding: 5px 0px;
-    // reset element-ui css
-    // reset element-ui css
-    .horizontal-collapse-transition {
-      transition: 0s width ease-in-out, 0s padding-left ease-in-out,
-        0s padding-right ease-in-out;
-    }
+    border: none;
+  }
+  .is-active > .el-sub-menu__title {
+    color: $subMenuActiveText !important;
+  }
 
-        // reset element-ui css
-    .horizontal-collapse-transition {
-      transition: 0s width ease-in-out, 0s padding-left ease-in-out,
-        0s padding-right ease-in-out;
-    }
+  .el-menu-item,
+  .el-sub-menu__title {
+    min-width: $sideBarWidth !important;
+    background-color: $menuBg !important;
 
-    .scrollbar-wrapper {
-      overflow-x: hidden !important;
-    }
-
-    .el-scrollbar__bar.is-vertical {
-      right: 0;
-    }
-
-    .el-menu {
-      width: 100% !important;
-      height: 100%;
-      border: none;
-    }
-    .is-active > .el-sub-menu__title {
-      color: $subMenuActiveText !important;
-    }
-
-    .el-menu-item,.el-sub-menu__title {
-      min-width: $sideBarWidth !important;
-      background-color: $menuBg !important;
-
-      &:hover {
-        background-color: $menuHover !important;
-      }
+    &:hover {
+      background-color: $menuHover !important;
     }
   }
+}

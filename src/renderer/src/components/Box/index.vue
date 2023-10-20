@@ -3,9 +3,9 @@ const props = defineProps({
   icon: {
     type: String,
     require: false,
-    default: "",
+    default: '',
   },
-});
+})
 </script>
 <template>
   <div class="box">

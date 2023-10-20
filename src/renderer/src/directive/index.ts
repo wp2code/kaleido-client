@@ -1,6 +1,6 @@
 /** @format */
 
-import type { App } from "vue";
+import type { App } from 'vue'
 
 // import { hasPerm } from './permission'
 
@@ -8,5 +8,5 @@ import type { App } from "vue";
 export function setupDirective(app: App<Element>): void {
   // 使 v-hasPerm 在所有组件中都可用
   // app.directive('hasPerm', hasPerm)
-  console.log(app);
+  console.log(app)
 }

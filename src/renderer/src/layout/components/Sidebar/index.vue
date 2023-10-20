@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { useRoute } from "vue-router";
-import { constantRoutes } from "@/router";
-import SidebarItem from "./SidebarItem.vue";
-const currRoute = useRoute();
-import variables from "@/styles/variables.module.scss";
+import { useRoute } from 'vue-router'
+import { constantRoutes } from '@/router'
+import SidebarItem from './SidebarItem.vue'
+const currRoute = useRoute()
+import variables from '@/styles/variables.module.scss'
 </script>
 <template>
   <div class="sidebar">

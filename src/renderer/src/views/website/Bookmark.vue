@@ -1,7 +1,7 @@
 <template>
   <el-input
-    class="search"
     v-model="filterText"
+    class="search"
     :prefix-icon="`Search`"
     placeholder="搜索"
   />
@@ -22,7 +22,10 @@
               style="width: 16px; height: 16px"
               alt=""
           /></span>
-          <span>{{ node.label }}</span>
+          <span v-if="data.isDir">{{ node.label }}</span>
+          <span v-else style="cursor: pointer" @click.self="toHref(node.label)">{{
+            node.label
+          }}</span>
         </div>
         <div style="cursor: pointer" @click.stop @click.self="handleClikMore()">
           <el-dropdown hide-on-click trigger="click" @command="handleCommand">
@@ -46,11 +49,20 @@
       </div>
     </template>
   </el-tree>
-  <el-dialog v-model="dialogVisible" :title="dialogTitle" :before-close="resetForm">
+  <EditBookmark
+    v-model="dialogVisible"
+    title="测试"
+    :is-add-sub="isAddSub"
+    :data="targetBookmark.info"
+    @close="dialogVisible = false"
+    @submit="saveBookmark"
+  ></EditBookmark>
+  <!-- <el-dialog v-model="dialogVisible" :title="dialogTitle" :before-close="resetForm">
     <el-form
       ref="bookmarkDataRef"
       :model="bookmarkData"
       :rules="rules"
+      node-key="id"
       label-width="auto"
       label-position="right"
     >
@@ -75,220 +87,198 @@
         <el-button type="primary" @click="submitForm"> 保存 </el-button>
       </span>
     </template>
-  </el-dialog>
+  </el-dialog> -->
 </template>
 <script lang="ts" setup>
-import { getAssetsImge } from "@/utils";
-import { ElTree, DropdownInstance, ElForm, FormInstance, FormRules } from "element-plus";
-// import SvgIcon from "@/components/SvgIcon/index.vue";
-import type Node from "element-plus/es/components/tree/src/model/node";
-import { Bookmark } from "~/repositories/entity/Bookmark";
+import { getAssetsImge } from '@/utils'
+import EditBookmark from './EditBookmark.vue'
+import { ElTree, DropdownInstance } from 'element-plus'
+import type Node from 'element-plus/es/components/tree/src/model/node'
+import { Bookmark } from '~/repositories/entity/Bookmark'
+const { proxy } = getCurrentInstance()
 interface BookmarkFrom {
-  label: string;
-  type: string;
+  label: string
+  type: string
+  isDir: boolean
 }
 interface MoreMenu {
-  [key: string]: any;
+  [key: string]: any
 }
-const dialogVisible = ref(false);
-const dialogTitle = ref("");
-const morMenuInstance = ref<DropdownInstance>();
-const filterText = ref("");
+declare type TargetBookmark = {
+  info?: Bookmark
+  node?: Node
+}
+const dialogVisible = ref(false)
+const dialogTitle = ref('')
+const morMenuInstance = ref<DropdownInstance>()
+const filterText = ref('')
 const bookmarkData = reactive<BookmarkFrom>({
-  label: "",
-  type: "",
-});
-const website = reactive({
-  protocol: "http",
-});
-const dataSource: Ref<Bookmark[]> = ref([]);
-const treeRef = ref<InstanceType<typeof ElTree>>();
-const { proxy } = getCurrentInstance();
-const rules = reactive<FormRules<BookmarkFrom>>({
-  label: { required: true, message: "请填写", trigger: "blur" },
-});
+  label: '',
+  type: '',
+  isDir: false,
+})
+
+const targetBookmark = ref<TargetBookmark>({})
+const dataSource = ref<Bookmark[]>([])
+const treeRef = ref<InstanceType<typeof ElTree>>()
+const isAddSub = ref(false)
 const morMenuList: MoreMenu[] = [
   {
-    id: "delete",
-    name: "删除",
-    icon: "Delete",
-    type: "all",
+    id: 'delete',
+    name: '删除',
+    icon: 'Delete',
+    type: 'all',
     command: (node: Node, data: Bookmark) => {
-      return deleteItem(node, data);
+      return deleteItem(node, data)
     },
   },
   {
-    id: "edit",
-    name: "编辑",
-    icon: "Edit",
-    type: "all",
+    id: 'edit',
+    name: '编辑',
+    icon: 'Edit',
+    type: 'all',
     command: (node: Node, data: Bookmark) => {
-      return editItem(node, data);
+      return editItem(node, data)
     },
   },
   {
-    id: "addWebsite",
-    name: "添加网址",
-    icon: "CirclePlus",
-    type: "dir",
+    id: 'addWebsite',
+    name: '添加网址',
+    icon: 'CirclePlus',
+    type: 'dir',
     command: (node: Node, data: Bookmark) => {
-      return addWebsite(node, data);
+      return addWebsite(node, data)
     },
   },
   {
-    id: "addSubDir",
-    name: "添加子目录",
-    icon: "CirclePlus",
-    type: "dir",
+    id: 'addSubDir',
+    name: '添加子目录',
+    icon: 'CirclePlus',
+    type: 'dir',
     command: (node: Node, data: Bookmark) => {
-      return addSubDir(node, data);
+      return addSubDir(node, data)
     },
   },
-];
+]
 onMounted(async () => {
-  const bookmarks = await window.db.bookmark.listAll();
-  dataSource.value = bookmarks;
-});
-
-const resetForm = (done: () => void) => {
-  dialogClose();
-  done();
-};
-const dialogClose = () => {
-  const formEl = proxy.$refs["bookmarkDataRef"];
-  (formEl as FormInstance).resetFields();
-  dialogVisible.value = false;
-};
-const submitForm = async () => {
-  const formEl = proxy.$refs["bookmarkDataRef"];
-  if (!formEl) return;
-  await (formEl as FormInstance).validate((valid, fields) => {
-    if (valid) {
-      console.log("submit!");
-    } else {
-      console.log("error submit!", fields);
-    }
-  });
-};
+  init()
+})
+watch(filterText, (val) => {
+  treeRef.value!.filter(val)
+})
+const init = async () => {
+  const bookmarks = await window.db.bookmark.listAll()
+  dataSource.value = bookmarks
+}
+const append = (data: Bookmark) => {
+  const children = targetBookmark.value.info.children || []
+  children.push(data)
+  dataSource.value = [...dataSource.value]
+}
+const remove = (node: Node, data: Bookmark) => {
+  const parent = node.parent
+  const children: Bookmark[] = parent.data.children || parent.data
+  const index = children.findIndex((d) => d.id === data.id)
+  children.splice(index, 1)
+  dataSource.value = [...dataSource.value]
+}
+const saveBookmark = (data: Bookmark) => {
+  console.log('saveBookmark', data.label)
+}
+//  const submitForm = async () => {
+//   const formEl = proxy.$refs['bookmarkDataRef']
+//   if (!formEl) return
+//   await (formEl as FormInstance).validate(async (valid, fields) => {
+//     if (valid) {
+//       const bkInfo = new Bookmark()
+//       bkInfo.label = bookmarkData.label
+//       bkInfo.icon = bookmarkData.isDir ? 'Folder' : 'item.png'
+//       bkInfo.parent = toRaw(targetBookmark.value.info)
+//       bkInfo.isDir = bookmarkData.isDir
+//       await window.db.bookmark
+//         .save(bkInfo)
+//         .then((res) => {
+//           if (res) {
+//             append(res)
+//             dialogClose()
+//           }
+//         })
+//         .catch((err) => {
+//           console.error('save Error', err)
+//         })
+//     } else {
+//       console.log('error submit!', fields)
+//     }
+//   })
+// }
 
 const deleteItem = (node: Node, data: Bookmark) => {
-  console.log("deleteItem");
-};
+  proxy.$msgBoxUtil.confirm('确认删除', {
+    ok: async () => {
+      const res = await window.db.bookmark.del(toRaw(data))
+      if (res) {
+        remove(node, data)
+        return true
+      }
+      return false
+    },
+    successMsg: '删除成功',
+    failMsg: '删除失败',
+  })
+}
+
 const editItem = (node: Node, data: Bookmark) => {
-  console.log("editItem");
-};
+  dialogVisible.value = true
+  dialogTitle.value = '编辑'
+  bookmarkData.type = 'website'
+  isAddSub.value = false
+  bookmarkData.isDir = data.isDir
+  targetBookmark.value.info = data
+  targetBookmark.value.node = node
+}
 const addWebsite = (node: Node, data: Bookmark) => {
-  console.log("addWebsite");
-  dialogVisible.value = true;
-  dialogTitle.value = "添加网址";
-  bookmarkData.type = "website";
-};
+  dialogVisible.value = true
+  dialogTitle.value = '添加网址'
+  bookmarkData.type = 'website'
+  bookmarkData.isDir = true
+  isAddSub.value = true
+  targetBookmark.value.info = data
+  targetBookmark.value.node = node
+}
 const addSubDir = (node: Node, data: Bookmark) => {
-  console.log("addSubDir");
-  dialogVisible.value = true;
-  dialogTitle.value = "添加子目录";
-  bookmarkData.type = "dir";
-};
+  dialogVisible.value = true
+  dialogTitle.value = '添加子目录'
+  bookmarkData.type = 'dir'
+  bookmarkData.isDir = true
+  isAddSub.value = true
+  targetBookmark.value.info = data
+  targetBookmark.value.node = node
+}
 
 const filterMorrMenu = (data: Bookmark) => {
-  return morMenuList.filter(
-    (v) =>
-      (v.type == "all" && (v.id != "delete" || data.parent)) ||
-      (v.type == "dir" && data.children)
-  );
-};
-// let id = 1000;
-watch(filterText, (val) => {
-  treeRef.value!.filter(val);
-});
+  return morMenuList.filter((v) => {
+    if (!data.parent && v.id == 'delete') {
+      return false
+    }
+    return v.type == 'all' || (v.type == 'dir' && data.isDir)
+  })
+}
 
-const filterNode = (value: string, dataSource: Tree) => {
-  if (!value) return true;
-  return dataSource.label.includes(value);
-};
+const filterNode = (value: string, dataSource: Bookmark) => {
+  if (!value) return true
+  return dataSource.label.includes(value)
+}
 
 const handleClikMore = () => {
-  if (!morMenuInstance.value) return;
-  morMenuInstance.value.handleOpen();
-};
+  if (!morMenuInstance.value) return
+  morMenuInstance.value.handleOpen()
+}
 const handleCommand = (obj) => {
-  obj.item.command(obj.node, obj.data);
-};
-// const append = (dataSource: Tree) => {
-//   const newChild = { label: "testtest", children: [] };
-//   if (!dataSource.children) {
-//     dataSource.children = [];
-//   }
-//   dataSource.children.push(newChild);
-//   dataSource.value = [...dataSource.value];
-// };
-
-// const remove = (node: Node, dataSource: Tree) => {
-//   const parent = node.parent;
-//   const children: Tree[] = parent.data.children || parent.data;
-//   const index = children.findIndex((d) => d.id === dataSource.id);
-//   children.splice(index, 1);
-//   dataSource.value = [...dataSource.value];
-// };
-
-// const dataSource2: Tree[] = [
-//   {
-//     id: 0,
-//     label: "Level one 0",
-//     icon: getAssetsImge("item.png"),
-//   },
-//   {
-//     id: 1,
-//     label: "Level one 1",
-//     children: [
-//       {
-//         id: 4,
-//         label: "Level two 1-1",
-//         children: [
-//           {
-//             id: 9,
-//             label: "Level three 1-1-1",
-//           },
-//           {
-//             id: 10,
-//             label: "Level three 1-1-2",
-//           },
-//         ],
-//       },
-//     ],
-//   },
-//   {
-//     id: 2,
-//     label: "Level one 2",
-
-//     children: [
-//       {
-//         id: 5,
-//         label: "Level two 2-1",
-//         icon: getAssetsImge("item.png"),
-//       },
-//       {
-//         id: 6,
-//         label: "Level two 2-2",
-//         icon: getAssetsImge("item.png"),
-//       },
-//     ],
-//   },
-//   {
-//     id: 3,
-//     label: "Level one 3",
-//     children: [
-//       {
-//         id: 7,
-//         label: "Level two 3-1",
-//       },
-//       {
-//         id: 8,
-//         label: "Level two 3-2",
-//       },
-//     ],
-//   },
-// ];
+  obj.item.command(obj.node, obj.data)
+}
+const toHref = (link: string) => {
+  window.open(link, 'linkRef')
+}
 </script>
 <style lang="scss" scoped>
 .bookmark-tree {

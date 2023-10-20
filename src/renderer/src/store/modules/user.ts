@@ -1,5 +1,5 @@
-import { defineStore } from "pinia";
-import { store } from "@/store";
+import { defineStore } from 'pinia'
+import { store } from '@/store'
 // import { loginApi, logoutApi } from '@/api/auth'
 // import { getUserInfo } from '@/api/user'
 // import { resetRouter } from '@/router'
@@ -7,16 +7,16 @@ import { store } from "@/store";
 // import { LoginData } from '@/api/auth/types'
 // import { UserInfo } from '@/api/user/types'
 
-import { useStorage } from "@vueuse/core";
+import { useStorage } from '@vueuse/core'
 
-export const useUserStore = defineStore("user", () => {
+export const useUserStore = defineStore('user', () => {
   // state
-  const userId = ref();
-  const token = useStorage("accessToken", "");
-  const nickname = ref("");
-  const avatar = ref("");
-  const roles = ref<Array<string>>([]); // 用户角色编码集合 → 判断路由权限
-  const perms = ref<Array<string>>([]); // 用户权限编码集合 → 判断按钮权限
+  const userId = ref()
+  const token = useStorage('accessToken', '')
+  const nickname = ref('')
+  const avatar = ref('')
+  const roles = ref<Array<string>>([]) // 用户角色编码集合 → 判断路由权限
+  const perms = ref<Array<string>>([]) // 用户权限编码集合 → 判断按钮权限
 
   /**
    * 登录调用
@@ -80,11 +80,11 @@ export const useUserStore = defineStore("user", () => {
 
   // 重置
   function resetToken() {
-    token.value = "";
-    nickname.value = "";
-    avatar.value = "";
-    roles.value = [];
-    perms.value = [];
+    token.value = ''
+    nickname.value = ''
+    avatar.value = ''
+    roles.value = []
+    perms.value = []
   }
   return {
     token,
@@ -100,10 +100,10 @@ export const useUserStore = defineStore("user", () => {
      * 当前登录用户ID
      */
     userId,
-  };
-});
+  }
+})
 
 // 非setup
 export function useUserStoreHook() {
-  return useUserStore(store);
+  return useUserStore(store)
 }

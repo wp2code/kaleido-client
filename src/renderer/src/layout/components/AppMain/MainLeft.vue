@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import { translateRouteTitleI18n } from "@/utils/i18n";
+import { translateRouteTitleI18n } from '@/utils/i18n'
 const props = defineProps({
   title: String,
-});
+})
 const titleValue = computed(() => {
-  return translateRouteTitleI18n(props.title);
-});
+  return translateRouteTitleI18n(props.title)
+})
 </script>
 <template>
   <div class="am-left">

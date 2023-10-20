@@ -1,24 +1,34 @@
-import {Entity, Tree, Column, PrimaryGeneratedColumn, TreeChildren, TreeParent} from "typeorm";
+import {
+  Entity,
+  Tree,
+  Column,
+  PrimaryGeneratedColumn,
+  TreeChildren,
+  TreeParent,
+} from 'typeorm'
 @Entity()
-@Tree("closure-table")
-export class Bookmark{
-	@PrimaryGeneratedColumn()
-	id?: number;
+@Tree('closure-table')
+export class Bookmark {
+  @PrimaryGeneratedColumn()
+  id?: number
 
-	@Column("varchar")
-	icon: string;
+  @Column('varchar')
+  icon?: string
 
-	@Column("varchar")
-	label: string;
-	
-	@TreeChildren()
-	children?:Bookmark[];
+  @Column('varchar')
+  label?: string
 
-	@TreeParent()
-	parent?: Bookmark
+  @Column('boolean')
+  isDir?: boolean
+
+  @TreeChildren()
+  children?: Bookmark[]
+
+  @TreeParent()
+  parent?: Bookmark
 }
-
-export const defaultRoot={
-	icon:"item.png",
-	label:"根目录"
+export const defaultRoot = {
+  icon: 'item.png',
+  label: '根目录',
+  isDir: true,
 }

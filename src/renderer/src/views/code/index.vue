@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import DbPanel from "./DbPanel.vue";
-import DbTable from "./DbTable.vue";
+import DbPanel from './DbPanel.vue'
+import DbTable from './DbTable.vue'
 
 function newC(): void {
-  console.log("新增连接。。。");
+  console.log('新增连接。。。')
 }
 </script>
 <template>
@@ -14,7 +14,9 @@ function newC(): void {
         <DbTable class="cv-db-table" />
       </div>
       <div class="am-code-btn">
-        <el-button size="small" type="primary" @click="newC">新增连接</el-button>
+        <el-button size="small" type="primary" @click="newC"
+          >新增连接</el-button
+        >
       </div>
     </main-Left>
     <main-right> <div>Code Right</div></main-right>

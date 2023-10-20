@@ -2,28 +2,32 @@
 const props = defineProps({
   prefix: {
     type: String,
-    default: "icon",
+    default: 'icon',
   },
   iconClass: {
     type: String,
     required: false,
-    default: "",
+    default: '',
   },
   color: {
     type: String,
-    default: "",
+    default: '',
   },
   size: {
     type: String,
-    default: "1em",
+    default: '1em',
   },
-});
+})
 
-const symbolId = computed(() => `#${props.prefix}-${props.iconClass}`);
+const symbolId = computed(() => `#${props.prefix}-${props.iconClass}`)
 </script>
 
 <template>
-  <svg aria-hidden="true" class="svg-icon" :style="'width:' + size + ';height:' + size">
+  <svg
+    aria-hidden="true"
+    class="svg-icon"
+    :style="'width:' + size + ';height:' + size"
+  >
     <use :xlink:href="symbolId" :fill="color" />
   </svg>
 </template>

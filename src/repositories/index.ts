@@ -1,3 +1,2 @@
-
-import * as bookmark  from  './BookmarkRepository'
-export  { bookmark }
+import * as bookmark from './BookmarkRepository'
+export { bookmark }

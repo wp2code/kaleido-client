@@ -5,28 +5,28 @@ interface DefaultSettings {
   /**
    * 系统title
    */
-  title: string;
+  title: string
   /**
    * 主题模式
    */
-  theme: string;
+  theme: string
 
   /**
    * 布局大小
    */
-  size: string;
+  size: string
   /**
    *
    */
-  sidevarLogo: boolean;
+  sidevarLogo: boolean
   /**
    * 语言
    */
-  language: string;
+  language: string
 }
 
 const defaultSettings: DefaultSettings = {
-  title: "DevBox",
+  title: 'DevBox',
   sidevarLogo: true,
   /**
    *  主题模式
@@ -34,9 +34,9 @@ const defaultSettings: DefaultSettings = {
    * dark:暗黑模式
    * light: 明亮模式
    */
-  theme: "dark",
-  size: "default", // default |large |small
-  language: "zh-cn", // zh-cn| en
-};
+  theme: 'dark',
+  size: 'default', // default |large |small
+  language: 'zh-cn', // zh-cn| en
+}
 
-export default defaultSettings;
+export default defaultSettings

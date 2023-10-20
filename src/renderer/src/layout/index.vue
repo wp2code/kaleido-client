@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import Sidebar from "./components/Sidebar/index.vue";
-import AppMain from "./components/AppMain/index.vue";
+import Sidebar from './components/Sidebar/index.vue'
+import AppMain from './components/AppMain/index.vue'
 </script>
 <template>
   <section>

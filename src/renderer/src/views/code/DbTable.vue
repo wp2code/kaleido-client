@@ -2,7 +2,9 @@
 
 <template>
   <div class="db-table-box">
-    <span :style="`font-size: var(--el-font-size-medium);font-weight: 500`">表</span>
+    <span :style="`font-size: var(--el-font-size-medium);font-weight: 500`"
+      >表</span
+    >
     <div>table 1</div>
   </div>
 </template>
