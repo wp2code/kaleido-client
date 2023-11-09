@@ -43,6 +43,12 @@ module.exports = {
     'vue/require-default-prop': 'off',
     'vue/multi-word-component-names': 'off', //https://eslint.vuejs.org/rules/multi-word-component-names.html
     'no-console”': 'off',
+    'vue/no-unused-vars': [
+      'error',
+      {
+        ignorePattern: '^_',
+      },
+    ],
   },
   // https://eslint.org/docs/latest/use/configure/language-options#specifying-globals
   globals: {

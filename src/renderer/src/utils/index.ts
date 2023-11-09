@@ -31,3 +31,16 @@ export function deepClone(obj, target): any {
   }
   return target
 }
+/**
+ *
+ * @param urlStr
+ */
+export function isValidHttpUrl(urlStr: any): Boolean {
+  let url
+  try {
+    url = new URL(urlStr)
+  } catch (_) {
+    return false
+  }
+  return url.protocol === 'http:' || url.protocol === 'https:'
+}

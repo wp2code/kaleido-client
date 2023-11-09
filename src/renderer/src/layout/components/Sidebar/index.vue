@@ -2,12 +2,13 @@
 import { useRoute } from 'vue-router'
 import { constantRoutes } from '@/router'
 import SidebarItem from './SidebarItem.vue'
+import Logo from './Logo.vue'
 const currRoute = useRoute()
 import variables from '@/styles/variables.module.scss'
 </script>
 <template>
   <div class="sidebar">
-    <logo />
+    <Logo />
     <el-menu
       :default-active="currRoute.fullPath"
       :background-color="variables.menuBg"

@@ -22,5 +22,4 @@ app.config.globalProperties.$msgBoxUtil = MsgBoxUtil
 setupDirective(app)
 // 全局注册 状态管理(store)
 setupStore(app)
-
 app.use(router).use(i18n).mount('#app')

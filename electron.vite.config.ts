@@ -23,8 +23,6 @@ import path from 'path'
 import UnoCSS from 'unocss/vite'
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const pathSrc = path.resolve(__dirname, 'src/renderer/src')
-console.log(pathSrc)
-
 export default ({ command }) => {
   console.log(command)
   const optimizeDepsElementPlusIncludes = [
@@ -137,7 +135,7 @@ export default ({ command }) => {
           // 指定需要缓存的图标文件夹
           iconDirs: [resolve(pathSrc, 'assets/icons')],
           // 指定symbolId格式
-          symbolId: 'icon-[dir]-[name]',
+          symbolId: 'icon-[name]',
         }),
         //https://github.com/antfu/unocss
         UnoCSS({}),

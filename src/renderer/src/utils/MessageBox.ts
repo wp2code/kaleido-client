@@ -1,7 +1,7 @@
 import { ElMessageBox, ElMessage } from 'element-plus'
 
 export interface MsgBoxOptions {
-  ok: () => Boolean | Promise<Boolean>
+  ok: () => void | Boolean | Promise<Boolean>
   successMsg?: string
   failMsg?: string
 }

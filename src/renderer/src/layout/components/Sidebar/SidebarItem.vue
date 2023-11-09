@@ -7,7 +7,7 @@ import SvgIcon from '@/components/SvgIcon/index.vue'
 
 const props = defineProps({
   /**
-   * 路由(eg:level_3_1)
+   *
    */
   item: {
     type: Object,
@@ -15,7 +15,7 @@ const props = defineProps({
   },
 
   /**
-   * 父层级完整路由路径(eg:/level/level_3/level_3_1)
+   *
    */
   basePath: {
     type: String,
