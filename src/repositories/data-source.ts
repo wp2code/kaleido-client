@@ -1,6 +1,7 @@
 import 'reflect-metadata'
 import { DataSource } from 'typeorm'
 import { Bookmark } from './entity/Bookmark'
+import { DbConfig } from './entity/DbConfig'
 const AppDataSource = new DataSource({
   type: 'better-sqlite3',
   database: 'store.db',
@@ -8,7 +9,7 @@ const AppDataSource = new DataSource({
   synchronize: true,
   logging: 'all',
   logger: 'simple-console',
-  entities: [Bookmark],
+  entities: [Bookmark, DbConfig],
   migrations: [],
   subscribers: [],
 })

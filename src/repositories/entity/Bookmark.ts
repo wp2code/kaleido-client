@@ -4,7 +4,7 @@ export class Bookmark {
   @PrimaryGeneratedColumn()
   id: number
 
-  @Column('int8', { default: 0 })
+  @Column('int8', { default: 0, nullable: true })
   parentId?: number
 
   @Column({ type: 'varchar', length: 50, nullable: true })

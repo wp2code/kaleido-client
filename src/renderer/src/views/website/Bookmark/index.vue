@@ -39,7 +39,7 @@ onMounted(async () => {
   return await initList(queryParams)
 })
 async function initList(params: any | undefined) {
-  const bookmarkList = await window.db.bookmark.queryList(params)
+  const bookmarkList = await window.db.Bookmark.queryList(params)
   console.log('bookmarkList', bookmarkList)
   list.value = bookmarkList
 }
@@ -64,7 +64,7 @@ const save = async (data) => {
   const bookmark = { ...data } as Bookmark
   if (bookmark.id > 0) {
     //更新
-    await window.db.bookmark.update(bookmark.id, bookmark).then(async (t) => {
+    await window.db.Bookmark.update(bookmark.id, bookmark).then(async (t) => {
       if (t) {
         await initList(null)
         dialogVisible.value = false
@@ -72,7 +72,7 @@ const save = async (data) => {
     })
   } else {
     //新增
-    await window.db.bookmark.save(bookmark).then((t: any) => {
+    await window.db.Bookmark.save(bookmark).then((t: any) => {
       if (t) {
         if (bookmark.parentId > 0 && bookmark.type === 0) {
           for (const bk of list.value) {
@@ -95,7 +95,7 @@ const deleteItem = (data: any) => {
     ok: async () => {
       const subList = toRaw(data.subList)
       console.log('id', data.id, 'subList', subList)
-      return await window.db.bookmark.del(data.id, subList).then(async (res) => {
+      return await window.db.Bookmark.del(data.id, subList).then(async (res) => {
         const isSuccess = res.success === true
         if (isSuccess) {
           await initList(null)
@@ -121,14 +121,12 @@ const editItem = (data: any) => {
 }
 //下拉菜单 选择事件
 const selectMorMenuItem = (item: any) => {
-  console.log('item', item)
   if (item) {
     item.menu.command(item.data)
   }
 }
 //右键菜单 选择事件
 const selectMenuItem = (menu, data) => {
-  console.log('menu', menu, 'data', data.label)
   if (menu) {
     menu.command(data)
   }
@@ -140,7 +138,7 @@ const selectItem = (item: any) => {
 const emites = defineEmits(['select'])
 </script>
 <template>
-  <el-scrollbar height="100%">
+  <el-scrollbar class="box-scrollbar">
     <div class="box">
       <div class="bm-item">
         <div
@@ -156,14 +154,7 @@ const emites = defineEmits(['select'])
         >
           <div class="header">
             <div class="desc">
-              <svg
-                v-if="item.type === 0"
-                aria-hidden="true"
-                style="width: 1em; height: 1em; margin-top: 0.2em"
-                fill="#ddd"
-              >
-                <use :href="`#icon-website`" />
-              </svg>
+              <svg-icon v-if="item.type === 0" icon-name="website" />
               <Collection v-else style="width: 1em; height: 1em; margin-top: 0.2em" />
               <span>{{ item.label }}</span>
             </div>
@@ -247,6 +238,10 @@ const emites = defineEmits(['select'])
 </template>
 
 <style lang="scss" scoped>
+.box-scrollbar {
+  width: 100%;
+  height: 100%;
+}
 .box {
   color: #ddd;
   width: 100%;
@@ -305,7 +300,7 @@ const emites = defineEmits(['select'])
     cursor: pointer;
     i {
       &:hover {
-        background-color: $menuActiveText;
+        // background-color: $menuActiveText;
         border-radius: 50%;
         color: #ddd;
       }

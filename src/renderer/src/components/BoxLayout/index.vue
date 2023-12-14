@@ -1,21 +1,29 @@
 <script lang="ts" setup>
 interface IProps {
   className?: string
-  minSize?: string
+  size?: string
   layout?: 'row' | 'column'
 }
 const props = withDefaults(defineProps<IProps>(), {
   layout: 'row',
-  minSize: '200px',
+  size: '30%',
 })
 const isRow = computed(() => {
   return props.layout === 'row'
+})
+const style = ref()
+watchEffect(() => {
+  if (props.layout === 'row') {
+    style.value = { width: props.size }
+  } else {
+    style.value = { height: props.size }
+  }
 })
 </script>
 
 <template>
   <div :class="['box', !isRow ? 'box-column' : null, className]">
-    <div class="firstBox" :style="[{ width: minSize }]">
+    <div class="firstBox" :style="style">
       <slot name="first"></slot>
     </div>
     <div class="divider"></div>
@@ -27,7 +35,6 @@ const isRow = computed(() => {
 
 <style lang="scss" scoped>
 .box {
-  // width: 100%;
   height: 100%;
   display: flex;
   .divider {
@@ -40,6 +47,7 @@ const isRow = computed(() => {
 .box-column {
   width: 100%;
   flex-direction: column;
+  align-items: center;
   .divider {
     height: 1px;
     width: 100%;
@@ -48,11 +56,17 @@ const isRow = computed(() => {
   }
 }
 .firstBox {
+  display: flex;
   background-color: $subMenuBg;
+  // overflow: hidden;
+  width: 100%;
+  height: 100%;
 }
 .otherBox {
   flex: 1;
   position: relative;
   background-color: $subMenuBg;
+  width: 100%;
+  height: 100%;
 }
 </style>

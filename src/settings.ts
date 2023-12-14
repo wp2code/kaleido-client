@@ -1,5 +1,3 @@
-/** @format */
-
 // 系统设置
 interface DefaultSettings {
   /**
@@ -16,7 +14,7 @@ interface DefaultSettings {
    */
   size: string
   /**
-   *
+   * log展示
    */
   sidevarLogo: boolean
   /**

@@ -4,7 +4,7 @@ const props = defineProps({
     type: String,
     default: 'icon',
   },
-  iconClass: {
+  iconName: {
     type: String,
     required: false,
     default: '',
@@ -19,15 +19,11 @@ const props = defineProps({
   },
 })
 
-const symbolId = computed(() => `#${props.prefix}-${props.iconClass}`)
+const symbolId = computed(() => `#${props.prefix}-${props.iconName}`)
 </script>
 
 <template>
-  <svg
-    aria-hidden="true"
-    class="svg-icon"
-    :style="'width:' + size + ';height:' + size"
-  >
+  <svg aria-hidden="true" class="svg-icon" :style="'width:' + size + ';height:' + size">
     <use :xlink:href="symbolId" :fill="color" />
   </svg>
 </template>

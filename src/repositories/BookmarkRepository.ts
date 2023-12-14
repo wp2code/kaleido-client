@@ -16,7 +16,7 @@ export async function queryList(_param: any) {
   return await bookmarkRepository
     .createQueryBuilder('bk')
     .addCommonTableExpression(
-      `SELECT id FROM bookmark WHERE type = 1 UNION ALL SELECT id FROM bookmark WHERE type = 0 AND (parentId = 0 or parentId ='')`,
+      `SELECT id FROM bookmark WHERE type = 1 UNION ALL SELECT id FROM bookmark WHERE type = 0 AND (parentId = 0 or parentId is null)`,
       'bk_tp'
     )
     .where(`bk.id in (SELECT "id" FROM 'bk_tp')`)

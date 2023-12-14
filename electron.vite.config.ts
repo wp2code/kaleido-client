@@ -18,11 +18,10 @@ import viteCompression from 'vite-plugin-compression'
 import Icons from 'unplugin-icons/vite'
 import IconsResolver from 'unplugin-icons/resolver'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
-import path from 'path'
 // 引入Unocss
 import UnoCSS from 'unocss/vite'
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const pathSrc = path.resolve(__dirname, 'src/renderer/src')
+const pathSrc = resolve(__dirname, 'src/renderer/src')
 export default ({ command }) => {
   console.log(command)
   const optimizeDepsElementPlusIncludes = [
@@ -51,7 +50,7 @@ export default ({ command }) => {
     renderer: {
       resolve: {
         alias: {
-          '@': pathSrc,
+          '@': resolve(__dirname, 'src/renderer/src'),
           '~': resolve('src'),
         },
       },

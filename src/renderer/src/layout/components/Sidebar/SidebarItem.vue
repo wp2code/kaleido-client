@@ -88,7 +88,7 @@ function resolvePath(routePath: string) {
         <el-menu-item :index="resolvePath(onlyOneChild.path)">
           <svg-icon
             v-if="onlyOneChild.meta && onlyOneChild.meta.icon"
-            :icon-class="onlyOneChild.meta.icon"
+            :icon-name="onlyOneChild.meta.icon"
             size="2em"
           />
           <template v-if="item.meta && item.meta.titleShow" #title>
@@ -103,7 +103,7 @@ function resolvePath(routePath: string) {
       <template #title>
         <svg-icon
           v-if="item.meta && item.meta.icon"
-          :icon-class="item.meta.icon"
+          :icon-name="item.meta.icon"
           size="2em"
         />
         <span v-if="item.meta && item.meta.title">{{

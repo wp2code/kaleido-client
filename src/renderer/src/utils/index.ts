@@ -44,3 +44,11 @@ export function isValidHttpUrl(urlStr: any): Boolean {
   }
   return url.protocol === 'http:' || url.protocol === 'https:'
 }
+/**
+ *
+ * @param val
+ */
+export function isNumer(val: string): boolean {
+  var re = new RegExp('^[1-9][0-9]*$')
+  return re.test(val)
+}

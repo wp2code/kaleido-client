@@ -1,13 +1,11 @@
-/** @format */
-
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
-import { join } from 'path'
+import { app, shell, BrowserWindow, ipcMain, net } from 'electron'
+import { join, parse } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 const icon = join(__dirname, '../resources/box.png?asset')
 function createWindow(): BrowserWindow {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
+    width: 950,
     height: 670,
     show: false,
     autoHideMenuBar: true,
@@ -71,6 +69,27 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
+})
+app.on('before-quit', (_event) => {
+  const request = net.request({
+    method: 'POST',
+    url: 'http://127.0.0.1:10824/api/system/stop',
+  })
+  request.setHeader('Content-Type', 'application/json')
+  request.write(JSON.stringify({}))
+  request.on('response', (response) => {
+    response.on('data', (res) => {
+      let data = JSON.parse(res.toString())
+      console.log('stop server', data)
+    })
+    response.on('end', () => {})
+  })
+  request.end()
+})
+ipcMain.handle('get-product-name', (_event) => {
+  const exePath = app.getPath('exe')
+  const { name } = parse(exePath)
+  return name
 })
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.

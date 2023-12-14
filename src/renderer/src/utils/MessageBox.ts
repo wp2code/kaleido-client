@@ -6,7 +6,7 @@ export interface MsgBoxOptions {
   failMsg?: string
 }
 
-const showElMessage = (isSuccess: Boolean, options: MsgBoxOptions) => {
+const showElMessage = (isSuccess: Boolean, options?: MsgBoxOptions) => {
   if (isSuccess) {
     ElMessage({
       type: 'success',
@@ -26,6 +26,20 @@ class MsgBox {
       MsgBox.instance = new MsgBox()
     }
     return MsgBox.instance
+  }
+  /**
+   *
+   * @param msg
+   */
+  ok(msg: string = '操作成功') {
+    showElMessage(true, { successMsg: msg } as MsgBoxOptions)
+  }
+  /**
+   *
+   * @param msg
+   */
+  fail(msg: string = '操作失败') {
+    showElMessage(true, { failMsg: msg } as MsgBoxOptions)
   }
   confirm(message: string, options: MsgBoxOptions) {
     ElMessageBox.confirm(message, '确认', {

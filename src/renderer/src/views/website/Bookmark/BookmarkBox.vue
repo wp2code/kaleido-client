@@ -85,7 +85,7 @@ const isLockType = computed(() => {
   return props.data.id > 0 || props.data.parentId > 0
 })
 onMounted(async () => {
-  const catalogList = await window.db.bookmark.getCatalogList()
+  const catalogList = await window.db.Bookmark.getCatalogList()
   if (catalogList) {
     catalogOptions.value = [...catalogList]
   }

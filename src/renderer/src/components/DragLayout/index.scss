@@ -1,19 +1,19 @@
-.leftBox {
-  // background-color: blue;
-  width: 220px;
-  height: 100%;
-  overflow: hidden;
-  // border: 1px solid #945494;
-  border-top: 0px;
-  border-bottom: 0px;
-}
-.rightBox {
-  // background-color: aqua;
-  position: relative;
-  z-index: 1;
-  flex: 1;
-  width: 0px;
-}
+// .leftBox {
+//   // background-color: blue;
+//   width: 220px;
+//   height: 100%;
+//   overflow: hidden;
+//   // border: 1px solid #945494;
+//   border-top: 0px;
+//   border-bottom: 0px;
+// }
+// .rightBox {
+//   // background-color: aqua;
+//   position: relative;
+//   z-index: 1;
+//   flex: 1;
+//   width: 0px;
+// }
 
 .box {
   width: 100%;
@@ -24,6 +24,7 @@
     position: relative;
     background-color: aquamarine;
   }
+
   .dividerCenter {
     position: absolute;
     width: 6px;
@@ -47,7 +48,6 @@
     width: 100%;
     position: relative;
   }
-
   .dividerCenter {
     height: 6px;
     width: auto;

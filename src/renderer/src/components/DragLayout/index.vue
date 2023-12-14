@@ -1,6 +1,6 @@
 <template>
   <div :class="['box', !isRow ? 'box-column' : null, className]">
-    <div ref="VolatileRef" class="firstBox">
+    <div ref="VolatileRef" class="firstBox" :style="style">
       <slot name="first"></slot>
     </div>
     <div ref="DividerRef" class="divider" :style="[dividerLineStyle]">
@@ -16,6 +16,7 @@
 interface IProps {
   className?: string
   minSize?: number
+  initSize: string | number
   layout?: 'row' | 'column'
   callback?: Function
   showLine?: boolean
@@ -23,7 +24,7 @@ interface IProps {
 const props = withDefaults(defineProps<IProps>(), {
   showLine: true,
   layout: 'row',
-  minSize: 5,
+  initSize: '38%',
 })
 // const attrs = useAttrs()
 const VolatileRef = ref<HTMLDivElement | null>(null)
@@ -40,6 +41,7 @@ const dividerLineStyle = computed(() => {
 onMounted(() => {
   DividerRef.value.onmousedown = (event: any) => {
     event.preventDefault()
+    event.stopPropagation()
     const clientStart = isRow.value ? event.clientX : event.clientY
     const volatileBoxXY = isRow.value
       ? VolatileRef.value.offsetWidth
@@ -59,6 +61,14 @@ onMounted(() => {
       document.onmouseup = null
       document.onmousemove = null
     }
+  }
+})
+const style = ref()
+watchEffect(() => {
+  if (props.layout === 'row') {
+    style.value = { 'min-width': props.minSize + 'px', width: props.initSize }
+  } else {
+    style.value = { 'min-height': props.minSize + 'px', height: props.initSize }
   }
 })
 onUnmounted(() => {
