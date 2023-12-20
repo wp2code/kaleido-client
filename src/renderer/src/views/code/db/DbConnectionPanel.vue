@@ -1,19 +1,20 @@
 <script lang="ts" setup>
-import { DbConfig } from '~/repositories/entity/DbConfig'
 import { deleteMenu, editMenu, type IMenu } from '@/utils/MenuOpions'
+import { listDataSource, deleteDataSource } from '@/api/datasource/index'
+import { DataSource } from '@/api/datasource/types'
 const { proxy } = getCurrentInstance()
-const list = ref<DbConfig[]>([])
+const list = ref<DataSource[]>([])
 const emits = defineEmits<{
-  select:[dbConfig:DbConfig,isEdit:Boolean]
+  select:[dbConfig:DataSource,isEdit:Boolean]
 }>()
 
 const selectDeleteConnect=(item:any)=>{
-  proxy.$msgBoxUtil.confirm('确认删除', {
-    ok: async () => {
-      const id=item!.id
-      return await window.db.DbConfig.del(id).then((bol) => {
-        if (bol===true) {
-           queryList(null)
+  proxy.$msgBoxUtil.confirm('确认删除?', {
+    ok:  async () => {
+      console.log('确认删除！',item)
+      return  await deleteDataSource(item.id).then(response=>{
+        if(response){
+          queryList()
           return true
         }
         return false
@@ -39,8 +40,10 @@ const selectMorMenuItem = (menu: IMenu) => {
   }
 }
 
-async function queryList(_params: any) {
-  list.value = await window.db.DbConfig.queryList()
+async function queryList(_params?: any) {
+    await listDataSource().then(response=>{
+    list.value=response.data||[]
+  })
 }
 const menuBindData=(menu:IMenu,data:any):IMenu=>{
   menu.bindData=data||{}
@@ -48,7 +51,7 @@ const menuBindData=(menu:IMenu,data:any):IMenu=>{
 }
 const morMenuList: IMenu[] = [editMenu(selectEditConnect), deleteMenu(selectDeleteConnect)]
 onMounted(() => {
-  queryList(null)
+  queryList()
 })
 defineExpose({ queryList })
 </script>
@@ -66,7 +69,7 @@ defineExpose({ queryList })
         >
           <div class="desc">
             <svg-icon
-              :icon-name="item.icon"
+              :icon-name="item?.icon"
               style="width: 1.1em; height: 1.1em; margin: 4px"
             />
             <div>
@@ -138,7 +141,6 @@ defineExpose({ queryList })
       text-overflow: ellipsis;
       color: #ddd;
       margin: 0 4px 0 0;
-      // background-color: red;
     }
   }
   &:hover {

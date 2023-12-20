@@ -1,19 +1,27 @@
 <script lang="ts" setup>
 import { FormInstance, FormRules } from 'element-plus'
-import { DbConfig, getDefault, DbType } from '~/repositories/entity/DbConfig'
+import {
+  updateDataSource,
+  addDataSource,
+  connectTestDataSource,
+} from '@/api/datasource/index'
+import { DataSource, getDefault, DbType } from '@/api/datasource/types'
 import { isNumer } from '@/utils'
+import { PropType } from 'vue'
+import { RefreshConnectList, EditConnectData, CancelConnectOps } from '../keys'
 const { proxy } = getCurrentInstance()
+
 const props = defineProps({
   data: {
-    type: DbConfig,
+    type: Object as PropType<DataSource>,
     default: null,
   },
 })
 const formRef = ref<FormInstance>()
-const params = toRef(inject<DbConfig>('Edit-Connect-Data'))
-const form = ref<DbConfig>(convert(props.data !== null ? props.data : params.value))
-function convert(data: DbConfig) {
-  return data!.id ? { ...data } : getDefault(DbType[data.type])
+const params = toRef(inject<DataSource>(EditConnectData))
+const form = ref<DataSource>(convert(props.data !== null ? props.data : params.value))
+function convert(data: DataSource) {
+  return data!.id ? { ...data } : getDefault(DbType[data?.type])
 }
 const validatePort = (_rule: any, value: any, callback: any) => {
   if (!value || value === '') {
@@ -33,29 +41,45 @@ const rules = reactive<FormRules>({
   userName: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
 })
-const refreshDbConnectList = inject('Refresh-Connect-List', () => {})
+const refreshDbConnectList = inject(RefreshConnectList, () => {})
+//保存或更新连接
 const save = async (formRef: FormInstance | undefined) => {
   if (!formRef) return
   await formRef.validate(async (valid, _fields) => {
     if (valid) {
-      await window.db.DbConfig.save({ ...form.value }).then((r) => {
-        proxy.$msgBoxUtil.ok('保存成功')
-        refreshDbConnectList()
-      })
+      if (form.value.id) {
+        await updateDataSource(form.value.id, form.value).then((res) => {
+          if (res) {
+            proxy.$msgBoxUtil.ok('更新成功')
+            refreshDbConnectList()
+          }
+        })
+      } else {
+        await addDataSource(form.value).then((res) => {
+          if (res) {
+            proxy.$msgBoxUtil.ok('保存成功')
+            refreshDbConnectList()
+          }
+        })
+      }
     }
   })
 }
-// defineExpose
+// 测试连接
 const testConnect = async (formRef: FormInstance | undefined) => {
   if (!formRef) return
   await formRef.validate(async (valid, _fields) => {
     if (valid) {
-      //TODO
+      await connectTestDataSource(form.value).then((res) => {
+        if (res) {
+          proxy.$msgBoxUtil.ok('连接成功')
+        }
+      })
     }
   })
 }
 //取消操作
-const cancelConnect = inject('Cancel-Connect-Ops', () => {})
+const cancelConnect = inject(CancelConnectOps, () => {})
 const emits = defineEmits(['cancel'])
 const cancel = () => {
   cancelConnect()

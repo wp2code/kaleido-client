@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import DbConnectionBox from '@/views/code/db/DbConnectionBox.vue'
-import { DbConfig, DbType, getDefault } from '~/repositories/entity/DbConfig'
-
-const list = ref<DbConfig[]>([])
+// import { DbConfig, DbType, getDefault } from '~/repositories/entity/DbConfig'
+import { DataSource, DbType, getDefault } from '@/api/datasource/types'
+const list = ref<DataSource[]>([])
 const showConnentBox = ref(false)
 const loayoutSize = ref(3)
-const selectDbConfig = ref<DbConfig>()
+const selectDbConfig = ref<DataSource>()
 const toConnent = (item: any) => {
   showConnentBox.value = true
   selectDbConfig.value = item

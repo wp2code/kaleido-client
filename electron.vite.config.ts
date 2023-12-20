@@ -3,7 +3,12 @@
 import vue from '@vitejs/plugin-vue'
 import { resolve } from 'path'
 import fs from 'fs'
-import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
+import {
+  defineConfig,
+  loadEnv,
+  externalizeDepsPlugin,
+  swcPlugin,
+} from 'electron-vite'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
@@ -22,8 +27,9 @@ import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 import UnoCSS from 'unocss/vite'
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const pathSrc = resolve(__dirname, 'src/renderer/src')
-export default ({ command }) => {
-  console.log(command)
+export default ({ command, mode }) => {
+  console.debug('command', command, 'mode', mode)
+  const env = loadEnv(mode, process.cwd(), '')
   const optimizeDepsElementPlusIncludes = [
     'element-plus/es',
     '@vuemap/vue-amap/es',
@@ -42,12 +48,15 @@ export default ({ command }) => {
   })
   return defineConfig({
     main: {
-      plugins: [externalizeDepsPlugin()],
+      envPrefix: 'M_VITE_',
+      plugins: [externalizeDepsPlugin(), swcPlugin()],
     },
     preload: {
+      envPrefix: 'PRE_VITE_',
       plugins: [externalizeDepsPlugin()],
     },
     renderer: {
+      envPrefix: 'RD_VITE_',
       resolve: {
         alias: {
           '@': resolve(__dirname, 'src/renderer/src'),
@@ -67,20 +76,17 @@ export default ({ command }) => {
         },
       },
       server: {
-        host: true,
-        port: 1027,
-        cors: true,
-        https: false,
-        strictPort: true,
+        host: '0.0.0.0',
+        port: Number(env.RD_VITE_PORT),
         open: false,
         proxy: {
-          '/external': {
-            target: 'https://external.com',
-            secure: true,
+          '/api': {
+            target: 'http://127.0.0.1:10270',
             changeOrigin: true,
             rewrite: (path: any) => {
-              return path.replace(/^\/external/, '')
+              return path.replace(/^\/api/, env.RD_VITE_API_PREFIX)
             },
+            logLevel: 'debug',
           },
         },
       },

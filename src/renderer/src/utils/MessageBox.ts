@@ -1,7 +1,7 @@
 import { ElMessageBox, ElMessage } from 'element-plus'
 
 export interface MsgBoxOptions {
-  ok: () => void | Boolean | Promise<Boolean>
+  ok: Boolean | Promise<Boolean> | Function
   successMsg?: string
   failMsg?: string
 }
@@ -39,7 +39,7 @@ class MsgBox {
    * @param msg
    */
   fail(msg: string = '操作失败') {
-    showElMessage(true, { failMsg: msg } as MsgBoxOptions)
+    showElMessage(false, { failMsg: msg } as MsgBoxOptions)
   }
   confirm(message: string, options: MsgBoxOptions) {
     ElMessageBox.confirm(message, '确认', {
@@ -47,7 +47,7 @@ class MsgBox {
       cancelButtonText: '取消',
       type: 'warning',
     }).then(() => {
-      const okExe = options['ok']()
+      const okExe = options['ok']
       if (
         okExe &&
         Object.prototype.toString.call(okExe) === '[object Promise]'
@@ -55,6 +55,8 @@ class MsgBox {
         ;(<Promise<Boolean>>okExe).then((res) => {
           showElMessage(res, options)
         })
+      } else if (typeof okExe === 'function') {
+        okExe()
       } else {
         showElMessage(<Boolean>okExe, options)
       }

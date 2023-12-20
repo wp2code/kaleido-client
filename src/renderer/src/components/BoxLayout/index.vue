@@ -3,20 +3,23 @@ interface IProps {
   className?: string
   size?: string
   layout?: 'row' | 'column'
+  firstBoxStyle?: any
+  showDivider: boolean
 }
 const props = withDefaults(defineProps<IProps>(), {
   layout: 'row',
   size: '30%',
+  showDivider: true,
 })
 const isRow = computed(() => {
   return props.layout === 'row'
 })
-const style = ref()
+const style = ref(props.firstBoxStyle || {})
 watchEffect(() => {
   if (props.layout === 'row') {
-    style.value = { width: props.size }
+    style.value = Object.assign(style.value, { width: props.size })
   } else {
-    style.value = { height: props.size }
+    style.value = Object.assign(style.value, { height: props.size })
   }
 })
 </script>
@@ -26,7 +29,7 @@ watchEffect(() => {
     <div class="firstBox" :style="style">
       <slot name="first"></slot>
     </div>
-    <div class="divider"></div>
+    <div v-if="props.showDivider" class="divider"></div>
     <div class="otherBox">
       <slot></slot>
     </div>
@@ -58,7 +61,7 @@ watchEffect(() => {
 .firstBox {
   display: flex;
   background-color: $subMenuBg;
-  // overflow: hidden;
+  overflow: hidden;
   width: 100%;
   height: 100%;
 }

@@ -89,7 +89,6 @@ const changeClientXY = (
   }
   const computedXY = nowClientXY - clientStart
   const finalXY = volatileBoxXY + computedXY
-  console.log('isRow', isRow)
   if (minSize && minSize > finalXY) {
     return
   }
