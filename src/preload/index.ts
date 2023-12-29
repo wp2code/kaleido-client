@@ -8,6 +8,7 @@ import { spawn } from 'child_process'
 // Custom APIs for renderer
 const winApi = {
   setTitle: (title) => ipcRenderer.send('set-title', title),
+  openDialog: (options) => ipcRenderer.invoke('dialog:showOpenDialog', options),
 }
 const serverApi = {
   startServerForSpawn: async () => {

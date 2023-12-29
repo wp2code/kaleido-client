@@ -21,12 +21,12 @@ const selectDbConfigData = ref<DbConfig>()
 //新增连接
 const toAddConnect = () => {
   componentName.value = DbPanel
-  componentKey.value = new Date()
+  componentKey.value = 'CN_' + new Date()
 }
 //编辑连接
 const selectDbConfig = (item: any, isEdit: boolean) => {
   if (isEdit) {
-    componentKey.value = new Date()
+    componentKey.value = 'CF_' + new Date()
     componentName.value = DbConnectionBox
     componentParams.value = item
   } else {
@@ -35,15 +35,15 @@ const selectDbConfig = (item: any, isEdit: boolean) => {
     selectDbConfigData.value = item
   }
 }
+//选择数据库表
 const selectDbTable = (table: Table, dataSource: DataSource) => {
-  componentKey.value = new Date()
+  componentKey.value = 'TB_' + new Date()
   componentName.value = Generator
   selectDbTableData.value = new SelectDataTableData(dataSource, table)
 }
-const dbConnectionPanelRef = ref<InstanceType<typeof DbConnectionPanel>>()
-
 //选择数据库表
-provide(SelectDbable, selectDbTableData)
+provide(SelectDbable, selectDbTableData || {})
+const dbConnectionPanelRef = ref<InstanceType<typeof DbConnectionPanel>>()
 //刷新连接列表
 provide(RefreshConnectList, (params: any | undefined) => {
   dbConnectionPanelRef.value.queryList(params)

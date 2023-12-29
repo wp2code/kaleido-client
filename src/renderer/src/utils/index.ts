@@ -49,6 +49,28 @@ export function isValidHttpUrl(urlStr: any): Boolean {
  * @param val
  */
 export function isNumer(val: string): boolean {
-  var re = new RegExp('^[1-9][0-9]*$')
+  let re = new RegExp('^[1-9][0-9]*$')
   return re.test(val)
+}
+
+export function groupArr(
+  list: Array<any>,
+  field: string,
+  groupNameKey?: string
+) {
+  let fieldList: Set<string> = new Set(),
+    att = []
+  list.map((e) => {
+    fieldList.add(e[field])
+  })
+  for (let item of fieldList) {
+    let arr = list.filter((e) => {
+      return e[field] == item
+    })
+    att.push({
+      [groupNameKey]: item,
+      arr,
+    })
+  }
+  return att
 }

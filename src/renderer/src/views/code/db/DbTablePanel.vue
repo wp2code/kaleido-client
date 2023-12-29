@@ -78,10 +78,10 @@ const onSerachSwitch = (onOff: boolean) => {
   }
 }
 const loading = ref(false)
-const queryMetaList = (id: string) => {
+const queryMetaList = async (id: string) => {
   if (id) {
     loading.value = true
-    getDataSourceMetaAll(id)
+    await getDataSourceMetaAll(id)
       .then((res) => {
         loading.value = false
         if (res.data) {
@@ -108,17 +108,14 @@ const queryMetaList = (id: string) => {
   }
 }
 //选中表
-const selectTable = (nodeData: TreeNodeData, node: TreeNode, e: MouseEvent) => {
+const selectTable = (nodeData: TreeNodeData, _node: TreeNode, _e: MouseEvent) => {
   const tableName = nodeData.data.tableName
   if (tableName) {
-    console.log('data', nodeData.data)
-    console.log('node', node)
-    console.log('e', e)
     emits('select', nodeData.data as Table, dataSource.value)
   }
 }
-const refreshTable = (id: string) => {
-  queryMetaList(id)
+const refreshTable = async (id: string) => {
+  await queryMetaList(id)
 }
 const tableBoxRef = ref<HTMLElement>()
 onMounted(() => {
