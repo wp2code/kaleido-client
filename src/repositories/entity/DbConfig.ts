@@ -1,5 +1,3 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm'
-
 export enum DbType {
   MySQL = 'MySQL',
   PostgreSQL = 'PostgreSQL',
@@ -55,7 +53,6 @@ export function getDefault(dbType: DbType): DbConfig {
   return dbConfig
 }
 
-@Entity()
 export class DbConfig {
   constructor(...args: any)
   constructor(type: string, icon?: string)
@@ -81,31 +78,22 @@ export class DbConfig {
     this.extend = extend
   }
 
-  @PrimaryGeneratedColumn()
   id: number
 
-  @Column({ type: 'varchar', length: 50, nullable: true })
   icon?: string
 
-  @Column({ type: 'varchar', length: 200 })
   name: string
 
-  @Column('varchar')
   type: string
 
-  @Column('varchar')
   url?: string
 
-  @Column('int', { nullable: true })
   port?: number
 
-  @Column('varchar', { nullable: true })
   userName?: string
 
-  @Column('varchar', { nullable: true })
   password?: string
 
-  @Column('varchar', { nullable: true })
   extend?: string
 
   dbName?: string

@@ -1,21 +1,27 @@
 <script lang="ts" setup>
-import { getDataSourceMetaAll } from '@/api/datasource/index'
-import { DataSource, Schema, Table, Database } from '@/api/datasource/types'
-import { ElInput, ElTreeV2, TreeNode } from 'element-plus'
-import { Refresh, Search } from '@element-plus/icons-vue'
-import { TreeNodeData } from 'element-plus/es/components/tree-v2/src/types'
+import {
+  openConnectDataSource,
+  openDataBase,
+  closeConnectDataSource,
+  getDataSourceByConnectionId,
+} from '@/api/datasource/index'
+import { Schema, Table, Database, SimpleDatabase } from '@/api/datasource/types'
+import type Node from 'element-plus/es/components/tree/src/model/node'
+const emits = defineEmits(['select'])
 interface Tree {
   id: string
   label: string
-  data: Table | Schema | Database
+  data: Table | Schema | Database | SimpleDatabase
+  connectionId?: string
   children?: Tree[]
+  leaf: boolean
   disabled?: string
 }
-
 const treeProps = {
   value: 'id',
   label: 'label',
   children: 'children',
+  isLeaf: 'leaf',
 }
 const props = defineProps({
   data: {
@@ -25,111 +31,118 @@ const props = defineProps({
 })
 const datasourceId = ref<string>(props.data?.id)
 const dataSourceMetaTree = ref<Tree[]>()
-const dataSource = ref<DataSource>()
-const emits = defineEmits<{
-  select: [table: Table, dataSource: DataSource]
-}>()
-//转换获取子节点
-function getChildren(
-  parentName: string = '',
-  arr: Array<Table | Schema>,
-  isSchema: boolean
-): Tree[] {
-  return arr?.map((item) => {
-    if (isSchema === true) {
-      const schema = item as Schema
-      const tableList = schema.tableList || []
-      return {
-        id: parentName + '_' + schema.schemaName,
-        label: schema.schemaName,
-        data: schema,
-        children:
-          tableList.length > 0
-            ? getChildren(parentName + '_' + schema.schemaName, tableList, false)
-            : [],
-      } as Tree
-    } else {
-      const table = item as Table
-      return {
-        id: parentName + '_' + table.tableName,
-        label: table.tableName,
-        data: table,
-        children: [],
-      } as Tree
+const openConnection = (id: string) => {
+  if (!id) {
+    return
+  }
+  openConnectDataSource(id).then((res) => {
+    const data = res.data
+    if (data) {
+      const treeData = data.databases.map((item) => {
+        return {
+          id: item.dataBaseName,
+          label: item.dataBaseName,
+          data: item,
+          leaf: false,
+          connectionId: data.connectionId,
+          children: [],
+        }
+      })
+      dataSourceMetaTree.value = treeData
     }
   })
 }
-const query = ref('')
-const tableTreeRef = ref<InstanceType<typeof ElTreeV2>>()
-const filterTableTree = (query: string, node: Tree) => {
-  return node?.label!.includes(query)
-}
-const onTableFilter = (query: string) => {
-  tableTreeRef.value!.filter(query)
-}
-const serachRef = ref<InstanceType<typeof ElInput>>()
-const serachSwitch = ref<boolean>(false)
-const onSerachSwitch = (onOff: boolean) => {
-  serachSwitch.value = onOff
-  if (onOff) {
-    nextTick(() => {
-      serachRef.value.focus()
+const clickSelectTable = async (tree: Tree) => {
+  if (tree.leaf) {
+    await getDataSourceByConnectionId(tree.connectionId).then((res) => {
+      console.log('选择表', tree.data, res.data)
+      emits('select', tree.data as Table, res.data)
     })
   }
 }
-const loading = ref(false)
-const queryMetaList = async (id: string) => {
-  if (id) {
-    loading.value = true
-    await getDataSourceMetaAll(id)
-      .then((res) => {
-        loading.value = false
+const selectLoadNode = (node: Node, resolve: (data: Tree[]) => void) => {
+  if (node.level == 0) {
+    return resolve(dataSourceMetaTree.value)
+  }
+  const data = node.data
+  if (node.level == 1) {
+    openDataBase(data.connectionId, (data.data as SimpleDatabase).dataBaseName).then(
+      (res) => {
         if (res.data) {
-          const data = res.data || {}
-          dataSource.value = res.data!.dataSource
-          const treeData = data.dateBaseList.map((item) => {
-            return {
-              id: item.name,
-              label: item.name,
-              data: item,
-              children: getChildren(
-                item.name,
-                item.supportSchema == true ? item.schemaList : item.tableList,
-                item.supportSchema
-              ),
+          const database = res.data as Database
+          if (database.supportSchema) {
+            resolve(
+              database.schemaList?.map((item) => {
+                return {
+                  id: item.schemaName,
+                  label: item.schemaName,
+                  data: item,
+                  leaf: false,
+                  connectionId: data.connectionId,
+                  children: [],
+                }
+              })
+            )
+          } else {
+            if (database.tableList) {
+              resolve(
+                database.tableList?.map((item) => {
+                  return {
+                    id: item.tableName,
+                    label: item.tableName,
+                    data: item,
+                    leaf: true,
+                    connectionId: data.connectionId,
+                    children: [],
+                  }
+                })
+              )
+            } else {
+              resolve([])
             }
-          })
-          dataSourceMetaTree.value = treeData
+          }
         }
-      })
-      .catch((_err) => {
-        loading.value = false
-      })
+      }
+    )
+  }
+  if (node.level == 2) {
+    const tableList = data.data.tableList
+    if (tableList) {
+      resolve(
+        data.data.tableList?.map((item) => {
+          return {
+            id: item.tableName,
+            label: item.tableName,
+            data: item,
+            leaf: true,
+            connectionId: data.connectionId,
+            children: [],
+          }
+        })
+      )
+    } else {
+      resolve([])
+    }
   }
 }
-//选中表
-const selectTable = (nodeData: TreeNodeData, _node: TreeNode, _e: MouseEvent) => {
-  const tableName = nodeData.data.tableName
-  if (tableName) {
-    emits('select', nodeData.data as Table, dataSource.value)
-  }
-}
-const refreshTable = async (id: string) => {
-  await queryMetaList(id)
-}
+
 const tableBoxRef = ref<HTMLElement>()
 onMounted(() => {
-  queryMetaList(datasourceId.value)
+  openConnection(datasourceId.value)
 })
-const headerRef = ref<HTMLElement>()
+onBeforeUpdate(() => {
+  closeConnectDataSource(datasourceId.value)
+})
+// const headerRef = ref<HTMLElement>()
 const treeHeight = ref()
 watchEffect(async () => {
-  treeHeight.value = tableBoxRef.value?.offsetHeight - headerRef.value?.offsetHeight
+  treeHeight.value = tableBoxRef.value?.offsetHeight
+  // treeHeight.value = tableBoxRef.value?.offsetHeight - headerRef.value?.offsetHeight
 })
 </script>
 <template>
   <div ref="tableBoxRef" class="table-tree">
-    <div
+    <!-- <div
       ref="headerRef"
       class="table-tree-header"
       :style="{ width: '100%', minHeight: '32px' }"
@@ -157,25 +170,23 @@ watchEffect(async () => {
           </el-icon>
         </div>
       </div>
-    </div>
+    </div> -->
     <div class="table-tree-content">
-      <el-scrollbar v-if="dataSourceMetaTree">
-        <el-tree-v2
-          ref="tableTreeRef"
-          v-loading="loading"
+      <el-scrollbar v-if="dataSourceMetaTree" :height="treeHeight">
+        <el-tree
           :data="dataSourceMetaTree"
-          highlight-current
-          :height="treeHeight"
           :props="treeProps"
           :empty-text="'~什么也没有'"
-          :filter-method="filterTableTree"
-          @node-click="selectTable"
+          highlight-current
+          lazy
+          :load="selectLoadNode"
+          @node-click="clickSelectTable"
         >
           <template #default="{ node }">
             <!-- <span class="prefix" :class="{ 'is-leaf': node.isLeaf }">[ElementPlus]</span> -->
             <span>{{ node.label }}</span>
           </template>
-        </el-tree-v2>
+        </el-tree>
       </el-scrollbar>
     </div>
   </div>

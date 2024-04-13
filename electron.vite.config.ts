@@ -33,6 +33,9 @@ export default ({ command, mode }) => {
   const optimizeDepsElementPlusIncludes = [
     'element-plus/es',
     '@vuemap/vue-amap/es',
+    'vue-codemirror',
+    '@codemirror/theme-one-dark',
+    '@codemirror/lang-javascript',
   ]
   fs.readdirSync('node_modules/element-plus/es/components').map((dirname) => {
     fs.access(
@@ -86,7 +89,6 @@ export default ({ command, mode }) => {
             rewrite: (path: any) => {
               return path.replace(/^\/api/, env.RD_VITE_API_PREFIX)
             },
-            logLevel: 'debug',
           },
         },
       },

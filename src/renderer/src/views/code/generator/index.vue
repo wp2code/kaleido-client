@@ -1,32 +1,49 @@
 <script lang="ts" setup>
 import { SelectDataTableData } from '@/api/datasource/types'
-import { CodeTemplate } from '@/api/code/types'
-import { listTemplateConfig } from '@/api/code/index'
+import { CodeTemplate, CodeGenerationParam, CodeGenerationResult } from '@/api/code/types'
+import { listTemplateConfig, previewCode } from '@/api/code/index'
 import { SelectDbable } from '../keys'
 import { ArrowRight } from '@element-plus/icons-vue'
 import BasicConfig from './template/BasicConfig.vue'
 import ModelTemplate from './template/ModelTemplate.vue'
-import BizTemplate from './template/BizTemplate.vue'
+import ServiceTemplate from './template/ServiceTemplate.vue'
 import WebTemplate from './template/WebTemplate.vue'
 import MapperTemplate from './template/MapperTemplate.vue'
-const selectDbTableData = inject(SelectDbable, {}) as SelectDataTableData
+import { buildCodeParams } from '@/utils/codeUtil'
+const selectDbTableData = inject(SelectDbable) as Ref<SelectDataTableData>
 const selectCodeTemplate = ref<CodeTemplate>()
 const codeTemplateList = ref<CodeTemplate[]>()
 const codeVisible = ref(false)
 const codeDialogTitle = ref('')
 const showBasicConfig = ref(false)
+const codeGenerationResult = ref<CodeGenerationResult>()
+const toPreviewCode = async (templateId: string, params: CodeGenerationParam[]) => {
+  console.log('有效的模板ID', templateId, '预览代码参数：', params)
+  await previewCode(templateId, params).then((res) => {
+    console.log('toPreviewCode:', res)
+    codeGenerationResult.value = res.data
+  })
+}
 onMounted(async () => {
   await listTemplateConfig({ language: 'java', needParseTemplate: true }).then((res) => {
     if (res.data) {
       const list = res.data
       codeTemplateList.value = list
-      selectCodeTemplate.value = list.filter((item) => item.isDefault === 1)[0] || list[0]
+      const template = list.filter((item) => item.isDefault === 1)[0] || list[0]
+      selectCodeTemplate.value = template
+      toPreviewCode(template.id, buildCodeParams(template, selectDbTableData.value))
     }
   })
 })
+
+//选择不同的模板配置
 const onChangeConfig = (value: any) => {
   console.log('---onChangeConfig', value)
   selectCodeTemplate.value = value
+  // toPreviewCode(
+  //   selectCodeTemplate.value.id,
+  //   CodeGenerationParam.mack(selectDbTableData, selectCodeTemplate.value)
+  // )
 }
 const openCodeDialog = (visible: boolean, title: string, isShowBasicConfig?: boolean) => {
   codeVisible.value = visible
@@ -93,16 +110,16 @@ watch(codeVisible, (nv, ov) => {
     <div class="conent">
       <el-tabs class="template-tabs">
         <el-tab-pane label="模型层（POJO）">
-          <ModelTemplate :data="selectCodeTemplate" />
+          <ModelTemplate :data="codeGenerationResult" :table-data="selectDbTableData" />
         </el-tab-pane>
         <el-tab-pane label="数据持久层（Mapper）">
-          <MapperTemplate :data="selectCodeTemplate"></MapperTemplate>
+          <MapperTemplate :data="codeGenerationResult"></MapperTemplate>
         </el-tab-pane>
         <el-tab-pane label="业务层（Service）">
-          <BizTemplate :data="selectCodeTemplate"></BizTemplate>
+          <ServiceTemplate :data="codeGenerationResult"></ServiceTemplate>
         </el-tab-pane>
         <el-tab-pane label="接口层（Controller）">
-          <WebTemplate :data="selectCodeTemplate"></WebTemplate>
+          <WebTemplate :data="codeGenerationResult"></WebTemplate>
         </el-tab-pane>
       </el-tabs>
     </div>

@@ -1,4 +1,11 @@
-import { DataSource, DataSourceMeta, DataSourceQuery } from './types'
+import {
+  DataSource,
+  DataSourceMeta,
+  Database,
+  DataSourceQuery,
+  ConnectionData,
+} from './types'
+import { TableFieldColumn } from '../code/types'
 import { AxiosPromise } from 'axios'
 import request from '../request'
 
@@ -99,5 +106,99 @@ export function connectTestDataSource(data: DataSource): AxiosPromise<Boolean> {
     url: '/api/v1/datasource/test/connect',
     method: 'post',
     data: data,
+  })
+}
+
+/**
+ *
+ * @param queryParams
+ * @returns
+ */
+export function getTableFieldColumnList(
+  dbType: string,
+  connectionId: string,
+  dataBaseName: string,
+  tableName: string,
+  schemaName?: string
+): AxiosPromise<TableFieldColumn[]> {
+  return request({
+    url: '/api/v1/datasource/table/column/fields',
+    method: 'post',
+    data: { dbType, dataBaseName, connectionId, tableName, schemaName },
+  })
+}
+/**
+ * 打开连接
+ *
+ * @param id
+ * @returns
+ */
+export function openConnectDataSource(
+  id: string
+): AxiosPromise<ConnectionData> {
+  return request({
+    url: `/api/v1/datasource/connect/${id}/open`,
+    method: 'get',
+  })
+}
+/**
+ *  关闭连接
+ *
+ * @param connectionId
+ * @returns
+ */
+export function closeConnectDataSource(
+  connectionId: string
+): AxiosPromise<Boolean> {
+  return request({
+    url: `/api/v1/datasource/connect/${connectionId}/close`,
+    method: 'delete',
+  })
+}
+
+/**
+ * 打开数据库
+ *
+ * @param connectionId
+ * @param databaseName
+ * @returns
+ */
+export function openDataBase(
+  connectionId: string,
+  databaseName: string
+): AxiosPromise<Database> {
+  return request({
+    url: `/api/v1/datasource/db/${connectionId}/${databaseName}/open`,
+    method: 'get',
+  })
+}
+
+/**
+ * 关闭数据库
+ *
+ * @param id
+ * @returns
+ */
+export function closeDataBase(
+  connectionId: string,
+  databaseName: string
+): AxiosPromise<Boolean> {
+  return request({
+    url: `/api/v1/datasource/db/${connectionId}/${databaseName}/close`,
+    method: 'delete',
+  })
+}
+/**
+ * 获取连接的数据源
+ *
+ * @param connectionId
+ * @returns
+ */
+export function getDataSourceByConnectionId(
+  connectionId: string
+): AxiosPromise<DataSource> {
+  return request({
+    url: `/api/v1/datasource/connection/${connectionId}`,
+    method: 'get',
   })
 }

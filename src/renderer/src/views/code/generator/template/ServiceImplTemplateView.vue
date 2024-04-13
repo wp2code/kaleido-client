@@ -1,42 +1,55 @@
 <script lang="ts" setup>
-import { MapperCodeView } from '@/api/code/types'
+import { ServiceCodeView } from '@/api/code/types'
 const props = defineProps({
   data: {
-    type: Object as PropType<MapperCodeView>,
-    default: {} as MapperCodeView,
+    type: Object as PropType<ServiceCodeView>,
+    default: {} as ServiceCodeView,
   },
 })
-const mapperCodeView = ref<MapperCodeView>(props.data)
+const serviceCodeView = ref<ServiceCodeView>(props.data)
+watchEffect(() => {
+  // const codeTemplateConfigs = props.data!.templateConfigList || []
+  // for (let config of codeTemplateConfigs) {
+  //   if (config.name === 'BizService') {
+  //     templateParams.value = config.templateParams
+  //   }
+  // }
+})
 const handleOpenMenu = async () => {
   const filePath = await window.winApi.openDialog({ properties: ['openDirectory'] })
   if (filePath) {
-    mapperCodeView.value.codePath = filePath
+    serviceCodeView.value.codePath = filePath
   }
 }
 </script>
+
 <template>
   <div class="modelBox">
     <div class="left">
       <div>
         <div>类名称:</div>
-        <div><el-input v-model="mapperCodeView!.name" /></div>
+        <div><el-input v-model="serviceCodeView!.name" /></div>
       </div>
       <div>
         <div>包名称:</div>
-        <div><el-input v-model="mapperCodeView!.packageName" /></div>
+        <div><el-input v-model="serviceCodeView!.packageName" /></div>
       </div>
       <div>
         <div>包路径:</div>
-        <div><el-input v-model="mapperCodeView!.sourceFolder" /></div>
+        <div><el-input v-model="serviceCodeView!.sourceFolder" /></div>
       </div>
       <div>
         <div>父类:</div>
-        <div><el-input v-model="mapperCodeView!.superclassName" /></div>
+        <div><el-input v-model="serviceCodeView!.superclassName" /></div>
+      </div>
+      <div>
+        <div>接口:</div>
+        <div><el-input v-model="serviceCodeView!.implInterface" /></div>
       </div>
       <div>
         <div class="box-lable">代码地址：</div>
         <div class="box-file">
-          <el-input v-model="mapperCodeView!.codePath">
+          <el-input v-model="serviceCodeView!.codePath">
             <template #append>
               <el-button type="primary" @click="handleOpenMenu">选择地址</el-button>
             </template>
@@ -45,22 +58,14 @@ const handleOpenMenu = async () => {
       </div>
       <div>
         <div>
-          <el-checkbox v-model="mapperCodeView.useMybatisPlus">Mybatis-puls</el-checkbox>
-        </div>
-      </div>
-      <div>
-        <div class="method-list">
-          <el-checkbox :checked="true" label="insert" />
-          <el-checkbox :checked="true" label="update" />
-          <el-checkbox :checked="true" label="insertOrUpdate" />
-        </div>
-        <div class="method-list">
-          <el-checkbox :checked="true" label="insertOrUpdate" />
+          <el-checkbox v-model="serviceCodeView!.useMybatisPlus"
+            >Mybatis-puls</el-checkbox
+          >
         </div>
       </div>
     </div>
     <div class="right">
-      <Codeview v-model:code="mapperCodeView.templateCode" dark></Codeview>
+      <Codeview v-model:code="serviceCodeView.templateCode" dark></Codeview>
     </div>
   </div>
 </template>

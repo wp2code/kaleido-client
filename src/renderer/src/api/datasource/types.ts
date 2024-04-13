@@ -9,6 +9,7 @@ export interface DataSource {
   password: string
   dbName?: string
   extend?: string
+  connectionId?: string
   updateTime?: string
   createTime?: string
 }
@@ -31,6 +32,7 @@ export interface Database {
   tableList?: Table[]
 }
 export interface DataSourceMeta {
+  connectionId: string
   dataSource?: DataSource
   dateBaseList?: Database[]
 }
@@ -72,7 +74,7 @@ export function getDefault(dbType: DbType): DataSource {
         name: '@localhost',
         url: 'localhost',
         port: 5432,
-        userName: 'root',
+        userName: 'postgres',
         dbName: 'postgres',
       } as DataSource
       break
@@ -98,4 +100,15 @@ export function getDefault(dbType: DbType): DataSource {
       break
   }
   return dbConfig
+}
+
+export class ConnectionData {
+  connectionId: string
+  type: string
+  databases: SimpleDatabase[]
+}
+
+export class SimpleDatabase {
+  dataBaseName: string
+  dataBaseComment?: string
 }

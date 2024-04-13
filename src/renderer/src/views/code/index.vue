@@ -16,7 +16,7 @@ const componentName = ref()
 const componentParams = ref()
 const componentKey = ref()
 const dbTablePanelKey = ref()
-const selectDbTableData = ref<SelectDataTableData>()
+const selectDbTableData = ref<SelectDataTableData>(new SelectDataTableData(null, null))
 const selectDbConfigData = ref<DbConfig>()
 //新增连接
 const toAddConnect = () => {
@@ -31,7 +31,6 @@ const selectDbConfig = (item: any, isEdit: boolean) => {
     componentParams.value = item
   } else {
     dbTablePanelKey.value = item?.id
-    //显示数据库
     selectDbConfigData.value = item
   }
 }
@@ -42,7 +41,7 @@ const selectDbTable = (table: Table, dataSource: DataSource) => {
   selectDbTableData.value = new SelectDataTableData(dataSource, table)
 }
 //选择数据库表
-provide(SelectDbable, selectDbTableData || {})
+provide(SelectDbable, selectDbTableData)
 const dbConnectionPanelRef = ref<InstanceType<typeof DbConnectionPanel>>()
 //刷新连接列表
 provide(RefreshConnectList, (params: any | undefined) => {
