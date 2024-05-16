@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { SelectDataTableData } from '@/api/datasource/types'
 import { CodeTemplate, CodeGenerationParam, CodeGenerationResult } from '@/api/code/types'
-import { listTemplateConfig, previewCode } from '@/api/code/index'
+import { listTemplateConfig, previewCode, updateBasicConfigById } from '@/api/code/index'
 import { SelectDbable } from '../keys'
 import { ArrowRight } from '@element-plus/icons-vue'
 import BasicConfig from './template/BasicConfig.vue'
@@ -9,7 +9,8 @@ import ModelTemplate from './template/ModelTemplate.vue'
 import ServiceTemplate from './template/ServiceTemplate.vue'
 import WebTemplate from './template/WebTemplate.vue'
 import MapperTemplate from './template/MapperTemplate.vue'
-import { buildCodeParams } from '@/utils/codeUtil'
+import { buildCodeParamsWithTemplate } from '@/utils/codeUtil'
+import MessageBox from '@/utils/MessageBox'
 const selectDbTableData = inject(SelectDbable) as Ref<SelectDataTableData>
 const selectCodeTemplate = ref<CodeTemplate>()
 const codeTemplateList = ref<CodeTemplate[]>()
@@ -17,12 +18,32 @@ const codeVisible = ref(false)
 const codeDialogTitle = ref('')
 const showBasicConfig = ref(false)
 const codeGenerationResult = ref<CodeGenerationResult>()
-const toPreviewCode = async (templateId: string, params: CodeGenerationParam[]) => {
-  console.log('有效的模板ID', templateId, '预览代码参数：', params)
-  await previewCode(templateId, params).then((res) => {
-    console.log('toPreviewCode:', res)
+const basicConfigInfo = ref()
+const tpTablsKey = ref('')
+const toPreviewCode = async (
+  templateId: string,
+  connectionId: string,
+  params: CodeGenerationParam[]
+) => {
+  console.log(
+    '有效的模板ID',
+    templateId,
+    '连接ID',
+    connectionId,
+    '预览代码参数：',
+    params
+  )
+  await previewCode(templateId, connectionId, params).then((res) => {
     codeGenerationResult.value = res.data
   })
+}
+const refrshClick = () => {
+  tpTablsKey.value = Math.random() + 'TB'
+  toPreviewCode(
+    selectCodeTemplate.value.id,
+    selectDbTableData.value.dataSource?.id,
+    buildCodeParamsWithTemplate(selectCodeTemplate.value, selectDbTableData.value)
+  )
 }
 onMounted(async () => {
   await listTemplateConfig({ language: 'java', needParseTemplate: true }).then((res) => {
@@ -31,19 +52,17 @@ onMounted(async () => {
       codeTemplateList.value = list
       const template = list.filter((item) => item.isDefault === 1)[0] || list[0]
       selectCodeTemplate.value = template
-      toPreviewCode(template.id, buildCodeParams(template, selectDbTableData.value))
+      const config = selectCodeTemplate.value.basicConfig
+      basicConfigInfo.value = config ? JSON.parse(config) : {}
+      refrshClick()
     }
   })
 })
 
 //选择不同的模板配置
 const onChangeConfig = (value: any) => {
-  console.log('---onChangeConfig', value)
   selectCodeTemplate.value = value
-  // toPreviewCode(
-  //   selectCodeTemplate.value.id,
-  //   CodeGenerationParam.mack(selectDbTableData, selectCodeTemplate.value)
-  // )
+  refrshClick()
 }
 const openCodeDialog = (visible: boolean, title: string, isShowBasicConfig?: boolean) => {
   codeVisible.value = visible
@@ -54,7 +73,16 @@ const cancel = () => {
   codeVisible.value = false
 }
 const save = (_isShowBasicConfig?: boolean) => {
-  // codeVisible.value = isShowBasicConfig
+  if (_isShowBasicConfig) {
+    updateBasicConfigById(
+      selectCodeTemplate.value.id,
+      JSON.stringify(basicConfigInfo.value)
+    ).then((res) => {
+      if (res) {
+        MessageBox.ok('更新成功')
+      }
+    })
+  }
 }
 watch(codeVisible, (nv, ov) => {
   if (nv !== true && ov == true) {
@@ -103,28 +131,40 @@ watch(codeVisible, (nv, ov) => {
               </el-option>
             </el-select>
           </div>
-          <el-link @click="openCodeDialog(true, '基本配置', true)">基本配置</el-link>
+          <el-link @click="openCodeDialog(true, '全局配置', true)">全局配置</el-link>
         </div>
       </div>
     </template>
     <div class="conent">
-      <el-tabs class="template-tabs">
+      <el-tabs :key="tpTablsKey" class="template-tabs">
         <el-tab-pane label="模型层（POJO）">
-          <ModelTemplate :data="codeGenerationResult" :table-data="selectDbTableData" />
+          <ModelTemplate
+            :data="codeGenerationResult"
+            :table-data="selectDbTableData"
+          ></ModelTemplate>
         </el-tab-pane>
         <el-tab-pane label="数据持久层（Mapper）">
-          <MapperTemplate :data="codeGenerationResult"></MapperTemplate>
+          <MapperTemplate
+            :data="codeGenerationResult"
+            :table-data="selectDbTableData"
+          ></MapperTemplate>
         </el-tab-pane>
         <el-tab-pane label="业务层（Service）">
-          <ServiceTemplate :data="codeGenerationResult"></ServiceTemplate>
+          <ServiceTemplate
+            :data="codeGenerationResult"
+            :table-data="selectDbTableData"
+          ></ServiceTemplate>
         </el-tab-pane>
         <el-tab-pane label="接口层（Controller）">
-          <WebTemplate :data="codeGenerationResult"></WebTemplate>
+          <WebTemplate
+            :data="codeGenerationResult"
+            :table-data="selectDbTableData"
+          ></WebTemplate>
         </el-tab-pane>
       </el-tabs>
     </div>
     <div class="bottom">
-      <el-button>保存模板</el-button>
+      <el-button @click="refrshClick">一键重置</el-button>
       <el-button type="primary" @click="openCodeDialog(true, '生成代码', false)"
         >生成代码</el-button
       >
@@ -135,7 +175,7 @@ watch(codeVisible, (nv, ov) => {
         :close-on-click-modal="true"
         :close-on-press-escape="true"
       >
-        <BasicConfig v-if="showBasicConfig == true" :data="selectCodeTemplate" />
+        <BasicConfig v-if="showBasicConfig == true" v-model="basicConfigInfo" />
         <div v-else>
           <el-checkbox :checked="true" label="模型层（Entity）" />
           <el-checkbox :checked="true" label="模型层（VO）" />

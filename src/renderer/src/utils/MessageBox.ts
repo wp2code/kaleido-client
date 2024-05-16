@@ -1,4 +1,4 @@
-import { ElMessageBox, ElMessage } from 'element-plus'
+import { ElMessageBox, ElMessage, ElNotification } from 'element-plus'
 
 export interface MsgBoxOptions {
   ok: Boolean | Promise<Boolean> | Function
@@ -19,6 +19,21 @@ const showElMessage = (isSuccess: Boolean, options?: MsgBoxOptions) => {
     })
   }
 }
+const showElNotify = (
+  msg: string,
+  title: string,
+  isShowClose: boolean,
+  position: any = 'top-right',
+  duration: number = 1000
+) => {
+  ElNotification.success({
+    title: title,
+    message: msg,
+    showClose: isShowClose,
+    duration: duration,
+    position: position,
+  })
+}
 class MsgBox {
   private static instance: MsgBox | null = null
   static make(): MsgBox {
@@ -33,6 +48,9 @@ class MsgBox {
    */
   ok(msg: string = '操作成功') {
     showElMessage(true, { successMsg: msg } as MsgBoxOptions)
+  }
+  notify(msg: string = '成功') {
+    showElNotify(msg, '', false, 'bottom-right')
   }
   /**
    *

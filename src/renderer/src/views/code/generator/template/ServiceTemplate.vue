@@ -1,20 +1,25 @@
 <script lang="ts" setup>
 import ServiceImplTemplateView from './ServiceImplTemplateView.vue'
 import ServiceApiTemplateView from './ServiceApiTemplateView.vue'
+import { SelectDataTableData } from '@/api/datasource/types'
 import {
   CodeGenerationResult,
   ServiceCodeView,
   ServiceApiCodeView,
 } from '@/api/code/types'
+import { TabsPaneContext } from 'element-plus'
 const props = defineProps({
   data: {
     type: Object as PropType<CodeGenerationResult>,
     default: {} as CodeGenerationResult,
   },
+  tableData: {
+    type: Object as PropType<SelectDataTableData>,
+    default: {} as SelectDataTableData,
+  },
 })
 const serviceCodeView = ref<ServiceCodeView>(new ServiceCodeView())
 const serviceApiCodeView = ref<ServiceApiCodeView>(new ServiceApiCodeView())
-onMounted(() => {})
 watchEffect(() => {
   const codeGenerationList = props.data!.codeGenerationList || []
   for (let code of codeGenerationList) {
@@ -28,7 +33,6 @@ watchEffect(() => {
       serviceApiCodeView.value.codeType = code.codeType
       serviceApiCodeView.value.useMybatisPlus = code.useMybatisPlus
       serviceApiCodeView.value.superclassName = code.superclassName
-      serviceApiCodeView.value.supperInterfaceName = code.supperInterfaceName
     }
     if (code.codeType === 'Service') {
       serviceCodeView.value.name = code.name
@@ -40,18 +44,33 @@ watchEffect(() => {
       serviceCodeView.value.codeType = code.codeType
       serviceCodeView.value.useMybatisPlus = code.useMybatisPlus
       serviceCodeView.value.superclassName = code.superclassName
-      serviceCodeView.value.implInterface = code.implInterfaceName
+      serviceCodeView.value.implInterfaceName = code.implInterfaceName
     }
   }
 })
+const serviceImplKey = ref('1')
+const handleClick = (pane: TabsPaneContext, _ev: Event) => {
+  if (pane.props.label == 'ServiceImpl') {
+    serviceImplKey.value = Math.random() + ''
+  }
+}
 </script>
 <template>
-  <el-tabs class="template-tabs" tab-position="left">
+  <el-tabs class="template-tabs" tab-position="left" @tab-click="handleClick">
     <el-tab-pane label="ServiceApi">
-      <ServiceApiTemplateView :data="serviceApiCodeView"></ServiceApiTemplateView>
+      <ServiceApiTemplateView
+        :data="serviceApiCodeView"
+        :table-data="props.tableData"
+        :template-info="props.data.templateInfo"
+      ></ServiceApiTemplateView>
     </el-tab-pane>
     <el-tab-pane label="ServiceImpl">
-      <ServiceImplTemplateView :data="serviceCodeView"></ServiceImplTemplateView>
+      <ServiceImplTemplateView
+        :data="serviceCodeView"
+        :table-data="props.tableData"
+        :template-info="props.data.templateInfo"
+        :key-value="serviceImplKey"
+      ></ServiceImplTemplateView>
     </el-tab-pane>
   </el-tabs>
 </template>

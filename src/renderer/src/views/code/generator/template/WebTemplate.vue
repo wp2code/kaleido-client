@@ -1,11 +1,20 @@
 <script lang="ts" setup>
 import { CodeGenerationResult, WebCodeView } from '@/api/code/types'
+import { SelectDataTableData } from '@/api/datasource/types'
+import { previewCode } from '@/api/code/index'
+import { buildCodeParamsWithCodeView } from '@/utils/codeUtil'
+import { useGenCodeParamStore } from '@/store/modules/cache'
 const props = defineProps({
   data: {
     type: Object as PropType<CodeGenerationResult>,
     default: {} as CodeGenerationResult,
   },
+  tableData: {
+    type: Object as PropType<SelectDataTableData>,
+    default: {} as SelectDataTableData,
+  },
 })
+const useGenCodeParam = useGenCodeParamStore()
 const webCodeView = ref<WebCodeView>(new WebCodeView())
 watchEffect(() => {
   const codeGenerationList = props.data!.codeGenerationList || []
@@ -24,6 +33,38 @@ watchEffect(() => {
     }
   }
 })
+watch(
+  [
+    () => webCodeView.value.name,
+    () => webCodeView.value.useSwagger,
+    () => webCodeView.value.useMybatisPlus,
+    () => webCodeView.value.superclassName,
+    () => webCodeView.value.packageName,
+  ],
+  (_nv, _ov) => {
+    if (_nv !== _ov && _ov[0] != undefined) {
+      refreshGenCode()
+    }
+  }
+)
+const refreshGenCode = () => {
+  const serviceApiCodeParam = useGenCodeParam.getCodeParamCache('ServiceApi')
+  const voCodeParam = useGenCodeParam.getCodeParamCache('VO')
+  const p = buildCodeParamsWithCodeView([webCodeView.value], props.tableData)
+  if (serviceApiCodeParam) {
+    p.push(serviceApiCodeParam)
+  }
+  if (voCodeParam) {
+    p.push(voCodeParam)
+  }
+  previewCode(props.data!.templateInfo?.id, props.tableData.dataSource?.id, p, [
+    'Controller',
+  ]).then((res) => {
+    if (res.data.codeGenerationList) {
+      webCodeView.value.templateCode = res.data.codeGenerationList[0].templateCode
+    }
+  })
+}
 const handleOpenMenu = async () => {
   const filePath = await window.winApi.openDialog({ properties: ['openDirectory'] })
   if (filePath) {

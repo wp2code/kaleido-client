@@ -2,6 +2,7 @@
 import type { CSSProperties } from 'vue'
 import { Codemirror } from 'vue-codemirror'
 import { html } from '@codemirror/lang-html'
+import MessageBox from '@/utils/MessageBox'
 import { oneDark } from '@codemirror/theme-one-dark'
 interface Props {
   codeStyle?: CSSProperties // 代码样式
@@ -13,13 +14,14 @@ interface Props {
   indentWithTab?: boolean // 启用tab按键
   tabSize?: number // tab按键缩进空格数
 }
+const showCopy = ref(false)
 const props = withDefaults(defineProps<Props>(), {
-  placeholder: 'Code goes here...',
+  placeholder: '加载代码...',
   codeStyle: () => {
     return {
       height: '100%',
       width: '100%',
-      fontSize: '11px',
+      fontSize: '12px',
     }
   },
   dark: false,
@@ -36,6 +38,13 @@ function handleReady(payload: any) {
   console.log('ready')
   emits('ready', payload)
 }
+const handleCopy = async () => {
+  if (codeValue) {
+    await window.winApi.copy(codeValue.value)
+    MessageBox.ok('复制成功')
+  }
+}
+
 function onChange(value: string, viewUpdate: any) {
   emits('change', value, viewUpdate)
   emits('update:code', value)
@@ -46,44 +55,64 @@ function onFocus(viewUpdate: any) {
 function onBlur(viewUpdate: any) {
   emits('blur', viewUpdate)
 }
+function onmouseover() {
+  if (!showCopy.value) {
+    showCopy.value = true
+  }
+}
+function onmouseout() {
+  if (showCopy.value) {
+    showCopy.value = false
+  }
+}
 watchEffect(() => {
   codeValue.value = props.code
 })
 </script>
 <template>
   <el-scrollbar class="codemirow-box">
-    <Codemirror
-      ref="codemirror"
-      v-model="codeValue"
-      :placeholder="placeholder"
-      :style="codeStyle"
-      v-bind="$attrs"
-      :extensions="extensions"
-      :disabled="disabled"
-      @ready="handleReady"
-      @change="onChange"
-      @focus="onFocus"
-      @blur="onBlur"
-    />
+    <div @mouseover.stop="onmouseover" @mouseout.stop="onmouseout">
+      <el-button
+        v-show="showCopy"
+        class="btn-copy"
+        @mouseover.prevent
+        @mouseout.prevent
+        @click="handleCopy()"
+        >Copy</el-button
+      >
+      <Codemirror
+        ref="codemirror"
+        v-model="codeValue"
+        :placeholder="placeholder"
+        :style="codeStyle"
+        v-bind="$attrs"
+        :extensions="extensions"
+        :disabled="disabled"
+        @ready="handleReady"
+        @change="onChange"
+        @focus="onFocus"
+        @blur="onBlur"
+      />
+    </div>
   </el-scrollbar>
 </template>
 <style lang="scss" scoped>
 .codemirow-box {
   max-width: 90vw;
   max-height: 70vh;
-  // color: #abb2bf;
-  // background-color: #282c34;
+  position: relative;
+  .btn-copy {
+    position: absolute;
+    right: 1px;
+    top: 1px;
+    z-index: 100;
+    color: #cdd0d6;
+    background-color: transparent;
+  }
+  .btn-copy:hover {
+    background-color: #e6e8eb;
+    color: #303133;
+    border-color: #303133;
+  }
 }
-// :deep(.cm-editor) {
-//   // border-radius: 8px;
-//   // height: 10vh;
-//   outline: none;
-//   border: 1px solid transparent;
-//   .cm-scroller {
-//     border-radius: 8px;
-//   }
-// }
-// :deep(.cm-focused) {
-//   border: 1px solid #6b778c;
-// }
 </style>

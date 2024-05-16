@@ -1,13 +1,61 @@
 <script lang="ts" setup>
-import { ServiceApiCodeView } from '@/api/code/types'
+import { ServiceApiCodeView, CodeTemplate } from '@/api/code/types'
+import { SelectDataTableData } from '@/api/datasource/types'
+import { previewCode } from '@/api/code/index'
+import { buildCodeParamsWithCodeView } from '@/utils/codeUtil'
+import { useGenCodeParamStore } from '@/store/modules/cache'
 const props = defineProps({
   data: {
     type: Object as PropType<ServiceApiCodeView>,
     default: {} as ServiceApiCodeView,
   },
+  templateInfo: {
+    type: Object as PropType<CodeTemplate>,
+    required: true,
+  },
+  tableData: {
+    type: Object as PropType<SelectDataTableData>,
+    required: true,
+  },
 })
-const serviceApiCodeView = ref<ServiceApiCodeView>(props.data)
-watchEffect(() => {})
+const serviceApiCodeView = ref<ServiceApiCodeView>()
+const useGenCodeParam = useGenCodeParamStore()
+watchEffect(() => {
+  const codeView = props.data as ServiceApiCodeView
+  serviceApiCodeView.value = {
+    ...codeView,
+    toCodeGenerationParam: codeView.toCodeGenerationParam,
+  } as ServiceApiCodeView
+})
+watch(
+  [
+    () => serviceApiCodeView.value.name,
+    () => serviceApiCodeView.value.useMybatisPlus,
+    () => serviceApiCodeView.value.superclassName,
+    () => serviceApiCodeView.value.packageName,
+  ],
+  (_nv, _ov) => {
+    if (_nv !== _ov && _ov[0] != undefined) {
+      refreshGenCode()
+    }
+  }
+)
+const refreshGenCode = () => {
+  const p = buildCodeParamsWithCodeView([serviceApiCodeView.value], props.tableData)
+  if (serviceApiCodeView.value.useMybatisPlus == true) {
+    const entityCodeParam = useGenCodeParam.getCodeParamCache('Entity')
+    if (entityCodeParam) {
+      p.push(entityCodeParam)
+    }
+  }
+  previewCode(props.templateInfo.id, props.tableData.dataSource?.id, p, [
+    'ServiceApi',
+  ]).then((res) => {
+    if (res.data.codeGenerationList) {
+      serviceApiCodeView.value.templateCode = res.data.codeGenerationList[0].templateCode
+    }
+  })
+}
 const handleOpenMenu = async () => {
   const filePath = await window.winApi.openDialog({ properties: ['openDirectory'] })
   if (filePath) {
@@ -34,10 +82,6 @@ const handleOpenMenu = async () => {
       <div>
         <div>父类:</div>
         <div><el-input v-model="serviceApiCodeView!.superclassName" /></div>
-      </div>
-      <div>
-        <div>接口:</div>
-        <div><el-input v-model="serviceApiCodeView!.supperInterfaceName" /></div>
       </div>
       <div>
         <div class="box-lable">代码地址：</div>

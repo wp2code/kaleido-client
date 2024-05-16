@@ -5,6 +5,7 @@ import DbPanel from './db/DbPanel.vue'
 import DbTablePanel from './db/DbTablePanel.vue'
 import Generator from './generator/index.vue'
 import DbConnectionBox from '@/views/code/db/DbConnectionBox.vue'
+import { useGenCodeParamStore } from '@/store/modules/cache'
 import { DataSource, Table, SelectDataTableData } from '@/api/datasource/types'
 import {
   SelectDbable,
@@ -18,6 +19,7 @@ const componentKey = ref()
 const dbTablePanelKey = ref()
 const selectDbTableData = ref<SelectDataTableData>(new SelectDataTableData(null, null))
 const selectDbConfigData = ref<DbConfig>()
+const useGenCodeParam = useGenCodeParamStore()
 //新增连接
 const toAddConnect = () => {
   componentName.value = DbPanel
@@ -53,6 +55,9 @@ provide(CancelConnectOps, () => {
 })
 //编辑连接
 provide(EditConnectData, componentParams)
+onBeforeUnmount(() => {
+  useGenCodeParam.clearCodeParamCache()
+})
 </script>
 <template>
   <drag-layout init-size="30%">

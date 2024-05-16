@@ -110,24 +110,6 @@ export function connectTestDataSource(data: DataSource): AxiosPromise<Boolean> {
 }
 
 /**
- *
- * @param queryParams
- * @returns
- */
-export function getTableFieldColumnList(
-  dbType: string,
-  connectionId: string,
-  dataBaseName: string,
-  tableName: string,
-  schemaName?: string
-): AxiosPromise<TableFieldColumn[]> {
-  return request({
-    url: '/api/v1/datasource/table/column/fields',
-    method: 'post',
-    data: { dbType, dataBaseName, connectionId, tableName, schemaName },
-  })
-}
-/**
  * 打开连接
  *
  * @param id

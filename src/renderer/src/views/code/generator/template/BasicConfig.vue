@@ -1,21 +1,22 @@
 <script lang="ts" setup>
-import { CodeTemplate, CodeTemplateBasicConfig } from '@/api/code/types'
-const props = defineProps({
-  data: {
-    type: Object as PropType<CodeTemplate>,
-    default: {} as CodeTemplate,
-  },
+import { CodeTemplateBasicConfig } from '@/api/code/types'
+const config = defineModel({
+  type: Object as PropType<CodeTemplateBasicConfig>,
+  required: true,
 })
-const form = ref<CodeTemplateBasicConfig>(
-  props.data!.basicConfig || ({} as CodeTemplateBasicConfig)
-)
-watchEffect(() => {
-  form.value = props.data!.basicConfig || ({} as CodeTemplateBasicConfig)
-})
+const basicConfigView = ref<CodeTemplateBasicConfig>(config.value)
+// watchEffect(() => {
+//   basicConfigView.value = props.value.basicConfig
+//     ? (JSON.parse(props.value.basicConfig) as CodeTemplateBasicConfig)
+//     : {}
+//   if (basicConfigView.value) {
+//     props.value.basicConfig = JSON.stringify(basicConfigView.value)
+//   }
+// })
 const handleOpenMenu = async () => {
   const filePath = await window.winApi.openDialog({ properties: ['openDirectory'] })
   if (filePath) {
-    form.value.codePath = filePath
+    basicConfigView.value.codePath = filePath
   }
 }
 </script>
@@ -24,7 +25,7 @@ const handleOpenMenu = async () => {
     <div>
       <div class="box-lable">代码地址：</div>
       <div class="box-file">
-        <el-input v-model="form.codePath">
+        <el-input v-model="basicConfigView!.codePath">
           <template #append>
             <el-button type="primary" @click="handleOpenMenu">选择地址</el-button>
           </template>
@@ -33,12 +34,12 @@ const handleOpenMenu = async () => {
     </div>
     <div>
       <div class="box-lable">代码作者：</div>
-      <div><el-input v-model="form.author" /></div>
+      <div><el-input v-model="basicConfigView!.author" /></div>
     </div>
     <div>
       <div>
         <div class="box-lable">代码license：</div>
-        <div><el-input v-model="form.license" type="textarea" /></div>
+        <div><el-input v-model="basicConfigView!.license" type="textarea" /></div>
       </div>
     </div>
   </div>

@@ -2,6 +2,7 @@ import {
   CodeTemplate,
   CodeGenerationResult,
   CodeGenerationParam,
+  JavaTypeInfo,
 } from './types'
 import { AxiosPromise } from 'axios'
 import request from '../request'
@@ -26,12 +27,13 @@ export function listTemplateConfig(
  */
 export function generationCode(
   templateId: string,
+  connectionId: string,
   codeGenerationList?: CodeGenerationParam[]
 ): AxiosPromise<CodeGenerationResult> {
   return request({
     url: '/api/v1/code-gen/generation',
     method: 'post',
-    data: { codeGenerationList, templateId } || {},
+    data: { connectionId, templateId, codeGenerationList } || {},
   })
 }
 /**
@@ -41,12 +43,38 @@ export function generationCode(
  */
 export function previewCode(
   templateId: string,
-  codeGenerationList?: CodeGenerationParam[]
+  connectionId: string,
+  codeGenerationList?: CodeGenerationParam[],
+  responseTemplateCodeList?: string[]
 ): AxiosPromise<CodeGenerationResult> {
   return request({
     url: `/api/v1/code-gen/preview`,
     method: 'post',
-    data: { codeGenerationList, templateId } || {},
+    data:
+      {
+        connectionId,
+        templateId,
+        codeGenerationList,
+        responseTemplateCodeList,
+      } || {},
+  })
+}
+/**
+ *
+ * @param id
+ * @param basicConfig
+ * @returns
+ */
+export function updateBasicConfigById(
+  id: string,
+  basicConfig: string
+): AxiosPromise<Boolean> {
+  return request({
+    url: `/api/v1/code-tp/${id}/update`,
+    method: 'put',
+    data: {
+      basicConfig,
+    },
   })
 }
 /**
@@ -62,5 +90,19 @@ export function previewCodeByTemplateId(
     url: `/api/v1/code-gen/${templateId}/preview`,
     method: 'post',
     data: codeGenerationParam || {},
+  })
+}
+
+/**
+ *
+ * @param queryParams
+ * @returns
+ */
+export function getJavaTypeList(
+  classification: string = ''
+): AxiosPromise<JavaTypeInfo[]> {
+  return request({
+    url: `/api/v1/code-gen/java/type?cf=${classification}`,
+    method: 'get',
   })
 }

@@ -93,7 +93,11 @@ export default ({ command, mode }) => {
         },
       },
       plugins: [
-        vue(),
+        vue({
+          script: {
+            defineModel: true,
+          },
+        }),
         vueJsx(),
         //解决message和notification引入不生效问题
         // createStyleImportPlugin({

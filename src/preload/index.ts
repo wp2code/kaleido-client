@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer, clipboard } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 import path from 'path'
 import { JAVA_APP_NAME, JAVA_PATH } from './constants'
@@ -9,7 +9,9 @@ import { spawn } from 'child_process'
 const winApi = {
   setTitle: (title) => ipcRenderer.send('set-title', title),
   openDialog: (options) => ipcRenderer.invoke('dialog:showOpenDialog', options),
+  copy: (text) => clipboard.writeText(text),
 }
+
 const serverApi = {
   startServerForSpawn: async () => {
     const javaPath = path.join(__dirname, '', `./static/${JAVA_APP_NAME}`)
