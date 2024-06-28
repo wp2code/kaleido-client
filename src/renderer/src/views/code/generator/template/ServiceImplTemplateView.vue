@@ -1,9 +1,11 @@
 <script lang="ts" setup>
-import { ServiceCodeView, CodeTemplate } from '@/api/code/types'
+import { ServiceCodeView, CodeTemplate, PartitionTempate } from '@/api/code/types'
 import { SelectDataTableData } from '@/api/datasource/types'
 import { previewCode } from '@/api/code/index'
 import { buildCodeParamsWithCodeView } from '@/utils/codeUtil'
 import { useGenCodeParamStore } from '@/store/modules/cache'
+import CodeTemplateEdit from './CodeTemplateEdit.vue'
+import { TriggerWatch } from '../../keys'
 const props = defineProps({
   data: {
     type: Object as PropType<ServiceCodeView>,
@@ -22,17 +24,22 @@ const props = defineProps({
     required: false,
   },
 })
+const canTriggerWatch = inject(TriggerWatch) as Ref
 const serviceCodeView = ref<ServiceCodeView>()
+const templateEditVisible = ref(false)
 const useGenCodeParam = useGenCodeParamStore()
 const selectMode = ref('0')
+const templateId = ref('')
 const implInterfaceName = ref('')
+const editTemlateSuccess = (template: PartitionTempate) => {
+  serviceCodeView.value = Object.assign(serviceCodeView.value, {
+    ...template,
+    name: serviceCodeView.value.name,
+  })
+}
 watchEffect(() => {
-  const codeView = props.data as ServiceCodeView
-  serviceCodeView.value = {
-    ...codeView,
-    toCodeGenerationParam: codeView.toCodeGenerationParam,
-  } as ServiceCodeView
-  implInterfaceName.value = codeView.implInterfaceName
+  serviceCodeView.value = props.data
+  templateId.value = props.templateInfo ? props.templateInfo!.id : ''
 })
 watch(
   [
@@ -45,12 +52,12 @@ watch(
     () => selectMode.value,
   ],
   (_nv, _ov) => {
-    if ((_nv !== _ov || _nv[6] == '1') && _ov[0] != undefined) {
-      refreshGenCode()
+    if (canTriggerWatch!.value == true && _nv !== _ov && _ov[0] != undefined) {
+      refreshGenCode(false)
     }
   }
 )
-const refreshGenCode = () => {
+const refreshGenCode = (directUseTemplateConfig: boolean) => {
   const serviceApiCodeParam = useGenCodeParam.getCodeParamCache('ServiceApi')
   serviceCodeView.value.implInterfaceName =
     selectMode.value == '1' ? implInterfaceName.value : null
@@ -68,11 +75,15 @@ const refreshGenCode = () => {
   if (serviceApiCodeParam) {
     p.push(serviceApiCodeParam)
   }
-  previewCode(props.templateInfo?.id, props.tableData.dataSource?.id, p, [
-    'Service',
-  ]).then((res) => {
+  previewCode(
+    props.templateInfo?.id,
+    props.tableData.dataSource?.id,
+    directUseTemplateConfig,
+    p,
+    ['Service']
+  ).then((res) => {
     if (res.data.codeGenerationList) {
-      serviceCodeView.value.templateCode = res.data.codeGenerationList[0].templateCode
+      ServiceCodeView.replace(res.data.codeGenerationList[0], serviceCodeView.value)
     }
   })
 }
@@ -82,11 +93,25 @@ const handleOpenMenu = async () => {
     serviceCodeView.value.codePath = filePath
   }
 }
+const toEditTemplate = () => {
+  templateEditVisible.value = true
+}
 </script>
 
 <template>
   <div class="modelBox">
     <div class="left">
+      <div style="text-align: right">
+        <el-link type="primary" @click.stop="toEditTemplate()">编辑模板</el-link>
+        <CodeTemplateEdit
+          v-if="templateEditVisible"
+          v-model:visible="templateEditVisible"
+          :template-id="templateId"
+          title="ServiceImpl模板"
+          type="Service"
+          @success="editTemlateSuccess"
+        ></CodeTemplateEdit>
+      </div>
       <div>
         <div>类名称:</div>
         <div><el-input v-model="serviceCodeView!.name" /></div>
@@ -115,13 +140,22 @@ const handleOpenMenu = async () => {
         </div>
       </div>
       <div>
-        <div class="box-lable">代码地址：</div>
+        <div class="box-lable">代码地址2：</div>
         <div class="box-file">
-          <el-input v-model="serviceCodeView!.codePath">
-            <template #append>
-              <el-button type="primary" @click="handleOpenMenu">选择地址</el-button>
-            </template>
-          </el-input>
+          <el-tooltip
+            :content="serviceCodeView!.codePath"
+            :disabled="
+              serviceCodeView.codePath == undefined ||
+              serviceCodeView.codePath.trim().length <= 0
+            "
+            placement="bottom"
+          >
+            <el-input v-model="serviceCodeView!.codePath">
+              <template #append>
+                <el-button type="primary" @click="handleOpenMenu">选择地址</el-button>
+              </template>
+            </el-input>
+          </el-tooltip>
         </div>
       </div>
       <div>

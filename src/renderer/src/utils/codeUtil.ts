@@ -52,5 +52,75 @@ const buildCodeParamsWithTemplate = (
   }
   return params
 }
+/**
+ *
+ * @param template
+ * @param tableData
+ * @param tableFieldColumnList
+ * @returns
+ */
+const buildCodeParamsWithCache = (
+  template: CodeTemplate,
+  tableData: SelectDataTableData,
+  responseTemplateCodeList: string[]
+): CodeGenerationParam[] => {
+  const configs = template.templateConfigList
+  const params = []
+  for (let config of configs) {
+    const p = useGenCodeParam.getCodeParamCache(config.name)
+    if (!p) {
+      const p = CodeGenerationParam.mack(tableData, template, config.name)
+      useGenCodeParam.setCodeParamCache(p.configName, p)
+    }
+    if (responseTemplateCodeList) {
+      p.generationCodeFile = responseTemplateCodeList.includes(p.configName)
+    }
+    params.push(p)
+  }
+  return params
+}
 
-export { buildCodeParamsWithCodeView, buildCodeParamsWithTemplate }
+const initBuildCodePrams = () => {
+  return [
+    { name: 'Entity', description: '模型层（Entity）' },
+    { name: 'VO', description: '模型层（VO）' },
+    { name: 'Mapper', description: '数据持久层（Mapper）' },
+    { name: 'Xml', description: '数据持久层（XML）' },
+    { name: 'ServiceApi', description: '业务层（ServiceApi）' },
+    { name: 'Service', description: '业务层（ServiceImpl）' },
+    { name: 'Controller', description: '接口层（Controller）' },
+  ]
+}
+
+const initBuildXmlCodeParams = () => {
+  return [
+    'insertSelective',
+    'insertOrUpdate',
+    'insertOrUpdateSelective',
+    'updateByPrimaryKey',
+    'updateByPrimaryKeySelective',
+    'selectByEntity',
+    'selectByPrimaryKey',
+    'deleteByPrimaryKey',
+  ]
+}
+const initBuildMapperCodeParams = () => {
+  return [
+    'insertSelective',
+    'insertOrUpdate',
+    'insertOrUpdateSelective',
+    'updateByPrimaryKey',
+    'updateByPrimaryKeySelective',
+    'selectByEntity',
+    'selectByPrimaryKey',
+    'deleteByPrimaryKey',
+  ]
+}
+export {
+  initBuildCodePrams,
+  initBuildXmlCodeParams,
+  initBuildMapperCodeParams,
+  buildCodeParamsWithCodeView,
+  buildCodeParamsWithTemplate,
+  buildCodeParamsWithCache,
+}

@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer, clipboard } from 'electron'
+import { contextBridge, ipcRenderer, clipboard, shell } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 import path from 'path'
 import { JAVA_APP_NAME, JAVA_PATH } from './constants'
@@ -10,6 +10,7 @@ const winApi = {
   setTitle: (title) => ipcRenderer.send('set-title', title),
   openDialog: (options) => ipcRenderer.invoke('dialog:showOpenDialog', options),
   copy: (text) => clipboard.writeText(text),
+  openPath: (path) => shell.openPath(path),
 }
 
 const serverApi = {

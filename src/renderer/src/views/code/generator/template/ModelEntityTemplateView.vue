@@ -4,17 +4,20 @@ import {
   TableFieldColumn,
   JavaTypeInfo,
   CodeTemplate,
+  PartitionTempate,
 } from '@/api/code/types'
-import { SelectDataTableData } from '@/api/datasource/types'
+import { SelectDataTableData, TableFieldColumnParam } from '@/api/datasource/types'
+import { getTemplateTableFieldColumnList } from '@/api/code/index'
 import { ElTable } from 'element-plus'
 import { PropType } from 'vue'
 import { previewCode } from '@/api/code/index'
 import { buildCodeParamsWithCodeView } from '@/utils/codeUtil'
 import MessageBox from '@/utils/MessageBox'
+import CodeTemplateEdit from './CodeTemplateEdit.vue'
+import { TriggerWatch } from '../../keys'
 const props = defineProps({
   data: {
     type: Object as PropType<EntityCodeView>,
-    default: {} as EntityCodeView,
   },
   showMybatisPuls: {
     type: Boolean,
@@ -36,77 +39,89 @@ const props = defineProps({
 const emits = defineEmits<{
   genCode: [param: EntityCodeView]
 }>()
+const canTriggerWatch = inject(TriggerWatch) as Ref
 const selectTableFieldColumn = ref<TableFieldColumn[]>()
 const tableFieldColumnData = ref<TableFieldColumn[]>()
 const entityCodeParams = ref<EntityCodeView>()
 const multipleTableRef = ref<InstanceType<typeof ElTable>>()
 const fieldVisible = ref(false)
-watchEffect(() => {
-  const codeView = props.data as EntityCodeView
-  entityCodeParams.value = {
-    ...codeView,
-    toCodeGenerationParam: codeView.toCodeGenerationParam,
-    tableFieldColumnMap: codeView.tableFieldColumnMap?.map(
-      (item) =>
-        ({
-          ...item,
-          selected: true,
-        } as TableFieldColumn)
-    ),
-  }
-})
-watch(
-  [
-    () => entityCodeParams.value.useLombok,
-    () => entityCodeParams.value.useMybatisPlus,
-    () => entityCodeParams.value.useSwagger,
-    () => entityCodeParams.value.name,
-    () => entityCodeParams.value.superclassName,
-    () => entityCodeParams.value.packageName,
-  ],
-  (_nv, _ov) => {
-    if (_nv !== _ov && _ov[0] != undefined) {
-      refreshGenCode()
-    }
-  }
-)
-
-const backTableFieldColumn = computed(() => {
-  const codeView = props.data as EntityCodeView
-  return codeView.tableFieldColumnMap?.map(
-    (item) =>
-      ({
-        ...item,
-        selected: true,
-      } as TableFieldColumn)
-  )
-})
-
-const clickFieldMap = () => {
-  fieldVisible.value = true
-  if (entityCodeParams.value.tableFieldColumnMap) {
-    nextTick(() => {
-      if (multipleTableRef.value) {
-        multipleTableRef.value.clearSelection()
-        tableFieldColumnData.value = entityCodeParams.value.tableFieldColumnMap?.map(
-          (item) => {
-            multipleTableRef.value!.toggleRowSelection(item, item.selected == true)
-            return { ...item } as TableFieldColumn
-          }
-        )
+const templateEditVisible = ref(false)
+const templateId = ref('')
+const refreshFieldColumn = (
+  callback?: (tableFieldColumns: TableFieldColumn[]) => void
+) => {
+  if (props.tableData && props.templateInfo) {
+    getTemplateTableFieldColumnList(
+      props.templateInfo.id,
+      entityCodeParams.value.codeType,
+      TableFieldColumnParam.mack(
+        props.tableData.dataSource.id,
+        props.tableData.table.tableName,
+        props.tableData.table.dataBaseName,
+        props.tableData.table.schemaName
+      )
+    ).then((res) => {
+      if (res.data) {
+        tableFieldColumnData.value = res.data
+        if (typeof callback == 'function') {
+          callback(res.data)
+        }
       }
     })
   }
 }
-const refreshGenCode = () => {
+watchEffect(() => {
+  entityCodeParams.value = props.data
+  templateId.value = props.templateInfo ? props.templateInfo!.id : ''
+  tableFieldColumnData.value = props.data!.tableFieldColumnMap
+})
+watch(
+  [
+    () => entityCodeParams.value.useLombok,
+    () => entityCodeParams.value.codePath,
+    () => entityCodeParams.value.name,
+    () => entityCodeParams.value.useMybatisPlus,
+    () => entityCodeParams.value.useSwagger,
+    () => entityCodeParams.value.superclassName,
+    () => entityCodeParams.value.packageName,
+    () => entityCodeParams.value.tableFieldColumnMap,
+  ],
+  (_nv, _ov) => {
+    // canTriggerWatch.value =
+    //   canTriggerWatch.value == false ? _ov[0] != undefined : canTriggerWatch.value
+    if (canTriggerWatch!.value == true && _nv !== _ov && _ov[0] != undefined) {
+      refreshGenCode(false)
+    }
+  }
+)
+const clickFieldMap = () => {
+  fieldVisible.value = true
+  nextTick(() => {
+    multipleTableRef.value.clearSelection()
+    tableFieldColumnData.value?.forEach((item) => {
+      multipleTableRef.value!.toggleRowSelection(item, item.selected)
+    })
+  })
+}
+const editTemlateSuccess = (template: PartitionTempate) => {
+  refreshFieldColumn((tableFieldColumns) => {
+    entityCodeParams.value = Object.assign(entityCodeParams.value, {
+      ...template,
+      name: entityCodeParams.value.name,
+    })
+    entityCodeParams.value.tableFieldColumnMap = tableFieldColumns
+  })
+}
+const refreshGenCode = (directUseTemplateConfig: boolean) => {
   previewCode(
     props.templateInfo.id,
     props.tableData.dataSource?.id,
+    directUseTemplateConfig,
     buildCodeParamsWithCodeView([entityCodeParams.value], props.tableData),
     ['Entity']
   ).then((res) => {
     if (res.data.codeGenerationList) {
-      entityCodeParams.value.templateCode = res.data.codeGenerationList[0].templateCode
+      EntityCodeView.replace(res.data.codeGenerationList[0], entityCodeParams.value)
     }
   })
 }
@@ -126,9 +141,11 @@ const clickInputChange = (row: TableFieldColumn) => {
   })
 }
 const clickReset = () => {
-  tableFieldColumnData.value = backTableFieldColumn.value.map((item) => {
-    multipleTableRef.value!.toggleRowSelection(item, item.selected == true)
-    return { ...item } as TableFieldColumn
+  refreshFieldColumn((tableFieldColumns) => {
+    multipleTableRef.value.clearSelection()
+    tableFieldColumns.forEach((item) => {
+      multipleTableRef.value!.toggleRowSelection(item, item.selected)
+    })
   })
 }
 const clickCancel = () => {
@@ -147,7 +164,7 @@ const clickConfirm = () => {
     v.selected = valMap.has(v.column)
   })
   entityCodeParams.value.tableFieldColumnMap = tableFieldColumnData.value
-  refreshGenCode()
+  refreshGenCode(false)
 }
 const handleSelectionChange = (val: TableFieldColumn[]) => {
   selectTableFieldColumn.value = val
@@ -161,10 +178,24 @@ const handleOpenMenu = async () => {
     entityCodeParams.value.codePath = filePath
   }
 }
+const toEditTemplate = () => {
+  templateEditVisible.value = true
+}
 </script>
 <template>
   <div class="modelBox">
     <div class="left">
+      <div style="text-align: right">
+        <el-link type="primary" @click="toEditTemplate()">编辑模板</el-link>
+        <CodeTemplateEdit
+          v-if="templateEditVisible"
+          v-model:visible="templateEditVisible"
+          :template-id="templateId"
+          title="Entity模板"
+          type="Entity"
+          @success="editTemlateSuccess"
+        ></CodeTemplateEdit>
+      </div>
       <div>
         <div>类名称:</div>
         <div><el-input v-model="entityCodeParams!.name" /></div>
@@ -184,11 +215,20 @@ const handleOpenMenu = async () => {
       <div>
         <div class="box-lable">代码地址：</div>
         <div class="box-file">
-          <el-input v-model="entityCodeParams!.codePath">
-            <template #append>
-              <el-button type="primary" @click="handleOpenMenu">选择地址</el-button>
-            </template>
-          </el-input>
+          <el-tooltip
+            :content="entityCodeParams!.codePath"
+            :disabled="
+              entityCodeParams.codePath == undefined ||
+              entityCodeParams.codePath.trim().length <= 0
+            "
+            placement="bottom"
+          >
+            <el-input v-model="entityCodeParams!.codePath">
+              <template #append>
+                <el-button type="primary" @click="handleOpenMenu">选择地址</el-button>
+              </template>
+            </el-input>
+          </el-tooltip>
         </div>
       </div>
       <div>

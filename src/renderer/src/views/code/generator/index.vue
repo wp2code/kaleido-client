@@ -1,94 +1,279 @@
 <script lang="ts" setup>
 import { SelectDataTableData } from '@/api/datasource/types'
-import { CodeTemplate, CodeGenerationParam, CodeGenerationResult } from '@/api/code/types'
-import { listTemplateConfig, previewCode, updateBasicConfigById } from '@/api/code/index'
-import { SelectDbable } from '../keys'
+import {
+  CodeTemplate,
+  CodeGenerationParam,
+  CodeGenerationResult,
+  CodeTemplateBasicConfig,
+} from '@/api/code/types'
+import {
+  listTemplateConfig,
+  previewCode,
+  generationCode,
+  checkTemplateNameExists,
+  copyAddTemplate,
+  updateTemplateName,
+  deleteCodeGenerationTemplate,
+} from '@/api/code/index'
+import { SelectDbable, TriggerWatch } from '../keys'
+import { MoreMenu, initFilterMoreMenu } from './type'
 import { ArrowRight } from '@element-plus/icons-vue'
 import BasicConfig from './template/BasicConfig.vue'
+import CodeResult from './template/CodeResult.vue'
 import ModelTemplate from './template/ModelTemplate.vue'
 import ServiceTemplate from './template/ServiceTemplate.vue'
 import WebTemplate from './template/WebTemplate.vue'
 import MapperTemplate from './template/MapperTemplate.vue'
-import { buildCodeParamsWithTemplate } from '@/utils/codeUtil'
+import {
+  buildCodeParamsWithTemplate,
+  buildCodeParamsWithCache,
+  initBuildCodePrams,
+} from '@/utils/codeUtil'
 import MessageBox from '@/utils/MessageBox'
+const morMenuList = ref<MoreMenu[]>()
+const selectedCodeParams = ref([])
+const allCodeParams = initBuildCodePrams()
+const checkAllCodePrams = ref(true)
+const isIndeterminate = ref(true)
 const selectDbTableData = inject(SelectDbable) as Ref<SelectDataTableData>
 const selectCodeTemplate = ref<CodeTemplate>()
+const selectEditCodeTemplate = ref<CodeTemplate>()
 const codeTemplateList = ref<CodeTemplate[]>()
+const allCodeTemplateList = ref<CodeTemplate[]>()
 const codeVisible = ref(false)
 const codeDialogTitle = ref('')
-const showBasicConfig = ref(false)
+const basicConfigVisible = ref(false)
 const codeGenerationResult = ref<CodeGenerationResult>()
-const basicConfigInfo = ref()
+const generationCodeFlag = ref(false)
+const basicConfigInfo = ref<CodeTemplateBasicConfig>()
 const tpTablsKey = ref('')
+const selectCTKey = ref()
+const actionVisabel = ref(false)
+const actionTitle = ref('')
+const canTriggerWatch = ref(false)
+const actionActive = ref<MoreMenu>()
+const initTemplateList = async (
+  directUseTemplateConfig: boolean,
+  seleteTemplateId?: string
+) => {
+  handleCheckedAllCodeParamChange(true)
+  await listTemplateConfig({
+    needParseTemplate: true,
+  }).then((res) => {
+    if (res.data) {
+      const list = res.data
+      codeTemplateList.value = list
+      allCodeTemplateList.value = list
+      let template
+      if (seleteTemplateId) {
+        template = list.find((item) => item.id == seleteTemplateId)
+      }
+      if (!template) {
+        template = list.filter((item) => item.isDefault === 1)[0]
+      }
+      selectCodeTemplate.value = template
+      const config = selectCodeTemplate.value.basicConfig
+      basicConfigInfo.value = config
+        ? (JSON.parse(config) as CodeTemplateBasicConfig)
+        : null
+      initFilterMoreMenuList()
+      refrshClick(directUseTemplateConfig)
+    }
+  })
+}
+onMounted(() => {
+  initTemplateList(true)
+})
+const copyTemplate = (item: any) => {
+  actionTitle.value = '复制新增'
+  actionVisabel.value = true
+  selectEditCodeTemplate.value.templateName =
+    selectEditCodeTemplate.value.templateName + 'Copy'
+  actionActive.value = (item.menu || {}) as MoreMenu
+}
+const deleteTemplate = (item: any) => {
+  actionActive.value = (item.menu || {}) as MoreMenu
+  MessageBox.confirm(`确认删除【${selectEditCodeTemplate.value.templateName}】? `, {
+    ok: async () => {
+      await deleteCodeGenerationTemplate(selectEditCodeTemplate.value.id).then((res) => {
+        initTemplateList(true)
+        return res.data
+      })
+    },
+    successMsg: '删除成功',
+    failMsg: '删除失败',
+  })
+}
+const renameTemplate = (item: any) => {
+  actionTitle.value = '重命名'
+  actionVisabel.value = true
+  actionActive.value = (item.menu || {}) as MoreMenu
+}
+const exoprtTemplate = (item: any) => {
+  actionTitle.value = '导出'
+  actionVisabel.value = true
+  actionActive.value = (item.menu || {}) as MoreMenu
+}
+const initFilterMoreMenuList = () => {
+  const copyTemplateItem = MoreMenu.mack(
+    'copyAdd',
+    '复制新增',
+    'CopyDocument',
+    copyTemplate
+  )
+  const renameTemplateItem = MoreMenu.mack('rename', '重命名', 'SetUp', renameTemplate)
+  const deleteTemplateItem = MoreMenu.mack('delete', '删除', 'Delete', deleteTemplate)
+  const exportTemplateItem = MoreMenu.mack('export', '导出', 'Expand', exoprtTemplate)
+  morMenuList.value = initFilterMoreMenu(
+    [copyTemplateItem, renameTemplateItem, deleteTemplateItem, exportTemplateItem],
+    (item: MoreMenu) => {
+      if (selectCodeTemplate.value.isInternal == 1) {
+        return item.id !== 'delete' && item.id !== 'rename'
+      }
+      return true
+    }
+  )
+}
+const actionSave = async () => {
+  const actionActiveMenu = actionActive.value
+  if (!actionActiveMenu) {
+    return
+  }
+  if (actionActiveMenu!.id == 'rename') {
+    await checkTemplateNameExists(
+      selectEditCodeTemplate.value.templateName,
+      selectCodeTemplate.value.id
+    ).then(async (res) => {
+      if (!res.data) {
+        await updateTemplateName(
+          selectCodeTemplate.value.id,
+          selectEditCodeTemplate.value.templateName
+        ).then((result) => {
+          if (result.data) {
+            MessageBox.ok('重命名成功')
+            selectCodeTemplate.value.templateName =
+              selectEditCodeTemplate.value.templateName
+            actionVisabel.value = false
+          } else {
+            MessageBox.fail('重命名失败')
+          }
+        })
+      } else {
+        MessageBox.fail('模板名称已存在')
+      }
+    })
+  }
+  if (actionActiveMenu!.id == 'copyAdd') {
+    await checkTemplateNameExists(selectEditCodeTemplate.value.templateName).then(
+      async (res) => {
+        if (!res.data) {
+          await copyAddTemplate(
+            selectCodeTemplate.value.id,
+            selectEditCodeTemplate.value.templateName
+          ).then((result) => {
+            if (result.data) {
+              MessageBox.ok('复制新增成功')
+              initTemplateList(true, result.data)
+              actionVisabel.value = false
+            } else {
+              MessageBox.fail('复制新增失败')
+            }
+          })
+        } else {
+          MessageBox.fail('模板名称已存在')
+        }
+      }
+    )
+  }
+}
 const toPreviewCode = async (
   templateId: string,
   connectionId: string,
-  params: CodeGenerationParam[]
+  params: CodeGenerationParam[],
+  firstRequest: boolean
 ) => {
-  console.log(
-    '有效的模板ID',
-    templateId,
-    '连接ID',
-    connectionId,
-    '预览代码参数：',
-    params
-  )
-  await previewCode(templateId, connectionId, params).then((res) => {
-    codeGenerationResult.value = res.data
-  })
+  canTriggerWatch.value = false
+  await previewCode(templateId, connectionId, firstRequest, params)
+    .then((res) => {
+      codeGenerationResult.value = res.data
+      generationCodeFlag.value = false
+    })
+    .finally(() => {
+      nextTick(() => {
+        canTriggerWatch.value = true
+      })
+    })
 }
-const refrshClick = () => {
+const refrshClick = (directUseTemplateConfig: boolean) => {
   tpTablsKey.value = Math.random() + 'TB'
   toPreviewCode(
     selectCodeTemplate.value.id,
     selectDbTableData.value.dataSource?.id,
-    buildCodeParamsWithTemplate(selectCodeTemplate.value, selectDbTableData.value)
+    buildCodeParamsWithTemplate(selectCodeTemplate.value, selectDbTableData.value),
+    directUseTemplateConfig
   )
 }
-onMounted(async () => {
-  await listTemplateConfig({ language: 'java', needParseTemplate: true }).then((res) => {
-    if (res.data) {
-      const list = res.data
-      codeTemplateList.value = list
-      const template = list.filter((item) => item.isDefault === 1)[0] || list[0]
-      selectCodeTemplate.value = template
-      const config = selectCodeTemplate.value.basicConfig
-      basicConfigInfo.value = config ? JSON.parse(config) : {}
-      refrshClick()
-    }
-  })
-})
 
-//选择不同的模板配置
+provide(TriggerWatch, canTriggerWatch)
 const onChangeConfig = (value: any) => {
   selectCodeTemplate.value = value
-  refrshClick()
+  canTriggerWatch.value = false
+  initFilterMoreMenuList()
+  refrshClick(true)
 }
-const openCodeDialog = (visible: boolean, title: string, isShowBasicConfig?: boolean) => {
+const openCodeDialog = (visible: boolean, title: string) => {
   codeVisible.value = visible
-  showBasicConfig.value = isShowBasicConfig
   codeDialogTitle.value = title
+}
+const openBasicCOnfigDialog = () => {
+  basicConfigVisible.value = true
 }
 const cancel = () => {
   codeVisible.value = false
 }
-const save = (_isShowBasicConfig?: boolean) => {
-  if (_isShowBasicConfig) {
-    updateBasicConfigById(
-      selectCodeTemplate.value.id,
-      JSON.stringify(basicConfigInfo.value)
-    ).then((res) => {
-      if (res) {
-        MessageBox.ok('更新成功')
-      }
-    })
+const saveGenCode = () => {
+  if (selectedCodeParams.value.length <= 0) {
+    MessageBox.fail('请选择需要生成的代码模板')
+    return
   }
+  generationCode(
+    selectCodeTemplate.value.id,
+    selectDbTableData.value.dataSource?.id,
+    buildCodeParamsWithCache(
+      selectCodeTemplate.value,
+      selectDbTableData.value,
+      selectedCodeParams.value
+    ),
+    selectedCodeParams.value
+  ).then((res) => {
+    generationCodeFlag.value = true
+    codeGenerationResult.value = res.data
+  })
 }
-watch(codeVisible, (nv, ov) => {
-  if (nv !== true && ov == true) {
-    showBasicConfig.value = false
+const handleCheckedAllCodeParamChange = (val: boolean) => {
+  let checked = allCodeParams.map((item) => {
+    return item.name
+  })
+  selectedCodeParams.value = val ? checked : []
+  isIndeterminate.value = false
+}
+const handleCheckedCodeParamChange = (_value: string[]) => {
+  const checkedCount = _value.length
+  checkAllCodePrams.value = checkedCount === allCodeParams.length
+  isIndeterminate.value = checkedCount > 0 && checkedCount < allCodeParams.length
+}
+
+watch(codeVisible, (nv, _ov) => {
+  if (nv == false) {
+    codeGenerationResult.value.codeGenerationList = []
   }
 })
+const selectMorMenuItem = (item: any) => {
+  if (item) {
+    selectEditCodeTemplate.value = { ...item.template } as CodeTemplate
+    item.menu.command(item)
+  }
+}
 </script>
 <template>
   <box-layout layout="coloum" size="12%" :show-divider="false">
@@ -108,6 +293,7 @@ watch(codeVisible, (nv, ov) => {
           <div class="config-select">
             <label>模板配置：</label>
             <el-select
+              :key="selectCTKey"
               v-model="selectCodeTemplate"
               placeholder="选择配置"
               value-key="id"
@@ -120,19 +306,51 @@ watch(codeVisible, (nv, ov) => {
                 :value="item"
               >
                 <span style="float: left">{{ item.templateName }}</span>
-                <span
-                  style="
-                    float: right;
-                    color: var(--el-text-color-secondary);
-                    font-size: 13px;
-                  "
-                  >{{ item.isInternal === 1 ? 'default' : '' }}</span
-                >
               </el-option>
             </el-select>
+            <div style="float: right; padding: 5px">
+              <el-dropdown hide-on-click trigger="click" @command="selectMorMenuItem">
+                <el-icon><Tools /></el-icon>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item
+                      v-for="menuItem of morMenuList"
+                      :key="menuItem.id"
+                      :icon="menuItem.icon"
+                      :command="{ menu: menuItem, template: selectCodeTemplate }"
+                    >
+                      {{ menuItem.name }}</el-dropdown-item
+                    >
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </div>
           </div>
-          <el-link @click="openCodeDialog(true, '全局配置', true)">全局配置</el-link>
+          <div>
+            <BasicConfig
+              v-if="basicConfigVisible == true"
+              v-model:visible="basicConfigVisible"
+              :data="basicConfigInfo"
+              :code-template-list="allCodeTemplateList"
+            />
+            <el-link @click.stop="openBasicCOnfigDialog()">全局配置</el-link>
+          </div>
         </div>
+        <el-dialog
+          v-model="actionVisabel"
+          draggable
+          width="50%"
+          append-to-body
+          :title="actionTitle"
+        >
+          <el-input v-model="selectEditCodeTemplate.templateName" />
+          <template #footer>
+            <span class="dialog-footer">
+              <el-button @click="actionVisabel = false">取消</el-button>
+              <el-button type="primary" @click="actionSave()"> 确认 </el-button>
+            </span>
+          </template>
+        </el-dialog>
       </div>
     </template>
     <div class="conent">
@@ -164,30 +382,50 @@ watch(codeVisible, (nv, ov) => {
       </el-tabs>
     </div>
     <div class="bottom">
-      <el-button @click="refrshClick">一键重置</el-button>
-      <el-button type="primary" @click="openCodeDialog(true, '生成代码', false)"
+      <el-button @click.stop="refrshClick(true)">一键重置</el-button>
+      <el-button type="primary" @click.stop="openCodeDialog(true, '生成代码')"
         >生成代码</el-button
       >
       <el-dialog
         v-model="codeVisible"
         :title="codeDialogTitle"
+        width="65%"
         draggable
-        :close-on-click-modal="true"
-        :close-on-press-escape="true"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
       >
-        <BasicConfig v-if="showBasicConfig == true" v-model="basicConfigInfo" />
-        <div v-else>
-          <el-checkbox :checked="true" label="模型层（Entity）" />
-          <el-checkbox :checked="true" label="模型层（VO）" />
-          <el-checkbox :checked="true" label="数据持久层（Mapper）" />
-          <el-checkbox :checked="true" label="数据持久层（XML）" />
-          <el-checkbox :checked="true" label="业务层（Service）" />
-          <el-checkbox :checked="true" label="接口层（Controller）" />
+        <div>
+          <el-checkbox
+            v-model="checkAllCodePrams"
+            :indeterminate="isIndeterminate"
+            @change="handleCheckedAllCodeParamChange"
+          >
+            全选
+          </el-checkbox>
+          <el-checkbox-group
+            v-model="selectedCodeParams"
+            @change="handleCheckedCodeParamChange"
+          >
+            <el-checkbox
+              v-for="param in allCodeParams"
+              :key="param.name"
+              :label="param.name"
+            >
+              {{ param.description }}
+            </el-checkbox>
+          </el-checkbox-group>
+          <CodeResult
+            v-if="
+              generationCodeFlag == true &&
+              codeGenerationResult.codeGenerationList.length > 0
+            "
+            :data="codeGenerationResult"
+          />
         </div>
         <template #footer>
           <span class="dialog-footer">
             <el-button @click="cancel()">取消</el-button>
-            <el-button type="primary" @click="save(showBasicConfig)"> 确认 </el-button>
+            <el-button type="primary" @click="saveGenCode()"> 确认 </el-button>
           </span>
         </template>
       </el-dialog>
@@ -201,6 +439,7 @@ watch(codeVisible, (nv, ov) => {
   color: #fff;
   display: flex;
   flex-direction: column;
+
   width: 100%;
   .config {
     justify-content: center;

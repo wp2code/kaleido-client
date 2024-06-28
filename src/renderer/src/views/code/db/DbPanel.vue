@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import DbConnectionBox from '@/views/code/db/DbConnectionBox.vue'
-// import { DbConfig, DbType, getDefault } from '~/repositories/entity/DbConfig'
-import { DataSource, DbType, getDefault } from '@/api/datasource/types'
+import { DataSource, initDataSource } from '@/api/datasource/types'
 const list = ref<DataSource[]>([])
 const showConnentBox = ref(false)
 const loayoutSize = ref(3)
@@ -11,12 +10,7 @@ const toConnent = (item: any) => {
   selectDbConfig.value = item
 }
 onMounted(() => {
-  list.value = [
-    getDefault(DbType.MySQL),
-    getDefault(DbType.PostgreSQL),
-    getDefault(DbType.Oracle),
-    getDefault(DbType.TDengine),
-  ]
+  list.value = initDataSource()
 })
 
 const spaceCount = computed(() => {

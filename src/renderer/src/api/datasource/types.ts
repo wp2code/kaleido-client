@@ -37,7 +37,9 @@ export interface DataSourceMeta {
   dateBaseList?: Database[]
 }
 
-export interface DataSourceQuery {}
+export interface DataSourceQuery {
+  //TODO
+}
 
 export enum DbType {
   MySQL = 'MySQL',
@@ -52,6 +54,15 @@ export class SelectDataTableData {
     this.dataSource = dataSource
     this.table = table
   }
+}
+
+export function initDataSource(): DataSource[] {
+  return [
+    getDefault(DbType.MySQL),
+    getDefault(DbType.PostgreSQL),
+    // getDefault(DbType.Oracle),
+    // getDefault(DbType.TDengine),
+  ]
 }
 
 export function getDefault(dbType: DbType): DataSource {
@@ -111,4 +122,24 @@ export class ConnectionData {
 export class SimpleDatabase {
   dataBaseName: string
   dataBaseComment?: string
+}
+
+export class TableFieldColumnParam {
+  connectionId: string
+  tableName: string
+  dataBaseName?: string
+  schemaName?: string
+  static mack(
+    connectionId: string,
+    tableName: string,
+    dataBaseName?: string,
+    schemaName?: string
+  ): TableFieldColumnParam {
+    const param = new TableFieldColumnParam()
+    param.connectionId = connectionId
+    param.tableName = tableName
+    param.dataBaseName = dataBaseName
+    param.schemaName = schemaName
+    return param
+  }
 }

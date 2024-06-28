@@ -1,10 +1,12 @@
 <script lang="ts" setup>
 // import { CodeTemplateConfig, TemplateConfig } from '@/api/code/types'
-import { XmlCodeView, CodeTemplate } from '@/api/code/types'
+import { XmlCodeView, CodeTemplate, PartitionTempate } from '@/api/code/types'
 import { SelectDataTableData } from '@/api/datasource/types'
 import { previewCode } from '@/api/code/index'
-import { buildCodeParamsWithCodeView } from '@/utils/codeUtil'
+import { buildCodeParamsWithCodeView, initBuildXmlCodeParams } from '@/utils/codeUtil'
 import { useGenCodeParamStore } from '@/store/modules/cache'
+import CodeTemplateEdit from './CodeTemplateEdit.vue'
+import { TriggerWatch } from '../../keys'
 const props = defineProps({
   data: {
     type: Object as PropType<XmlCodeView>,
@@ -27,27 +29,32 @@ const props = defineProps({
     required: true,
   },
 })
+const canTriggerWatch = inject(TriggerWatch) as Ref
 const xmlCodeView = ref<XmlCodeView>()
 const methodVisible = ref(false)
+const templateEditVisible = ref(false)
+const templateId = ref('')
+const apis = initBuildXmlCodeParams()
+const checkAllCodePrams = ref(true)
+const isIndeterminate = ref(true)
 const useGenCodeParam = useGenCodeParamStore()
-const apis = [
-  'insertSelective',
-  'insertOrUpdate',
-  'insertOrUpdateSelective',
-  'updateByPrimaryKey',
-  'updateByPrimaryKeySelective',
-  'selectByEntity',
-  'selectByPrimaryKey',
-  'deleteByPrimaryKey',
-]
-const methodList = ref<string[]>(apis)
+const methodList = ref<string[]>()
+const handleCheckedAllCodeParamChange = (val: boolean) => {
+  let checked = apis.map((item) => {
+    return item
+  })
+  methodList.value = val ? checked : []
+  isIndeterminate.value = false
+}
+const handleCheckedCodeParamChange = (_value: string[]) => {
+  const checkedCount = _value.length
+  checkAllCodePrams.value = checkedCount === apis.length
+  isIndeterminate.value = checkedCount > 0 && checkedCount < apis.length
+}
 watchEffect(() => {
-  const codeView = props.data as XmlCodeView
-  xmlCodeView.value = {
-    ...codeView,
-    methodList: apis,
-    toCodeGenerationParam: codeView.toCodeGenerationParam,
-  } as XmlCodeView
+  handleCheckedAllCodeParamChange(true)
+  xmlCodeView.value = props.data
+  templateId.value = props.templateInfo ? props.templateInfo!.id : ''
 })
 watch(
   [
@@ -58,15 +65,12 @@ watch(
     () => xmlCodeView.value.methodList,
   ],
   (_nv, _ov) => {
-    if (_nv !== _ov && _ov[0] != undefined) {
-      refreshGenCode()
+    if (canTriggerWatch!.value == true && _nv !== _ov && _ov[0] != undefined) {
+      refreshGenCode(false)
     }
-  },
-  {
-    deep: true,
   }
 )
-const refreshGenCode = () => {
+const refreshGenCode = (directUseTemplateConfig: boolean) => {
   const entityCodeParam = useGenCodeParam.getCodeParamCache('Entity')
   const mapperCodeParam = useGenCodeParam.getCodeParamCache('Mapper')
   const p = buildCodeParamsWithCodeView([xmlCodeView.value], props.tableData)
@@ -76,19 +80,31 @@ const refreshGenCode = () => {
   if (mapperCodeParam) {
     p.push(mapperCodeParam)
   }
-  previewCode(props.templateInfo.id, props.tableData.dataSource?.id, p, ['Xml']).then(
-    (res) => {
-      if (res.data.codeGenerationList) {
-        xmlCodeView.value.templateCode = res.data.codeGenerationList[0].templateCode
-      }
+  previewCode(
+    props.templateInfo.id,
+    props.tableData.dataSource?.id,
+    directUseTemplateConfig,
+    p,
+    ['Xml']
+  ).then((res) => {
+    if (res.data.codeGenerationList) {
+      XmlCodeView.replace(res.data.codeGenerationList[0], xmlCodeView.value)
     }
-  )
+  })
+}
+const editTemlateSuccess = (template: PartitionTempate) => {
+  xmlCodeView.value = Object.assign(xmlCodeView.value, {
+    ...template,
+    name: xmlCodeView.value.name,
+  })
 }
 const clickMethod = () => {
   methodVisible.value = true
 }
 const clickReset = () => {
   methodList.value = apis
+  checkAllCodePrams.value = true
+  isIndeterminate.value = false
 }
 const clickCancel = () => {
   methodVisible.value = false
@@ -102,10 +118,24 @@ const handleOpenMenu = async () => {
     xmlCodeView.value.codePath = filePath
   }
 }
+const toEditTemplate = () => {
+  templateEditVisible.value = true
+}
 </script>
 <template>
   <div class="modelBox">
     <div class="left">
+      <div style="text-align: right">
+        <el-link type="primary" @click="toEditTemplate()">编辑模板</el-link>
+        <CodeTemplateEdit
+          v-if="templateEditVisible"
+          v-model:visible="templateEditVisible"
+          :template-id="templateId"
+          title="Xml模板"
+          type="Xml"
+          @success="editTemlateSuccess"
+        ></CodeTemplateEdit>
+      </div>
       <div>
         <div>文件名称:</div>
         <div><el-input v-model="xmlCodeView!.name" /></div>
@@ -125,11 +155,19 @@ const handleOpenMenu = async () => {
       <div>
         <div class="box-lable">代码地址：</div>
         <div class="box-file">
-          <el-input v-model="xmlCodeView!.codePath">
-            <template #append>
-              <el-button type="primary" @click="handleOpenMenu">选择地址</el-button>
-            </template>
-          </el-input>
+          <el-tooltip
+            :content="xmlCodeView!.codePath"
+            :disabled="
+              xmlCodeView.codePath == undefined || xmlCodeView.codePath.trim().length <= 0
+            "
+            placement="bottom"
+          >
+            <el-input v-model="xmlCodeView!.codePath">
+              <template #append>
+                <el-button type="primary" @click="handleOpenMenu">选择地址</el-button>
+              </template>
+            </el-input>
+          </el-tooltip>
         </div>
       </div>
       <div>
@@ -157,7 +195,14 @@ const handleOpenMenu = async () => {
     :close-on-click-modal="true"
     :close-on-press-escape="true"
   >
-    <el-checkbox-group v-model="methodList">
+    <el-checkbox
+      v-model="checkAllCodePrams"
+      :indeterminate="isIndeterminate"
+      @change="handleCheckedAllCodeParamChange"
+    >
+      全选
+    </el-checkbox>
+    <el-checkbox-group v-model="methodList" @change="handleCheckedCodeParamChange">
       <div class="method-list">
         <el-checkbox v-for="item in apis" :key="item" :label="item" :value="item">
           {{ item }}

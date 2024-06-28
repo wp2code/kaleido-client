@@ -4,6 +4,7 @@ import {
   Database,
   DataSourceQuery,
   ConnectionData,
+  TableFieldColumnParam,
 } from './types'
 import { TableFieldColumn } from '../code/types'
 import { AxiosPromise } from 'axios'
@@ -182,5 +183,21 @@ export function getDataSourceByConnectionId(
   return request({
     url: `/api/v1/datasource/connection/${connectionId}`,
     method: 'get',
+  })
+}
+
+/**
+ * 获取连接的数据源
+ *
+ * @param connectionId
+ * @returns
+ */
+export function getTableFieldColumnList(
+  param: TableFieldColumnParam
+): AxiosPromise<TableFieldColumn[]> {
+  return request({
+    url: `/api/v1/datasource/table/column/fields`,
+    method: 'post',
+    data: { ...param },
   })
 }

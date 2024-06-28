@@ -70,33 +70,41 @@ watchEffect(() => {
 })
 </script>
 <template>
-  <el-scrollbar class="codemirow-box">
-    <div @mouseover.stop="onmouseover" @mouseout.stop="onmouseout">
-      <el-button
-        v-show="showCopy"
-        class="btn-copy"
-        @mouseover.prevent
-        @mouseout.prevent
-        @click="handleCopy()"
-        >Copy</el-button
-      >
-      <Codemirror
-        ref="codemirror"
-        v-model="codeValue"
-        :placeholder="placeholder"
-        :style="codeStyle"
-        v-bind="$attrs"
-        :extensions="extensions"
-        :disabled="disabled"
-        @ready="handleReady"
-        @change="onChange"
-        @focus="onFocus"
-        @blur="onBlur"
-      />
-    </div>
-  </el-scrollbar>
+  <div class="codemirow-box" @mouseover.stop="onmouseover" @mouseout.stop="onmouseout">
+    <el-button
+      v-show="showCopy"
+      class="btn-copy"
+      @mouseover.prevent
+      @mouseout.prevent
+      @click="handleCopy()"
+      >Copy</el-button
+    >
+    <Codemirror
+      ref="codemirror"
+      v-model="codeValue"
+      :placeholder="placeholder"
+      :style="codeStyle"
+      v-bind="$attrs"
+      :extensions="extensions"
+      :disabled="disabled"
+      @ready="handleReady"
+      @change="onChange"
+      @focus="onFocus"
+      @blur="onBlur"
+    />
+  </div>
 </template>
 <style lang="scss" scoped>
+:deep() {
+  .v-codemirror {
+    .cm-editor .cm-scroller {
+      // min-height: 580px;
+      // max-height: 70vh;
+      min-height: 500px;
+      max-height: 70vh;
+    }
+  }
+}
 .codemirow-box {
   max-width: 90vw;
   max-height: 70vh;

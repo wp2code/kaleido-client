@@ -5,6 +5,8 @@ export interface CodeTemplate {
   language: string
   isInternal: number
   isDefault: number
+  sourceType: number
+  source?: string
   basicConfig?: string
   templateConfigList?: CodeTemplateConfig[]
 }
@@ -16,6 +18,7 @@ export interface CodeTemplateConfig {
   alias: string
   hideStatus: number
   templateContent: string
+  codePath?: string
   templateParams?: TemplateConfig
 }
 
@@ -23,23 +26,53 @@ export interface CodeTemplateBasicConfig {
   author?: string
   codePath?: string
   license?: string
+  applyTemplateList?: ApplyTemplateParam[]
 }
 
+export class ApplyTemplateParam {
+  templateId: string
+  codeTypeList?: Array<string>
+  static mack(
+    templateId: string,
+    codeTypeList?: Array<string>
+  ): ApplyTemplateParam {
+    const p = new ApplyTemplateParam()
+    p.templateId = templateId
+    p.codeTypeList = codeTypeList || []
+    return p
+  }
+}
+export class PartitionTempate {
+  templateId: string
+  templateName: string
+  sourceFolder: string
+  packageName: string
+  codePath?: string
+  superclassName?: string
+  useLombok?: boolean
+  useMybatisPlus?: boolean
+  useSwagger?: boolean
+  defaultIgFields?: Array<string>
+}
 export interface TemplateConfig {
   name?: string
   sourceFolder?: string
   codePath?: string
   packageName?: string
   configName?: string
-  superclass?: string
+  superclass?: Superclass
   implInterface?: string
   responseGenericClass?: string
   namespace?: string
-  lombok?: boolean
-  mybatisPuls?: boolean
-  swagger?: boolean
+  useLombok?: boolean
+  useMybatisPlus?: boolean
+  useSwagger?: boolean
+  defaultIgFields?: Array<string>
 }
-
+export interface Superclass {
+  name: string
+  generics?: String[]
+}
 export abstract class BaseCodeView {
   name: string
   sourceFolder: string
@@ -70,6 +103,18 @@ export class MapperCodeView extends BaseCodeView {
     param.methodList = this.methodList
     return param
   }
+  static replace(
+    codeView: CodeGenerationView,
+    view: MapperCodeView
+  ): MapperCodeView {
+    view.sourceFolder = codeView.sourceFolder
+    view.useMybatisPlus = codeView.useMybatisPlus
+    view.templateCode = codeView.templateCode
+    view.packageName = codeView.packageName
+    view.codePath = codeView.codePath
+    view.name = codeView.name
+    return view
+  }
 }
 
 export class XmlCodeView extends BaseCodeView {
@@ -83,6 +128,16 @@ export class XmlCodeView extends BaseCodeView {
     param.useMybatisPlus = this.useMybatisPlus
     return param
   }
+  static replace(codeView: CodeGenerationView, view: XmlCodeView): XmlCodeView {
+    view.sourceFolder = codeView.sourceFolder
+    view.useMybatisPlus = codeView.useMybatisPlus
+    view.templateCode = codeView.templateCode
+    view.packageName = codeView.packageName
+    view.codePath = codeView.codePath
+    view.name = codeView.name
+    view.namespace = codeView.namespace
+    return view
+  }
 }
 export class ServiceApiCodeView extends BaseCodeView {
   superclassName: string
@@ -92,6 +147,19 @@ export class ServiceApiCodeView extends BaseCodeView {
     param.superclassName = this.superclassName
     param.useMybatisPlus = this.useMybatisPlus
     return param
+  }
+  static replace(
+    codeView: CodeGenerationView,
+    view: ServiceApiCodeView
+  ): ServiceApiCodeView {
+    view.sourceFolder = codeView.sourceFolder
+    view.useMybatisPlus = codeView.useMybatisPlus
+    view.superclassName = codeView.superclassName
+    view.templateCode = codeView.templateCode
+    view.packageName = codeView.packageName
+    view.codePath = codeView.codePath
+    view.name = codeView.name
+    return view
   }
 }
 export class ServiceCodeView extends BaseCodeView {
@@ -105,6 +173,19 @@ export class ServiceCodeView extends BaseCodeView {
     param.implInterfaceName = this.implInterfaceName
     return param
   }
+  static replace(
+    codeView: CodeGenerationView,
+    view: ServiceCodeView
+  ): ServiceCodeView {
+    view.sourceFolder = codeView.sourceFolder
+    view.useMybatisPlus = codeView.useMybatisPlus
+    view.templateCode = codeView.templateCode
+    view.superclassName = codeView.superclassName
+    view.packageName = codeView.packageName
+    view.codePath = codeView.codePath
+    view.name = codeView.name
+    return view
+  }
 }
 
 export class WebCodeView extends BaseCodeView {
@@ -117,6 +198,17 @@ export class WebCodeView extends BaseCodeView {
     param.useMybatisPlus = this.useMybatisPlus
     param.useSwagger = this.useSwagger
     return param
+  }
+  static replace(codeView: CodeGenerationView, view: WebCodeView): WebCodeView {
+    view.sourceFolder = codeView.sourceFolder
+    view.useMybatisPlus = codeView.useMybatisPlus
+    view.useSwagger = codeView.useSwagger
+    view.templateCode = codeView.templateCode
+    view.superclassName = codeView.superclassName
+    view.packageName = codeView.packageName
+    view.codePath = codeView.codePath
+    view.name = codeView.name
+    return view
   }
 }
 
@@ -138,6 +230,21 @@ export class EntityCodeView extends BaseCodeView {
     )
     return param
   }
+  static replace(
+    codeView: CodeGenerationView,
+    view: EntityCodeView
+  ): EntityCodeView {
+    view.sourceFolder = codeView.sourceFolder
+    view.useLombok = codeView.useLombok
+    view.useMybatisPlus = codeView.useMybatisPlus
+    view.useSwagger = codeView.useSwagger
+    view.superclassName = codeView.superclassName
+    view.templateCode = codeView.templateCode
+    view.packageName = codeView.packageName
+    view.codePath = codeView.codePath
+    view.name = codeView.name
+    return view
+  }
 }
 export class VoCodeView extends BaseCodeView {
   useLombok: boolean
@@ -153,6 +260,17 @@ export class VoCodeView extends BaseCodeView {
       (item) => item.selected
     )
     return param
+  }
+  static replace(codeView: CodeGenerationView, view: VoCodeView): VoCodeView {
+    view.sourceFolder = codeView.sourceFolder
+    view.useLombok = codeView.useLombok
+    view.useSwagger = codeView.useSwagger
+    view.superclassName = codeView.superclassName
+    view.templateCode = codeView.templateCode
+    view.packageName = codeView.packageName
+    view.codePath = codeView.codePath
+    view.name = codeView.name
+    return view
   }
 }
 export class ModelCodeViewWapper {
@@ -177,7 +295,7 @@ export class TableFieldColumn {
   javaType: string
   javaTypeSimpleName: string
   primaryKey: Boolean
-  selected?: Boolean
+  selected?: boolean
   static mack(v: TableFieldColumn): TableFieldColumn {
     const tableFieldColumn = new TableFieldColumn()
     tableFieldColumn.column = v.column
@@ -220,6 +338,7 @@ export class CodeGenerationParam {
   dataSource?: DataSource
   selectCodeTemplate?: CodeTemplate
   responseTemplateCodeList?: Array<string>
+  generationCodeFile?: Boolean
   static mack(
     tableData: SelectDataTableData,
     selectCodeTemplate: CodeTemplate,
@@ -256,6 +375,7 @@ export interface CodeGenerationView {
   namespace: string
   codeType: string
   primaryKey?: string
+  fileSuffix?: string
   useLombok: boolean
   useSwagger: boolean
   useMybatisPlus: boolean
