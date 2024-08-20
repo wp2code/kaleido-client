@@ -101,7 +101,7 @@ const titleText = computed(() => {
   return template.value.templateName + '(' + props.title + ')'
 })
 const handleOpenMenu = async () => {
-  const filePath = await window.winApi.openDialog({ properties: ['openDirectory'] })
+  const filePath = await window.winApi.openDirDialog()
   if (filePath) {
     template.value.codePath = filePath
   }

@@ -173,7 +173,7 @@ const indexMethod = (index: number) => {
   return index + 1
 }
 const handleOpenMenu = async () => {
-  const filePath = await window.winApi.openDialog({ properties: ['openDirectory'] })
+  const filePath = await window.winApi.openDirDialog()
   if (filePath) {
     entityCodeParams.value.codePath = filePath
   }

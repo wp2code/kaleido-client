@@ -21,5 +21,4 @@ const i18n = createI18n({
   messages: messages,
   globalInjection: true,
 })
-
 export default i18n

@@ -34,7 +34,8 @@
   .el-menu {
     width: 100% !important;
     height: 100%;
-    border: none;
+    border: 0 !important;
+    background-color: $menuBg !important;
   }
   .is-active > .el-sub-menu__title {
     color: $subMenuActiveText !important;
@@ -44,9 +45,9 @@
   .el-sub-menu__title {
     min-width: $sideBarWidth !important;
     background-color: $menuBg !important;
-
     &:hover {
-      background-color: $menuHover !important;
+      color: $subMenuActiveText !important;
+      // background-color: $menuHover !important;
     }
   }
 }

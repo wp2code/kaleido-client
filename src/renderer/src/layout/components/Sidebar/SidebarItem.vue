@@ -97,7 +97,6 @@ function resolvePath(routePath: string) {
         </el-menu-item>
       </app-link>
     </template>
-
     <!-- 包含多个子路由  -->
     <el-sub-menu v-else :index="resolvePath(item.path)" teleported>
       <template #title>
@@ -110,7 +109,6 @@ function resolvePath(routePath: string) {
           translateRouteTitleI18n(item.meta.title)
         }}</span>
       </template>
-
       <sidebar-item
         v-for="child in item.children"
         :key="child.path"

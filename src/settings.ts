@@ -24,7 +24,7 @@ interface DefaultSettings {
 }
 
 const defaultSettings: DefaultSettings = {
-  title: 'DevBox',
+  title: 'Kaleido',
   sidevarLogo: true,
   /**
    *  主题模式

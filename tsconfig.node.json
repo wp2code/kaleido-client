@@ -3,9 +3,9 @@
   "compilerOptions": {
     "composite": true,
     "strict": false,
-    "experimentalDecorators": true, 
-    "emitDecoratorMetadata": true 
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
-  "include": ["electron.vite.config.*","src/main/*", "src/preload/*","src/settings.ts","src/repositories/**/*"],
+  "include": ["electron.vite.config.*","src/main/*", "src/preload/*","src/settings.ts","src/repositories/**/*", "src/preload/init.ts"],
   "exclude": ["node_modules", "out"]
 }

@@ -88,7 +88,7 @@ const refreshGenCode = (directUseTemplateConfig: boolean) => {
   })
 }
 const handleOpenMenu = async () => {
-  const filePath = await window.winApi.openDialog({ properties: ['openDirectory'] })
+  const filePath = await window.winApi.openDirDialog()
   if (filePath) {
     serviceCodeView.value.codePath = filePath
   }

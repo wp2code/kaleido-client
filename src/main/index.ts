@@ -1,104 +1,132 @@
-import { app, shell, BrowserWindow, ipcMain, net, dialog } from 'electron'
+import { app, BrowserWindow, ipcMain, net, dialog } from 'electron'
 import { join, parse } from 'path'
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-const icon = join(__dirname, '../resources/box.png?asset')
-function createWindow(): BrowserWindow {
-  // Create the browser window.
-  const mainWindow = new BrowserWindow({
-    width: 1150,
-    height: 780,
-    show: false,
-    autoHideMenuBar: true,
-    transparent: false,
-    ...(process.platform === 'linux' ? { icon } : {}),
-    webPreferences: {
-      nodeIntegration: false,
-      preload: join(__dirname, '../preload/index.js'),
-      sandbox: false,
-    },
-  })
-  mainWindow.on('ready-to-show', () => {
-    mainWindow.show()
-  })
-  //;
-  mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
-    return { action: 'deny' }
-  })
-  // HMR for renderer base on electron-vite cli.
-  // Load the remote URL for development or the local html file for production.
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    // mainWindow.loadURL('http://test.dunsys.net/login')
-    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
-  } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
-  }
-  // mainWindow.webContents.openDevTools({mode:'right'});
-  return mainWindow
-}
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
-  ipcMain.on('set-title', (event, title) => {
-    const webContents = event.sender
-    const win = BrowserWindow.fromWebContents(webContents)
-    if (win) win.setTitle(title)
-  })
+import { optimizer, is } from '@electron-toolkit/utils'
+let baseUrl = null
+let isStopLoading = false
+const createWindow = () => {
+  return new Promise((resolve, _reject) => {
+    const mainWindow = new BrowserWindow({
+      width: 1150,
+      height: 780,
+      show: false,
+      autoHideMenuBar: true,
+      transparent: false,
+      ...(process.platform === 'linux'
+        ? { icon: join(__dirname, '../../resources/box.png?asset') }
+        : {}),
+      webPreferences: {
+        nodeIntegration: true,
+        contextIsolation: true,
+        allowRunningInsecureContent: true,
+        scrollBounce: true,
+        spellcheck: false,
+        webviewTag: true,
+        javascript: true,
+        preload: join(__dirname, '../preload/index.js'),
+        sandbox: false,
+      },
+    })
 
-  ipcMain.handle('dialog:showOpenDialog', async (_event, options) => {
-    let openDialogOptions = options || {}
-    const { canceled, filePaths } = await dialog.showOpenDialog(
-      openDialogOptions
-    )
-    if (!canceled) {
-      return filePaths[0]
+    if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+      const url = process.env['ELECTRON_RENDERER_URL']
+      console.log('loadURL is', url)
+      mainWindow.loadURL(url)
+    } else {
+      const filePath = join(__dirname, '../renderer/index.html')
+      console.log('loadFile is', filePath)
+      mainWindow.loadFile(filePath)
     }
+    // const loadingWindow = new BrowserWindow({
+    //   parent: mainWindow,
+    //   show: false,
+    //   frame: false,
+    //   width: 500,
+    //   height: 500,
+    //   resizable: false,
+    //   transparent: true,
+    // })
+    // loadingWindow.loadFile(join(__dirname, '../../resources/loading.html'))
+    // loadingWindow.once('ready-to-show', (_log) => {
+    //   loadingWindow.show()
+    // })
+    mainWindow.once('ready-to-show', (_log) => {
+      mainWindow.show()
+    })
+    ipcMain.on('stop-loading', (_event, _log) => {
+      console.log(isStopLoading, _log)
+      if (isStopLoading) {
+        return
+      }
+      isStopLoading = true
+      // mainWindow.show()
+      // loadingWindow.hide()
+      // loadingWindow.destroy()
+    })
+    // mainWindow.webContents.openDevTools({ mode: 'right' })
+    resolve(mainWindow)
   })
-  // Set app user model id for windows
-  electronApp.setAppUserModelId('com.electron')
-
-  // Default open or close DevTools by F12 in development
-  // and ignore CommandOrControl + R in production.
-  // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
-  app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window)
-  })
+}
+app.whenReady().then(() => {
   createWindow()
-  app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
-  })
 })
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
+app.on('browser-window-created', (_, window) => {
+  optimizer.watchWindowShortcuts(window)
+})
 app.on('window-all-closed', () => {
+  if (baseUrl) {
+    const request = net.request({
+      method: 'GET',
+      url: `${baseUrl}/v1/system/stop`,
+    })
+    console.log('stop server api', `${baseUrl}/v1/system/stop`)
+    request.setHeader('Content-Type', 'application/json')
+    request.write(JSON.stringify({}))
+    request.on('response', (response) => {
+      response.on('data', (res) => {
+        let data = JSON.parse(res.toString())
+        console.log('stop server', data)
+      })
+      response.on('end', () => {})
+    })
+    request.end()
+  }
   if (process.platform !== 'darwin') {
     app.quit()
   }
 })
-app.on('before-quit', (_event) => {
-  const request = net.request({
-    method: 'POST',
-    url: 'http://127.0.0.1:10824/api/system/stop',
-  })
-  request.setHeader('Content-Type', 'application/json')
-  request.write(JSON.stringify({}))
-  request.on('response', (response) => {
-    response.on('data', (res) => {
-      let data = JSON.parse(res.toString())
-      console.log('stop server', data)
-    })
-    response.on('end', () => {})
-  })
-  request.end()
+ipcMain.on('set-base-url', (_event, _baseUrl) => {
+  baseUrl = _baseUrl
 })
 ipcMain.handle('get-product-name', (_event) => {
   const exePath = app.getPath('exe')
   const { name } = parse(exePath)
   return name
 })
-// In this file you can include the rest of your app"s specific main process
-// code. You can also put them in separate files and require them here.
+ipcMain.handle('get-downloads-path', (_event) => {
+  const downloadPath = app.getPath('downloads')
+  return downloadPath
+})
+ipcMain.handle('open-save-dialog', (_event, params): any => {
+  const properties = [
+    'createDirectory',
+    'showOverwriteConfirmation',
+    'showHiddenFiles',
+  ]
+  const path = dialog.showSaveDialogSync({
+    properties: properties,
+    ...params.options,
+  })
+  return path === undefined ? undefined : path
+})
+ipcMain.handle('open-file-dialog', (_event, params): any => {
+  const properties = ['openFile']
+  if (params.multiSelections) {
+    properties.push('multiSelections')
+  }
+  const filePath = dialog.showOpenDialogSync({
+    properties: ['openFile'],
+    ...params.options,
+  })
+  console.log('filePath---', filePath)
+  return filePath === undefined ? undefined : filePath[0]
+})

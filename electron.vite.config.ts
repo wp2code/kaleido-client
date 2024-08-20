@@ -56,6 +56,11 @@ export default ({ command, mode }) => {
     },
     preload: {
       envPrefix: 'PRE_VITE_',
+      build: {
+        lib: {
+          entry: ['src/preload/init.ts', 'src/preload/index.ts'],
+        },
+      },
       plugins: [externalizeDepsPlugin()],
     },
     renderer: {
@@ -84,7 +89,7 @@ export default ({ command, mode }) => {
         open: false,
         proxy: {
           '/api': {
-            target: 'http://127.0.0.1:10270',
+            target: `${env.RD_VITE_API_HOST}`,
             changeOrigin: true,
             rewrite: (path: any) => {
               return path.replace(/^\/api/, env.RD_VITE_API_PREFIX)

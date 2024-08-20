@@ -56,6 +56,9 @@ dependencies:
   element-plus:
     specifier: ^2.3.8
     version: 2.3.8(vue@3.3.4)
+  form-data:
+    specifier: ^4.0.0
+    version: 4.0.0
   howler:
     specifier: ^2.2.3
     version: 2.2.3

@@ -20,14 +20,13 @@
   height: 100%;
   display: flex;
   .divider {
-    // width: 1px;
     position: relative;
-    background-color: aquamarine;
+    background-color: rgba(var(--el-color-primary-rgb), 0.5);
   }
 
   .dividerCenter {
     position: absolute;
-    width: 6px;
+    width: 0.2rem;
     height: auto;
     top: 0px;
     bottom: 0px;

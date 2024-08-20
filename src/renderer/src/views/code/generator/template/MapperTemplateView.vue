@@ -101,7 +101,7 @@ const clickConfirm = () => {
   mapperCodeView.value.methodList = methodList.value
 }
 const handleOpenMenu = async () => {
-  const filePath = await window.winApi.openDialog({ properties: ['openDirectory'] })
+  const filePath = await window.winApi.openDirDialog()
   if (filePath) {
     mapperCodeView.value.codePath = filePath
   }

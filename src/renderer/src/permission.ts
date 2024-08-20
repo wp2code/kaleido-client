@@ -13,12 +13,12 @@ NProgress.configure({ showSpinner: false }) // 进度条
 // 白名单路由
 // const whiteList = ['/login']
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (_to, _from, next) => {
   NProgress.start()
-  console.log(to)
-  console.log(from)
+  // console.log(_to)
+  // console.log(_from)
   const userStore = useUserStoreHook()
-  console.log(userStore)
+  // console.log(userStore)
   next()
   // const hasToken = localStorage.getItem("accessToken");
   // if (hasToken) {

@@ -8,7 +8,8 @@ import {
   TableFieldColumn,
 } from './types'
 import { AxiosPromise } from 'axios'
-import request from '../request'
+import FormData from 'form-data'
+import request from '@/api/request'
 import { TableFieldColumnParam } from '../datasource/types'
 /**
  *
@@ -234,5 +235,48 @@ export function getTemplateTableFieldColumnList(
     url: `/api/v1/code-tp/${templateId}/${codeType}/table/column/fields`,
     method: 'post',
     data: { ...param },
+  })
+}
+
+/**
+ * 导出模板
+ *
+ * @param templateId
+ * @returns
+ */
+export function exportTemplate(templateId: string): AxiosPromise {
+  return request({
+    url: `/api/v1/code-tp/file/export?templateId=${templateId}`,
+    method: 'get',
+    responseType: 'stream',
+    headers: { 'Content-Type': 'application/json; application/octet-stream' },
+  })
+}
+/**
+ * 导入模板
+ *
+ * @param templatePath
+ * @returns
+ */
+export function uploadTemplate(data: any): AxiosPromise<String> {
+  return request({
+    url: `/api/v1/code-tp/file/upload`,
+    method: 'post',
+    data: data,
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+}
+
+/**
+ * 保存导入模板
+ *
+ * @param templatePath
+ * @returns
+ */
+export function saveUploadTemplate(data: any): AxiosPromise<String> {
+  return request({
+    url: `/api/v1/code-tp/file/upload/save`,
+    method: 'post',
+    data: data,
   })
 }

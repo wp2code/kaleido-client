@@ -1,10 +1,12 @@
-import { serverApi, electronAPI, winApi, db } from './index.ts'
+import { serverApi, electronAPI, winApi, db, initApi } from './index.ts'
 //全局声明对象
 declare global {
   interface Window {
-    electronApi: electronAPI
+    electronAPI: electronAPI
     winApi: winApi
+    initApi: initApi
     db: db
     serverApi: serverApi
+    _BaseURL: string
   }
 }

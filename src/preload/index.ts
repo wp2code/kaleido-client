@@ -1,55 +1,36 @@
 import { contextBridge, ipcRenderer, clipboard, shell } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
-import path from 'path'
-import { JAVA_APP_NAME, JAVA_PATH } from './constants'
 import * as db from '../repositories'
-import { spawn } from 'child_process'
-// export * from './proxy'
-// Custom APIs for renderer
+import path from 'path'
+import fs from 'fs'
+import os from 'os'
+import initApi from './init'
 const winApi = {
-  setTitle: (title) => ipcRenderer.send('set-title', title),
-  openDialog: (options) => ipcRenderer.invoke('dialog:showOpenDialog', options),
-  copy: (text) => clipboard.writeText(text),
-  openPath: (path) => shell.openPath(path),
-}
-
-const serverApi = {
-  startServerForSpawn: async () => {
-    const javaPath = path.join(__dirname, '', `./static/${JAVA_APP_NAME}`)
-    const productName = await ipcRenderer.invoke('get-product-name')
-    const isTest = productName.match(/test$/i) !== null
-    console.log('productName:', productName, isTest)
-    const child = spawn(path.join(__dirname, '', `./static/${JAVA_PATH}`), [
-      '-jar',
-      '-Xmx512M',
-      `-Dspring.profiles.active=${isTest ? 'test' : 'release'}`,
-      '-Dserver.address=127.0.0.1',
-      javaPath,
-    ])
-    child.stdout.on('data', (buffer) => {
-      const data = buffer.toString('utf8')
-      console.log(data)
-      if (data.toString().indexOf('Started Application') !== -1) {
-        console.log('load success')
-      }
-    })
-    child.stderr.on('data', (data) => {
-      console.error(`stderr: ${data}`)
-    })
-    child.on('close', (code) => {
-      console.log(`child process exited with code ${code}`)
-    })
+  openSaveDialog: (options = {}) => {
+    return ipcRenderer.invoke('open-save-dialog', { options })
+  },
+  openFileDialog: (multiSelections: boolean = false, options = {}) => {
+    return ipcRenderer.invoke('open-file-dialog', { multiSelections, options })
+  },
+  copy: (text: string) => clipboard.writeText(text),
+  openPath: (path: string) => shell.openPath(path),
+  setBaseURL: (baseUrl: string) => {
+    ipcRenderer.send('set-base-url', baseUrl)
+  },
+  getDownloadPath: async (filename: string) => {
+    const downloadPath = await ipcRenderer.invoke('get-downloads-path')
+    const filePath = path.join(downloadPath, filename)
+    return filePath
   },
 }
-// Use `contextBridge` APIs to expose Electron APIs to
-// renderer only if context isolation is enabled, otherwise
-// just add to the DOM global.
 if (process.contextIsolated) {
   try {
-    contextBridge.exposeInMainWorld('electronApi', electronAPI)
+    contextBridge.exposeInMainWorld('electronAPI', electronAPI)
     contextBridge.exposeInMainWorld('winApi', winApi)
     contextBridge.exposeInMainWorld('db', db)
-    contextBridge.exposeInMainWorld('serverApi', serverApi)
+    contextBridge.exposeInMainWorld('fs', fs)
+    contextBridge.exposeInMainWorld('os', os)
+    contextBridge.exposeInMainWorld('path', path)
   } catch (error) {
     console.error(error)
   }
@@ -61,6 +42,10 @@ if (process.contextIsolated) {
   //@ts-ignore (define in dts)
   window.db = db
   //@ts-ignore (define in dts)
-  window.serverApi = serverApi
+  window.fs = fs
+  //@ts-ignore (define in dts)
+  window.os = os
+  //@ts-ignore (define in dts)
+  window.path = path
 }
-export default { electronAPI, winApi, db, serverApi }
+export default { electronAPI, winApi, db, initApi }

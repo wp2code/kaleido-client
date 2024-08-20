@@ -14,6 +14,8 @@ import {
   copyAddTemplate,
   updateTemplateName,
   deleteCodeGenerationTemplate,
+  exportTemplate,
+  saveUploadTemplate,
 } from '@/api/code/index'
 import { SelectDbable, TriggerWatch } from '../keys'
 import { MoreMenu, initFilterMoreMenu } from './type'
@@ -30,6 +32,7 @@ import {
   initBuildCodePrams,
 } from '@/utils/codeUtil'
 import MessageBox from '@/utils/MessageBox'
+import IoUtil from '@/utils/IoUtil'
 const morMenuList = ref<MoreMenu[]>()
 const selectedCodeParams = ref([])
 const allCodeParams = initBuildCodePrams()
@@ -109,10 +112,44 @@ const renameTemplate = (item: any) => {
   actionVisabel.value = true
   actionActive.value = (item.menu || {}) as MoreMenu
 }
-const exoprtTemplate = (item: any) => {
-  actionTitle.value = '导出'
-  actionVisabel.value = true
-  actionActive.value = (item.menu || {}) as MoreMenu
+const exoprtTemplate = async (_item: any) => {
+  const path = await window.winApi.openSaveDialog({
+    defaultPath: selectEditCodeTemplate.value.templateName,
+    filters: [{ name: 'Json Template', extensions: ['json'] }],
+    buttonLabel: '导出',
+  })
+  if (path && path !== undefined) {
+    exportTemplate(selectEditCodeTemplate.value.id).then(async (response) => {
+      if (response) {
+        await IoUtil.exportData(path, response.data, true, (_err) => {
+          if (_err) {
+            MessageBox.fail('导出失败！')
+          } else {
+            MessageBox.ok('导出成功！')
+          }
+        })
+      }
+    })
+  }
+}
+const importTemplate = async (_item: any) => {
+  const filePath = await window.winApi.openFileDialog(false, {
+    filters: [{ name: 'Json Template', extensions: ['json'] }],
+    buttonLabel: '导入',
+  })
+  if (filePath) {
+    const data = IoUtil.importData(filePath, (_err) => {
+      if (_err) {
+        MessageBox.fail('导出失败！')
+      }
+    })
+    if (data) {
+      saveUploadTemplate(data).then((_res) => {
+        MessageBox.ok('导入成功！')
+        initTemplateList(true, selectCodeTemplate.value.id)
+      })
+    }
+  }
 }
 const initFilterMoreMenuList = () => {
   const copyTemplateItem = MoreMenu.mack(
@@ -123,9 +160,16 @@ const initFilterMoreMenuList = () => {
   )
   const renameTemplateItem = MoreMenu.mack('rename', '重命名', 'SetUp', renameTemplate)
   const deleteTemplateItem = MoreMenu.mack('delete', '删除', 'Delete', deleteTemplate)
-  const exportTemplateItem = MoreMenu.mack('export', '导出', 'Expand', exoprtTemplate)
+  const exportTemplateItem = MoreMenu.mack('export', '导出', 'Download', exoprtTemplate)
+  const importTemplateItem = MoreMenu.mack('import', '导入', 'Upload', importTemplate)
   morMenuList.value = initFilterMoreMenu(
-    [copyTemplateItem, renameTemplateItem, deleteTemplateItem, exportTemplateItem],
+    [
+      copyTemplateItem,
+      renameTemplateItem,
+      deleteTemplateItem,
+      exportTemplateItem,
+      importTemplateItem,
+    ],
     (item: MoreMenu) => {
       if (selectCodeTemplate.value.isInternal == 1) {
         return item.id !== 'delete' && item.id !== 'rename'

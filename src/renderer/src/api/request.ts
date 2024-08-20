@@ -7,9 +7,9 @@ const Logout = debounce((fullPath) => {
   localStorage.clear()
   window.location.href = fullPath
 }, 600)
+
 // 创建 axios 实例
 const service = axios.create({
-  baseURL: import.meta.env.RD_VITE_API_HOST,
   timeout: 50000,
   headers: {
     'Content-Type': 'application/json;charset=UTF-8',
@@ -41,16 +41,24 @@ service.interceptors.response.use(
         },
       })
     }
+    if (response.status !== 200) {
+      MessageBox.fail('请求响应异常：' + response.status)
+      return
+    }
+    // 响应数据为二进制流处理(Excel导出)
+    if (
+      response.data instanceof ArrayBuffer ||
+      response.data instanceof Blob ||
+      response.headers['content-disposition']
+    ) {
+      return response
+    }
     const { code, message } = response.data
     if (code === 'success') {
       return response.data
     }
-    // 响应数据为二进制流处理(Excel导出)
-    if (response.data instanceof ArrayBuffer) {
-      return response
-    }
     MessageBox.fail(message || '系统出错')
-    return Promise.reject(new Error(message || 'Error'))
+    return Promise.reject(message || '系统出错')
   },
   (error: any) => {
     if (error.response.data) {
@@ -60,5 +68,4 @@ service.interceptors.response.use(
     return Promise.reject(error.message)
   }
 )
-// 导出 axios 实例
 export default service

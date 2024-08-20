@@ -4,17 +4,13 @@ import { constantRoutes } from '@/router'
 import SidebarItem from './SidebarItem.vue'
 import Logo from './Logo.vue'
 const currRoute = useRoute()
-import variables from '@/styles/variables.module.scss'
+// import variables from '@/styles/variables.module.scss'
 </script>
 <template>
   <div class="sidebar">
     <Logo />
-    <el-menu
-      :default-active="currRoute.fullPath"
-      :background-color="variables.menuBg"
-      mode="vertical"
-      collapse
-    >
+    <!-- :background-color="variables.menuBg" -->
+    <el-menu :default-active="currRoute.fullPath" mode="vertical" collapse>
       <sidebar-item
         v-for="route in constantRoutes"
         :key="route.path"

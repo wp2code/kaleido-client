@@ -21,7 +21,7 @@ const applyTemplteList=ref<[]>()
 const tpProps = { multiple: true }
 const basicConfigView = ref<CodeTemplateBasicConfig>()
 const handleOpenMenu = async () => {
-  const filePath = await window.winApi.openDialog({ properties: ['openDirectory'] })
+  const filePath = await window.winApi.openDirDialog()
   if (filePath) {
     basicConfigView.value.codePath = filePath
   }
