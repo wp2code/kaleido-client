@@ -1,11 +1,19 @@
-import { ElMessageBox, ElMessage, ElNotification } from 'element-plus'
+import {
+  ElMessageBox,
+  ElMessage,
+  ElNotification,
+  messageType,
+} from 'element-plus'
 
 export interface MsgBoxOptions {
   ok: Boolean | Promise<Boolean> | Function
   successMsg?: string
   failMsg?: string
+  showElMessage?: Boolean
+  confirmButtonText?: string
+  cancelButtonText?: string
+  type?: messageType
 }
-
 const showElMessage = (isSuccess: Boolean, options?: MsgBoxOptions) => {
   if (isSuccess) {
     ElMessage({
@@ -61,22 +69,27 @@ class MsgBox {
   }
   confirm(message: string, options: MsgBoxOptions) {
     ElMessageBox.confirm(message, '确认', {
-      confirmButtonText: '确认',
-      cancelButtonText: '取消',
-      type: 'warning',
+      confirmButtonText: options.confirmButtonText || '确认',
+      cancelButtonText: options.cancelButtonText || '取消',
+      type: options.type || 'warning',
     }).then(() => {
-      const okExe = options['ok']
+      const okExe = options.ok
+      const isShowElMessage = options.showElMessage || true
       if (
         okExe &&
         Object.prototype.toString.call(okExe) === '[object Promise]'
       ) {
         ;(<Promise<Boolean>>okExe).then((res) => {
-          showElMessage(res, options)
+          if (isShowElMessage) {
+            showElMessage(res, options)
+          }
         })
       } else if (typeof okExe === 'function') {
         okExe()
       } else {
-        showElMessage(<Boolean>okExe, options)
+        if (isShowElMessage) {
+          showElMessage(<Boolean>okExe, options)
+        }
       }
     })
   }

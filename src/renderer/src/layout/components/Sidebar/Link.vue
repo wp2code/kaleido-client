@@ -14,12 +14,15 @@ function push() {
     console.error(err)
   })
 }
+function openExternal(url) {
+  window.winApi.openExternal(url)
+}
 </script>
 
 <template>
-  <a v-if="isExternal(to)" :href="to" target="_blank" rel="noopener">
+  <span v-if="isExternal(to)" @click="openExternal(to)">
     <slot />
-  </a>
+  </span>
   <div v-else @click="push">
     <slot />
   </div>

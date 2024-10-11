@@ -1,49 +1,61 @@
-import { contextBridge, ipcRenderer, clipboard, shell } from 'electron'
-import path from 'path'
+import { contextBridge, ipcRenderer } from 'electron'
+import { join } from 'path'
 import { JAVA_APP_NAME, JAVA_HOME } from './constants'
 import { spawn } from 'child_process'
+const isDev = process.env.NODE_ENV == 'development'
 const initApi = {
-  stopLoading: (res: string) => {
+  stopLoading: (res?: string) => {
     ipcRenderer.send('stop-loading', res)
   },
   startServerForSpawn: () => {
     return new Promise(async (resolve, reject) => {
-      console.log('startting.....')
-      // const javaPath =
-      //   'D:\\wp2code\\github\\kaleido\\kaleido-start\\target\\kaleido-start-1.0.0-SNAPSHOT.jar'
-      const javaPath = path.join(__dirname, '', `./static/${JAVA_APP_NAME}`)
-      console.log('java jar path is ', javaPath)
-      const productName = await ipcRenderer.invoke('get-product-name')
-      const isProd = productName.match(/prod$/i) !== null
-      console.log('productName:', productName, isProd)
-      const jrePath = path.join(__dirname, '../..', `./static/${JAVA_HOME}`)
-      const child = spawn(
-        'D:\\Program Files\\Chat2DB\\resources\\app\\static\\jre\\bin\\java',
-        [
+      console.log(`startting..... is development ${isDev}`)
+      if (isDev) {
+        //模拟启动时间
+        setTimeout(() => {
+          resolve('isDev')
+        }, 5000)
+      }
+      try {
+        const javaApp = join(
+          __dirname,
+          '../../..',
+          `./server/app/${JAVA_APP_NAME}`
+        )
+        const libPath = join(__dirname, '../../..', `./server/app/lib`)
+        const jrePath = join(__dirname, '../../..', `./server/${JAVA_HOME}`)
+        console.log(
+          `root path is ${__dirname} javaApp is ${javaApp}  jrePath is ${jrePath} libPath is ${libPath}`
+        )
+        const child = spawn(jrePath, [
           '-Xmx1024M',
-          `-Dspring.profiles.active=${isProd ? 'prod' : 'dev'}`,
+          `-Dspring.profiles.active=${isDev ? 'dev' : 'prod'}`,
           '-Dserver.address=127.0.0.1',
           '-Djava.awt.headless=true',
+          `-Dloader.path=${libPath}`,
           '-jar',
-          javaPath,
-        ]
-      )
-      child.stdout.on('data', (buffer) => {
-        const data = buffer.toString('utf8')
-        console.log(data)
-        if (data.toString().indexOf('Started StartApplication') !== -1) {
-          console.log('>>>>>>>>>load success<<<<<<<<<<<')
-          resolve(data)
-          return
-        }
-      })
-      child.stderr.on('data', (data) => {
-        console.error(`stderr: ${data}`)
-        reject(data)
-      })
-      child.on('close', (code) => {
-        console.log(`child process exited with code ${code}`)
-      })
+          javaApp,
+        ])
+        child.stdout.on('data', (buffer) => {
+          const data = buffer.toString('utf8')
+          console.log(data)
+          if (data.toString().indexOf('Started StartApplication') !== -1) {
+            console.log('>>>>>>>>>load success<<<<<<<<<<<')
+            resolve(data)
+          }
+        })
+        child.stderr.on('data', (data) => {
+          reject(data)
+          console.error(`stderr:`, data)
+        })
+        child.on('close', (code) => {
+          console.log(`child process exited with code ${code}`)
+          resolve(code)
+        })
+      } catch (error) {
+        console.error('startting error', error)
+        reject(error)
+      }
     })
   },
 }

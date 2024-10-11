@@ -7,9 +7,10 @@ const Logout = debounce((fullPath) => {
   localStorage.clear()
   window.location.href = fullPath
 }, 600)
-
+const _BASEURL = import.meta.env.RD_VITE_API_HOST
+axios.defaults.baseURL = _BASEURL
 // 创建 axios 实例
-const service = axios.create({
+const requestInstance = axios.create({
   timeout: 50000,
   headers: {
     'Content-Type': 'application/json;charset=UTF-8',
@@ -18,7 +19,7 @@ const service = axios.create({
   },
 })
 // 请求拦截器
-service.interceptors.request.use(
+requestInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const userStore = useUserStoreHook()
     if (userStore.token) {
@@ -31,7 +32,7 @@ service.interceptors.request.use(
   }
 )
 // 响应拦截器
-service.interceptors.response.use(
+requestInstance.interceptors.response.use(
   (response: AxiosResponse) => {
     // token 过期,重新登录
     if (response.status === 401) {
@@ -68,4 +69,4 @@ service.interceptors.response.use(
     return Promise.reject(error.message)
   }
 )
-export default service
+export default requestInstance

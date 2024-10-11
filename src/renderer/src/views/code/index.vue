@@ -20,20 +20,37 @@ const dbTablePanelKey = ref()
 const selectDbTableData = ref<SelectDataTableData>(new SelectDataTableData(null, null))
 const selectDbConfigData = ref<DbConfig>()
 const useGenCodeParam = useGenCodeParamStore()
+const initDbTablePanel = () => {
+  dbTablePanelKey.value = 'INI_' + new Date()
+  selectDbConfigData.value = {} as DbConfig
+}
+const refreshInitComponent = (_data: Object, _eventName: string) => {
+  initDbTablePanel()
+  componentName.value = null
+  componentKey.value = 'INI_' + new Date()
+}
 //新增连接
 const toAddConnect = () => {
   componentName.value = DbPanel
   componentKey.value = 'CN_' + new Date()
 }
-//编辑连接
-const selectDbConfig = (item: any, isEdit: boolean) => {
+
+//选择数据库连接
+const selectDbConfig = (item: any, isEdit: boolean, isRefresh: boolean) => {
   if (isEdit) {
     componentKey.value = 'CF_' + new Date()
     componentName.value = DbConnectionBox
     componentParams.value = item
+    if (isRefresh) {
+      initDbTablePanel()
+    }
   } else {
     dbTablePanelKey.value = item?.id
     selectDbConfigData.value = item
+    if (isRefresh) {
+      componentName.value = null
+      componentKey.value = 'INI_' + new Date()
+    }
   }
 }
 //选择数据库表
@@ -62,9 +79,13 @@ onBeforeUnmount(() => {
 <template>
   <drag-layout init-size="30%">
     <template #first>
-      <box-layout layout="coloum" size="40%">
+      <box-layout layout="column" size="40%" :show-divider="true">
         <template #first>
-          <DbConnectionPanel ref="dbConnectionPanelRef" @select="selectDbConfig" />
+          <DbConnectionPanel
+            ref="dbConnectionPanelRef"
+            @select="selectDbConfig"
+            @refresh="refreshInitComponent"
+          />
         </template>
         <DbTablePanel
           :key="dbTablePanelKey"

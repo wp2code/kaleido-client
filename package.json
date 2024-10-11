@@ -4,6 +4,7 @@
   "description": "An Electron application with Vue and TypeScript",
   "main": "./out/main/index.js",
   "author": "wp2code",
+  "productName": "kaleido",
   "homepage": "https://github.com/wp2code",
   "scripts": {
     "format": "prettier --write .",
@@ -13,11 +14,12 @@
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
     "start": "electron-vite preview",
     "dev": "electron-vite dev --watch --mode development",
-    "build": "npm run typecheck && electron-vite build",
+    "build": "electron-vite build --mode production",
     "postinstall": "electron-builder install-app-deps",
-    "build:win": "npm run build && electron-builder --win --config --mode production",
-    "build:mac": "npm run build && electron-builder --mac --config --mode production",
-    "build:linux": "npm run build && electron-builder --linux --config --mode production"
+    "build:win": "npm run build && electron-builder --win --config",
+    "build:mac": "npm run build && electron-builder --mac --config",
+    "build:linux": "npm run build && electron-builder --linux --config",
+    "build:help": "electron-builder --help"
   },
   "dependencies": {
     "@codemirror/lang-html": "^6.4.7",
@@ -35,6 +37,7 @@
     "better-sqlite3": "^8.5.0",
     "classnames": "^2.3.2",
     "codemirror": "^6.0.1",
+    "electron-store": "8.2.0",
     "electron-updater": "^5.3.0",
     "element-plus": "^2.3.8",
     "form-data": "^4.0.0",
@@ -75,8 +78,8 @@
     "@vue/eslint-config-prettier": "^7.1.0",
     "@vue/eslint-config-typescript": "^11.0.3",
     "autoprefixer": "^10.4.14",
-    "electron": "^24.6.2",
-    "electron-builder": "^24.6.3",
+    "electron": "31.7.0",
+    "electron-builder": "^25.1.8",
     "electron-rebuild": "^3.2.9",
     "electron-vite": "^1.0.25",
     "eslint": "^8.44.0",

@@ -1,20 +1,21 @@
 <script lang="ts" setup>
 import { deleteMenu, editMenu, type IMenu } from '@/utils/MenuOpions'
-import { listDataSource, deleteDataSource } from '@/api/datasource/index'
+import { listDataSource, deleteDataSource ,checkConnectDataSourceIsOpen,closeCurrentConnectDataSource} from '@/api/datasource/index'
 import { DataSource } from '@/api/datasource/types'
 const { proxy } = getCurrentInstance()
 const list = ref<DataSource[]>([])
 const emits = defineEmits<{
-  select:[dbConfig:DataSource,isEdit:Boolean]
+  select:[dbConfig:DataSource,isEdit:Boolean,isRefresh:Boolean]
+  refresh:[data:Object,eventName:string]
 }>()
-
+const activeItemId=ref()
 const selectDeleteConnect=(item:any)=>{
   proxy.$msgBoxUtil.confirm('确认删除?', {
     ok:  async () => {
-      console.log('确认删除！',item)
       return  await deleteDataSource(item.id).then(response=>{
         if(response){
           queryList()
+          emits('refresh',item.id,'delete')
           return true
         }
         return false
@@ -26,12 +27,30 @@ const selectDeleteConnect=(item:any)=>{
 
 }
 //选择编辑
-const selectEditConnect=(item:any)=>{
-  emits('select', item, true)
+const selectEditConnect=async (item:any)=>{
+  //校验是否已经打开了
+ await checkConnectDataSourceIsOpen(item.id).then((res)=>{
+    if(res.data){
+      const connectionId=  res.data
+      proxy.$msgBoxUtil.confirm('要编辑连接，必须将其关闭 。你确认要继续吗？', {
+        ok: () => {
+          closeCurrentConnectDataSource(connectionId).then((_res)=>{
+            emits('select', item, true,true)
+          })
+        },
+        confirmButtonText:"关闭 & 编辑",
+        showElMessage: false
+      })
+    }else{
+      emits('select', item, true,false)
+    }
+  })
+
 }
-//选择连接数据库
+//选择连接
 const selectToConnect = (item: any) => {
-  emits('select', item, false)
+  activeItemId.value=item.id
+  emits('select', item, false, true)
 }
 //下拉菜单 选择事件
 const selectMorMenuItem = (menu: IMenu) => {
@@ -64,7 +83,7 @@ defineExpose({ queryList })
         <div
           v-for="(item, index) of list"
           :key="index"
-          class="item"
+          :class="['item', item.id == activeItemId ? 'active-item' : '']"
           @click="selectToConnect(item)"
         >
           <div class="desc">
@@ -145,7 +164,7 @@ defineExpose({ queryList })
   }
   &:hover {
     cursor: pointer;
-    background-color: $menuBg;
+    font-size: medium;
   }
   .more {
     &:hover {
@@ -153,5 +172,8 @@ defineExpose({ queryList })
       color: $menuActiveText;
     }
   }
+}
+.active-item {
+  background-color: $menuBg;
 }
 </style>

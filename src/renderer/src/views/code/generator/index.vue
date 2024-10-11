@@ -320,9 +320,9 @@ const selectMorMenuItem = (item: any) => {
 }
 </script>
 <template>
-  <box-layout layout="coloum" size="12%" :show-divider="false">
+  <box-layout layout="column" size="12%" :show-divider="false">
     <template #first>
-      <div class="header">
+      <div class="header lable-text">
         <div>
           <el-breadcrumb :separator-icon="ArrowRight">
             <el-breadcrumb-item>{{
@@ -333,52 +333,62 @@ const selectMorMenuItem = (item: any) => {
             }}</el-breadcrumb-item>
           </el-breadcrumb>
         </div>
-        <div class="config">
-          <div class="config-select">
-            <label>模板配置：</label>
-            <el-select
-              :key="selectCTKey"
-              v-model="selectCodeTemplate"
-              placeholder="选择配置"
-              value-key="id"
-              @change="onChangeConfig"
+        <div>
+          <el-row>
+            <el-col :offset="6" :span="2" class="col-center"
+              ><label>模板配置：</label></el-col
             >
-              <el-option
-                v-for="item in codeTemplateList"
-                :key="item.id"
-                :label="item.templateName"
-                :value="item"
+            <el-col :span="6">
+              <div>
+                <el-select
+                  :key="selectCTKey"
+                  v-model="selectCodeTemplate"
+                  placeholder="选择配置"
+                  value-key="id"
+                  @change="onChangeConfig"
+                >
+                  <el-option
+                    v-for="item in codeTemplateList"
+                    :key="item.id"
+                    :label="item.templateName"
+                    :value="item"
+                  >
+                    <span style="float: left">{{ item.templateName }}</span>
+                  </el-option>
+                </el-select>
+              </div>
+            </el-col>
+            <el-col :span="1" class="col-center col-margin-left">
+              <div>
+                <el-dropdown hide-on-click trigger="click" @command="selectMorMenuItem">
+                  <el-icon><Tools /></el-icon>
+                  <template #dropdown>
+                    <el-dropdown-menu>
+                      <el-dropdown-item
+                        v-for="menuItem of morMenuList"
+                        :key="menuItem.id"
+                        :icon="menuItem.icon"
+                        :command="{ menu: menuItem, template: selectCodeTemplate }"
+                      >
+                        {{ menuItem.name }}</el-dropdown-item
+                      >
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
+              </div>
+            </el-col>
+            <el-col :span="2" class="col-center">
+              <BasicConfig
+                v-if="basicConfigVisible == true"
+                v-model:visible="basicConfigVisible"
+                :data="basicConfigInfo"
+                :code-template-list="allCodeTemplateList"
+              />
+              <el-link class="lable-text" @click.stop="openBasicCOnfigDialog()"
+                >全局配置</el-link
               >
-                <span style="float: left">{{ item.templateName }}</span>
-              </el-option>
-            </el-select>
-            <div style="float: right; padding: 5px">
-              <el-dropdown hide-on-click trigger="click" @command="selectMorMenuItem">
-                <el-icon><Tools /></el-icon>
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item
-                      v-for="menuItem of morMenuList"
-                      :key="menuItem.id"
-                      :icon="menuItem.icon"
-                      :command="{ menu: menuItem, template: selectCodeTemplate }"
-                    >
-                      {{ menuItem.name }}</el-dropdown-item
-                    >
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-            </div>
-          </div>
-          <div>
-            <BasicConfig
-              v-if="basicConfigVisible == true"
-              v-model:visible="basicConfigVisible"
-              :data="basicConfigInfo"
-              :code-template-list="allCodeTemplateList"
-            />
-            <el-link @click.stop="openBasicCOnfigDialog()">全局配置</el-link>
-          </div>
+            </el-col>
+          </el-row>
         </div>
         <el-dialog
           v-model="actionVisabel"
@@ -479,28 +489,25 @@ const selectMorMenuItem = (item: any) => {
 
 <style lang="scss" scoped>
 .header {
-  padding: 4px;
-  color: #fff;
-  display: flex;
-  flex-direction: column;
-
   width: 100%;
-  .config {
-    justify-content: center;
-    flex-grow: 1;
-    display: flex;
-    align-items: center;
-    .config-select {
-      margin-right: 1rem;
-    }
+  & > :first-child {
+    padding: 0.2rem 0 0.8rem 0.2rem;
   }
 }
-
+.col-center {
+  margin-top: 0.5rem;
+}
+.col-margin-left {
+  margin-left: 0.5rem;
+}
 .conent {
   background-color: #fff;
   width: 100%;
   height: 100%;
   padding: 5px;
+}
+.lable-text {
+  color: #fff;
 }
 .bottom {
   position: absolute;
@@ -512,10 +519,6 @@ const selectMorMenuItem = (item: any) => {
   .template-tabs {
     .el-tabs__content {
       padding: 10px;
-      // color: #6b778c;
-      // font-size: 32px;
-      // font-weight: 600;
-      // background-color: red;
       height: 100%;
     }
   }

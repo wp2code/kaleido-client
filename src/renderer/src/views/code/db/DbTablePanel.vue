@@ -2,7 +2,7 @@
 import {
   openConnectDataSource,
   openDataBase,
-  closeConnectDataSource,
+  closeOtherConnectDataSource,
   getDataSourceByConnectionId,
 } from '@/api/datasource/index'
 import { Schema, Table, Database, SimpleDatabase } from '@/api/datasource/types'
@@ -55,7 +55,6 @@ const openConnection = (id: string) => {
 const clickSelectTable = async (tree: Tree) => {
   if (tree.leaf) {
     await getDataSourceByConnectionId(tree.connectionId).then((res) => {
-      console.log('选择表', tree.data, res.data)
       emits('select', tree.data as Table, res.data)
     })
   }
@@ -131,7 +130,7 @@ onMounted(() => {
   openConnection(datasourceId.value)
 })
 onBeforeUpdate(() => {
-  closeConnectDataSource(datasourceId.value)
+  closeOtherConnectDataSource(datasourceId.value)
 })
 // const headerRef = ref<HTMLElement>()
 const treeHeight = ref()
@@ -184,7 +183,7 @@ watchEffect(async () => {
         >
           <template #default="{ node }">
             <!-- <span class="prefix" :class="{ 'is-leaf': node.isLeaf }">[ElementPlus]</span> -->
-            <span>{{ node.label }}</span>
+            <span class="table-tree-lable">{{ node.label }}</span>
           </template>
         </el-tree>
       </el-scrollbar>
@@ -212,16 +211,19 @@ watchEffect(async () => {
       cursor: pointer;
       outline: none;
       margin-right: 2px;
-      :hover {
+      &:hover {
         color: #409efc;
       }
     }
   }
   padding: 5px;
-  .table-tree-content {
+}
+.table-tree-lable {
+  color: aliceblue;
+  &:hover {
+    font-size: medium;
   }
 }
-
 :deep() {
   .el-input--default > .el-input__wrapper {
     background-color: var(--subMenuBg);

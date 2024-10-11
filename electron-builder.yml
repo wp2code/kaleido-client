@@ -1,26 +1,43 @@
-# @format
-
-appId: com.electron.app
+appId: com.lzx.Kaleido
 productName: Kaleido
+extraResources:
+  - server
 directories:
   buildResources: build
+  output: dist
 files:
+  - 'build/*.ico'
+  - 'out/**/*'
   - '!**/.vscode/*'
   - '!src/*'
+  - '!electron'
+  - '!node_modules/*'
+  - '!server/*'
+  - '!store.db'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
-  - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
+  - '!{.eslintignore,.editorconfig,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,.prettierrc.cjs,dev-app-update.yml,CHANGELOG.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+asar: true
 asarUnpack:
-  - resources/**
-afterSign: build/notarize.js
+  - resources/app.asar
+# afterSign: build/notarize.js
 win:
-  executableName: Kaleido
+  publisherName: Kaleido
+  icon: build/logo.ico
 nsis:
+  ##是否一键安装
+  oneClick: false
+  allowElevation: true
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  runAfterFinish: true
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
-  createDesktopShortcut: always
+  installerIcon: build/logo.ico
+  uninstallerIcon: build/logo.ico
 mac:
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:

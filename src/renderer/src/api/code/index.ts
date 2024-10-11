@@ -7,10 +7,9 @@ import {
   PartitionTempate,
   TableFieldColumn,
 } from './types'
-import { AxiosPromise } from 'axios'
-import FormData from 'form-data'
-import request from '@/api/request'
+import request from '../request'
 import { TableFieldColumnParam } from '../datasource/types'
+import { AxiosPromise } from 'axios'
 /**
  *
  * @param queryParams
@@ -20,7 +19,7 @@ export function listTemplateConfig(
   queryParams?: any
 ): AxiosPromise<CodeTemplate[]> {
   return request({
-    url: '/api/v1/code-tp/list',
+    url: '/v1/code-tp/list',
     method: 'post',
     data: queryParams || {},
   })
@@ -37,15 +36,14 @@ export function generationCode(
   responseTemplateCodeList?: string[]
 ): AxiosPromise<CodeGenerationResult> {
   return request({
-    url: '/api/v1/code-gen/generation',
+    url: '/v1/code-gen/generation',
     method: 'post',
-    data:
-      {
-        connectionId,
-        templateId,
-        codeGenerationList,
-        responseTemplateCodeList,
-      } || {},
+    data: {
+      connectionId,
+      templateId,
+      codeGenerationList,
+      responseTemplateCodeList,
+    },
   })
 }
 /**
@@ -61,16 +59,15 @@ export function previewCode(
   responseTemplateCodeList?: string[]
 ): AxiosPromise<CodeGenerationResult> {
   return request({
-    url: `/api/v1/code-gen/preview`,
+    url: `/v1/code-gen/preview`,
     method: 'post',
-    data:
-      {
-        connectionId,
-        templateId,
-        codeGenerationList,
-        responseTemplateCodeList,
-        directUseTemplateConfig,
-      } || {},
+    data: {
+      connectionId,
+      templateId,
+      codeGenerationList,
+      responseTemplateCodeList,
+      directUseTemplateConfig,
+    },
   })
 }
 /**
@@ -83,7 +80,7 @@ export function updateGlobalConfig(
   basicConfig: CodeTemplateBasicConfig
 ): AxiosPromise<Boolean> {
   return request({
-    url: `/api/v1/code-tp/updateGlobalConfig`,
+    url: `/v1/code-tp/updateGlobalConfig`,
     method: 'put',
     data: basicConfig || {},
   })
@@ -99,7 +96,7 @@ export function previewCodeByTemplateId(
   codeGenerationParam?: CodeGenerationParam
 ): AxiosPromise<CodeGenerationResult> {
   return request({
-    url: `/api/v1/code-gen/${templateId}/preview`,
+    url: `/v1/code-gen/${templateId}/preview`,
     method: 'post',
     data: codeGenerationParam || {},
   })
@@ -114,7 +111,7 @@ export function getJavaTypeList(
   classification: string = ''
 ): AxiosPromise<JavaTypeInfo[]> {
   return request({
-    url: `/api/v1/code-gen/java/type?cf=${classification}`,
+    url: `/v1/code-gen/java/type?cf=${classification}`,
     method: 'get',
   })
 }
@@ -129,7 +126,7 @@ export function getTemplateInfo(
   nameList?: String[]
 ): AxiosPromise<CodeTemplate> {
   return request({
-    url: `/api/v1/code-tp/template/info`,
+    url: `/v1/code-tp/template/info`,
     method: 'post',
     data: {
       templateId,
@@ -145,7 +142,7 @@ export function getTemplateInfo(
  */
 export function copyAddTemplate(templateId: string, templateName: string) {
   return request({
-    url: `/api/v1/code-tp/add/copy`,
+    url: `/v1/code-tp/add/copy`,
     method: 'post',
     data: {
       templateId,
@@ -164,7 +161,7 @@ export function checkTemplateNameExists(
   templateId?: string
 ) {
   return request({
-    url: `/api/v1/code-tp/templateName/exists`,
+    url: `/v1/code-tp/templateName/exists`,
     method: 'post',
     data: {
       templateId,
@@ -184,7 +181,7 @@ export function updateTemplateName(
   templateName: string
 ): AxiosPromise<Boolean> {
   return request({
-    url: `/api/v1/code-tp/templateName/update`,
+    url: `/v1/code-tp/templateName/update`,
     method: 'put',
     data: { templateName, templateId },
   })
@@ -199,7 +196,7 @@ export function deleteCodeGenerationTemplate(
   templateId: string
 ): AxiosPromise<Boolean> {
   return request({
-    url: `/api/v1/code-tp/${templateId}/delete`,
+    url: `/v1/code-tp/${templateId}/delete`,
     method: 'delete',
   })
 }
@@ -214,7 +211,7 @@ export function updateCodeGenerationTemplateOfPartition(
   param: PartitionTempate
 ): AxiosPromise<Boolean> {
   return request({
-    url: `/api/v1/code-tp/partition/update`,
+    url: `/v1/code-tp/partition/update`,
     method: 'put',
     data: { ...param },
   })
@@ -232,7 +229,7 @@ export function getTemplateTableFieldColumnList(
   param: TableFieldColumnParam
 ): AxiosPromise<TableFieldColumn[]> {
   return request({
-    url: `/api/v1/code-tp/${templateId}/${codeType}/table/column/fields`,
+    url: `/v1/code-tp/${templateId}/${codeType}/table/column/fields`,
     method: 'post',
     data: { ...param },
   })
@@ -246,7 +243,7 @@ export function getTemplateTableFieldColumnList(
  */
 export function exportTemplate(templateId: string): AxiosPromise {
   return request({
-    url: `/api/v1/code-tp/file/export?templateId=${templateId}`,
+    url: `/v1/code-tp/file/export?templateId=${templateId}`,
     method: 'get',
     responseType: 'stream',
     headers: { 'Content-Type': 'application/json; application/octet-stream' },
@@ -260,7 +257,7 @@ export function exportTemplate(templateId: string): AxiosPromise {
  */
 export function uploadTemplate(data: any): AxiosPromise<String> {
   return request({
-    url: `/api/v1/code-tp/file/upload`,
+    url: `/v1/code-tp/file/upload`,
     method: 'post',
     data: data,
     headers: { 'Content-Type': 'multipart/form-data' },
@@ -275,7 +272,7 @@ export function uploadTemplate(data: any): AxiosPromise<String> {
  */
 export function saveUploadTemplate(data: any): AxiosPromise<String> {
   return request({
-    url: `/api/v1/code-tp/file/upload/save`,
+    url: `/v1/code-tp/file/upload/save`,
     method: 'post',
     data: data,
   })

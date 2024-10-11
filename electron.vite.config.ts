@@ -2,7 +2,7 @@
 
 import vue from '@vitejs/plugin-vue'
 import { resolve } from 'path'
-import fs from 'fs'
+import { readdirSync, access } from 'fs'
 import {
   defineConfig,
   loadEnv,
@@ -28,7 +28,7 @@ import UnoCSS from 'unocss/vite'
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const pathSrc = resolve(__dirname, 'src/renderer/src')
 export default ({ command, mode }) => {
-  console.debug('command', command, 'mode', mode)
+  console.info('command', command, 'mode', mode)
   const env = loadEnv(mode, process.cwd(), '')
   const optimizeDepsElementPlusIncludes = [
     'element-plus/es',
@@ -37,8 +37,8 @@ export default ({ command, mode }) => {
     '@codemirror/theme-one-dark',
     '@codemirror/lang-javascript',
   ]
-  fs.readdirSync('node_modules/element-plus/es/components').map((dirname) => {
-    fs.access(
+  readdirSync('node_modules/element-plus/es/components').map((dirname) => {
+    access(
       `node_modules/element-plus/es/components/${dirname}/style/css.mjs`,
       (err) => {
         if (!err) {
@@ -53,18 +53,30 @@ export default ({ command, mode }) => {
     main: {
       envPrefix: 'M_VITE_',
       plugins: [externalizeDepsPlugin(), swcPlugin()],
+      build: {
+        reportCompressedSize: false,
+        lib: {
+          entry: ['src/main/index.ts'],
+        },
+      },
     },
     preload: {
       envPrefix: 'PRE_VITE_',
       build: {
+        reportCompressedSize: false,
         lib: {
-          entry: ['src/preload/init.ts', 'src/preload/index.ts'],
+          entry: ['src/preload/index.ts'],
         },
       },
       plugins: [externalizeDepsPlugin()],
     },
     renderer: {
+      base: './',
+      publicDir: 'assets',
       envPrefix: 'RD_VITE_',
+      build: {
+        reportCompressedSize: false,
+      },
       resolve: {
         alias: {
           '@': resolve(__dirname, 'src/renderer/src'),

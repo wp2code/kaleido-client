@@ -159,7 +159,7 @@ const save = async () => {
       </div>
       <div>
         <div>
-          <div class="box-lable">应用模板配置：</div>
+          <div class="box-lable">应用模板：</div>
           <div>
             <el-cascader-panel
               v-model="applyTemplteList"
@@ -203,8 +203,7 @@ const save = async () => {
     display: flex;
   }
   .box-lable {
-    font-weight: 700;
-    font-size: medium;
+    font-weight: 600;
     margin-top: 10px;
   }
 }

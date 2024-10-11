@@ -17,7 +17,7 @@ import request from '../request'
  */
 export function addDataSource(data: DataSource) {
   return request({
-    url: '/api/v1/datasource/add',
+    url: '/v1/datasource/add',
     method: 'post',
     data: data,
   })
@@ -33,7 +33,7 @@ export function updateDataSource(
   data: DataSource
 ): AxiosPromise<Boolean> {
   return request({
-    url: '/api/v1/datasource/' + id + '/update',
+    url: '/v1/datasource/' + id + '/update',
     method: 'put',
     data: data,
   })
@@ -47,7 +47,7 @@ export function listDataSource(
   queryParams?: DataSourceQuery
 ): AxiosPromise<DataSource[]> {
   return request({
-    url: '/api/v1/datasource/list',
+    url: '/v1/datasource/list',
     method: 'post',
     data: queryParams || {},
   })
@@ -59,7 +59,7 @@ export function listDataSource(
  */
 export function getDataSourceDetail(id: string): AxiosPromise<DataSource> {
   return request({
-    url: '/api/v1/datasource/' + id + '/get',
+    url: '/v1/datasource/' + id + '/get',
     method: 'get',
   })
 }
@@ -70,7 +70,7 @@ export function getDataSourceDetail(id: string): AxiosPromise<DataSource> {
  */
 export function deleteDataSource(id: string) {
   return request({
-    url: '/api/v1/datasource/' + id + '/delete',
+    url: '/v1/datasource/' + id + '/delete',
     method: 'delete',
   })
 }
@@ -82,7 +82,7 @@ export function deleteDataSource(id: string) {
  */
 export function getDataSourceMeta(id: string): AxiosPromise<DataSourceMeta> {
   return request({
-    url: `/api/v1/datasource/meta/${id}/info`,
+    url: `/v1/datasource/meta/${id}/info`,
     method: 'get',
   })
 }
@@ -93,7 +93,7 @@ export function getDataSourceMeta(id: string): AxiosPromise<DataSourceMeta> {
  */
 export function getDataSourceMetaAll(id: string): AxiosPromise<DataSourceMeta> {
   return request({
-    url: `/api/v1/datasource/meta/${id}/all/info`,
+    url: `/v1/datasource/meta/${id}/all/info`,
     method: 'get',
   })
 }
@@ -104,7 +104,7 @@ export function getDataSourceMetaAll(id: string): AxiosPromise<DataSourceMeta> {
  */
 export function connectTestDataSource(data: DataSource): AxiosPromise<Boolean> {
   return request({
-    url: '/api/v1/datasource/test/connect',
+    url: '/v1/datasource/test/connect',
     method: 'post',
     data: data,
   })
@@ -120,25 +120,50 @@ export function openConnectDataSource(
   id: string
 ): AxiosPromise<ConnectionData> {
   return request({
-    url: `/api/v1/datasource/connect/${id}/open`,
+    url: `/v1/datasource/connect/${id}/open`,
     method: 'get',
   })
 }
 /**
- *  关闭连接
+ * 校验是否打开连接
+ *
+ * @param id
+ * @returns
+ */
+export function checkConnectDataSourceIsOpen(id: string): AxiosPromise<string> {
+  return request({
+    url: `/v1/datasource/connect/${id}/checkOpen`,
+    method: 'get',
+  })
+}
+/**
+ *  关闭其它连接
  *
  * @param connectionId
  * @returns
  */
-export function closeConnectDataSource(
+export function closeOtherConnectDataSource(
   connectionId: string
 ): AxiosPromise<Boolean> {
   return request({
-    url: `/api/v1/datasource/connect/${connectionId}/close`,
+    url: `/v1/datasource/connect/other/${connectionId}/close`,
     method: 'delete',
   })
 }
-
+/**
+ *  关闭当前连接
+ *
+ * @param connectionId
+ * @returns
+ */
+export function closeCurrentConnectDataSource(
+  connectionId: string
+): AxiosPromise<Boolean> {
+  return request({
+    url: `/v1/datasource/connect/current/${connectionId}/close`,
+    method: 'delete',
+  })
+}
 /**
  * 打开数据库
  *
@@ -151,7 +176,7 @@ export function openDataBase(
   databaseName: string
 ): AxiosPromise<Database> {
   return request({
-    url: `/api/v1/datasource/db/${connectionId}/${databaseName}/open`,
+    url: `/v1/datasource/db/${connectionId}/${databaseName}/open`,
     method: 'get',
   })
 }
@@ -167,7 +192,7 @@ export function closeDataBase(
   databaseName: string
 ): AxiosPromise<Boolean> {
   return request({
-    url: `/api/v1/datasource/db/${connectionId}/${databaseName}/close`,
+    url: `/v1/datasource/db/${connectionId}/${databaseName}/close`,
     method: 'delete',
   })
 }
@@ -181,7 +206,7 @@ export function getDataSourceByConnectionId(
   connectionId: string
 ): AxiosPromise<DataSource> {
   return request({
-    url: `/api/v1/datasource/connection/${connectionId}`,
+    url: `/v1/datasource/connection/${connectionId}`,
     method: 'get',
   })
 }
@@ -196,7 +221,7 @@ export function getTableFieldColumnList(
   param: TableFieldColumnParam
 ): AxiosPromise<TableFieldColumn[]> {
   return request({
-    url: `/api/v1/datasource/table/column/fields`,
+    url: `/v1/datasource/table/column/fields`,
     method: 'post',
     data: { ...param },
   })

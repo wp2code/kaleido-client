@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useSettingsStore } from '@/store/modules/settings'
-import defaultLogo from '@/assets/logo/logo.png'
+import defaultLogo from '@/assets/logo/icon.ico'
 import { isValidHttpUrl } from '@/utils'
 const settingsStore = useSettingsStore()
 

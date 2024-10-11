@@ -95,7 +95,6 @@ const initBuildCodePrams = () => {
 const initBuildXmlCodeParams = () => {
   return [
     'insertSelective',
-    'insertOrUpdate',
     'insertOrUpdateSelective',
     'updateByPrimaryKey',
     'updateByPrimaryKeySelective',
@@ -107,7 +106,6 @@ const initBuildXmlCodeParams = () => {
 const initBuildMapperCodeParams = () => {
   return [
     'insertSelective',
-    'insertOrUpdate',
     'insertOrUpdateSelective',
     'updateByPrimaryKey',
     'updateByPrimaryKeySelective',

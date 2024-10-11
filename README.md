@@ -1,6 +1,6 @@
 <!-- @format -->
 
-# devbox
+# Kaleido
 
 An Electron application with Vue and TypeScript
 

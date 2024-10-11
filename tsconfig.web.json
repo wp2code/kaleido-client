@@ -22,7 +22,7 @@
     "types": ["vite/client", "element-plus/global.d.ts", "unplugin-icons/types/vue"],
     "skipLibCheck": true /* Skip type checking all .d.ts files. */,
     "allowSyntheticDefaultImports": true /* 允许默认导入 */,
-    "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */
+    "forceConsistentCasingInFileNames": true, /* Ensure that casing is correct in imports. */
   },
   "include": [
     "src/renderer/src/env.d.ts",

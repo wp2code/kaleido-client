@@ -5,10 +5,10 @@ import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 // export const Layout = () => import("@/layout/components/AppMain/index.vue");
 // 静态路由
 export const constantRoutes: RouteRecordRaw[] = [
-  {
-    path: '/',
-    component: () => import('@/views/welcome/index.vue'),
-  },
+  // {
+  //   path: '/',
+  //   component: () => import('@/views/welcome/index.vue'),
+  // },
   // {
   //   path: '/website',
   //   children: [
@@ -31,22 +31,22 @@ export const constantRoutes: RouteRecordRaw[] = [
       },
     ],
   },
-  {
-    path: '/container',
-    children: [
-      {
-        path: 'container',
-        name: 'container',
-        component: () => import('@/views/container/index.vue'),
-        meta: { title: '容器', icon: 'container' },
-      },
-    ],
-  },
+  // {
+  //   path: '/container',
+  //   children: [
+  //     {
+  //       path: 'container',
+  //       name: 'container',
+  //       component: () => import('@/views/container/index.vue'),
+  //       meta: { title: '容器', icon: 'container' },
+  //     },
+  //   ],
+  // },
   {
     path: '/github',
     children: [
       {
-        path: 'https://www.baidu.com/',
+        path: 'https://github.com/wp2code/kaleido-client',
         redirect: '/github',
         meta: { title: '源码', icon: 'github' },
       },
