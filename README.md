@@ -2,7 +2,7 @@
 
 # Kaleido
 
-An Electron application with Vue and TypeScript
+kaleido工具前端源码 [后端源码](https://github.com/wp2code/kaleido)
 
 ## Recommended IDE Setup
 
