@@ -25,6 +25,7 @@ watchEffect(() => {
   for (let code of codeGenerationList) {
     if (code.codeType === 'ServiceApi') {
       serviceApiCodeView.value.name = code.name
+      serviceApiCodeView.value.nameSuffix = code.nameSuffix
       serviceApiCodeView.value.codeOutPath = code.codeOutPath
       serviceApiCodeView.value.codePath = code.codePath
       serviceApiCodeView.value.packageName = code.packageName
@@ -36,6 +37,7 @@ watchEffect(() => {
     }
     if (code.codeType === 'Service') {
       serviceCodeView.value.name = code.name
+      serviceCodeView.value.nameSuffix = code.nameSuffix
       serviceCodeView.value.codeOutPath = code.codeOutPath
       serviceCodeView.value.codePath = code.codePath
       serviceCodeView.value.packageName = code.packageName

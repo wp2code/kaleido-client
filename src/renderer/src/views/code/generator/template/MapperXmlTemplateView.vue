@@ -7,6 +7,7 @@ import { buildCodeParamsWithCodeView, initBuildXmlCodeParams } from '@/utils/cod
 import { useGenCodeParamStore } from '@/store/modules/cache'
 import CodeTemplateEdit from './CodeTemplateEdit.vue'
 import { TriggerWatch } from '../../keys'
+import { debounce } from 'lodash-es'
 const props = defineProps({
   data: {
     type: Object as PropType<XmlCodeView>,
@@ -59,8 +60,11 @@ watchEffect(() => {
 watch(
   [
     () => xmlCodeView.value.name,
+    () => xmlCodeView.value.nameSuffix,
     () => xmlCodeView.value.useMybatisPlus,
     () => xmlCodeView.value.namespace,
+    () => xmlCodeView.value.sourceFolder,
+    () => xmlCodeView.value.codeOutPath,
     () => xmlCodeView.value.packageName,
     () => xmlCodeView.value.methodList,
   ],
@@ -70,7 +74,7 @@ watch(
     }
   }
 )
-const refreshGenCode = (directUseTemplateConfig: boolean) => {
+const refreshGenCode = debounce((directUseTemplateConfig: boolean) => {
   const entityCodeParam = useGenCodeParam.getCodeParamCache('Entity')
   const mapperCodeParam = useGenCodeParam.getCodeParamCache('Mapper')
   const p = buildCodeParamsWithCodeView([xmlCodeView.value], props.tableData)
@@ -91,12 +95,14 @@ const refreshGenCode = (directUseTemplateConfig: boolean) => {
       XmlCodeView.replace(res.data.codeGenerationList[0], xmlCodeView.value)
     }
   })
-}
+}, 300)
 const editTemlateSuccess = (template: PartitionTempate) => {
+  console.log('template', template)
   xmlCodeView.value = Object.assign(xmlCodeView.value, {
     ...template,
     name: xmlCodeView.value.name,
   })
+  xmlCodeView.value.name = null
 }
 const clickMethod = () => {
   methodVisible.value = true
@@ -129,7 +135,7 @@ const toEditTemplate = () => {
         <el-link type="primary" @click="toEditTemplate()">编辑模板</el-link>
         <CodeTemplateEdit
           v-if="templateEditVisible"
-          v-model:visible="templateEditVisible"
+          v-model:is-show="templateEditVisible"
           :template-id="templateId"
           title="Xml模板"
           type="Xml"

@@ -5,6 +5,7 @@ import {
   DataSourceQuery,
   ConnectionData,
   TableFieldColumnParam,
+  TableDDLParam,
 } from './types'
 import { TableFieldColumn } from '../code/types'
 import { AxiosPromise } from 'axios'
@@ -222,6 +223,20 @@ export function getTableFieldColumnList(
 ): AxiosPromise<TableFieldColumn[]> {
   return request({
     url: `/v1/datasource/table/column/fields`,
+    method: 'post',
+    data: { ...param },
+  })
+}
+
+/**
+ * 获取表DDL
+ *
+ * @param connectionId
+ * @returns
+ */
+export function getTableDDL(param: TableDDLParam): AxiosPromise<string> {
+  return request({
+    url: `/v1/datasource/meta/table/ddl`,
     method: 'post',
     data: { ...param },
   })

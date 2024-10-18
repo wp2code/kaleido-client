@@ -6,6 +6,7 @@ import { buildCodeParamsWithCodeView } from '@/utils/codeUtil'
 import { useGenCodeParamStore } from '@/store/modules/cache'
 import CodeTemplateEdit from './CodeTemplateEdit.vue'
 import { TriggerWatch } from '../../keys'
+import { debounce } from 'lodash-es'
 const props = defineProps({
   data: {
     type: Object as PropType<ServiceApiCodeView>,
@@ -30,6 +31,7 @@ const editTemlateSuccess = (template: PartitionTempate) => {
     ...template,
     name: serviceApiCodeView.value.name,
   })
+  serviceApiCodeView.value.name = null
 }
 watchEffect(() => {
   serviceApiCodeView.value = props.data
@@ -38,8 +40,11 @@ watchEffect(() => {
 watch(
   [
     () => serviceApiCodeView.value.name,
+    () => serviceApiCodeView.value.nameSuffix,
     () => serviceApiCodeView.value.useMybatisPlus,
     () => serviceApiCodeView.value.superclassName,
+    () => serviceApiCodeView.value.sourceFolder,
+    () => serviceApiCodeView.value.codeOutPath,
     () => serviceApiCodeView.value.packageName,
   ],
   (_nv, _ov) => {
@@ -48,7 +53,7 @@ watch(
     }
   }
 )
-const refreshGenCode = (directUseTemplateConfig: boolean) => {
+const refreshGenCode = debounce((directUseTemplateConfig: boolean) => {
   const p = buildCodeParamsWithCodeView([serviceApiCodeView.value], props.tableData)
   if (serviceApiCodeView.value.useMybatisPlus == true) {
     const entityCodeParam = useGenCodeParam.getCodeParamCache('Entity')
@@ -67,7 +72,7 @@ const refreshGenCode = (directUseTemplateConfig: boolean) => {
       ServiceApiCodeView.replace(res.data.codeGenerationList[0], serviceApiCodeView.value)
     }
   })
-}
+}, 300)
 const handleOpenMenu = async () => {
   const filePath = await window.winApi.openDirDialog()
   if (filePath) {
@@ -86,7 +91,7 @@ const toEditTemplate = () => {
         <el-link type="primary" @click="toEditTemplate()">编辑模板</el-link>
         <CodeTemplateEdit
           v-if="templateEditVisible"
-          v-model:visible="templateEditVisible"
+          v-model:is-show="templateEditVisible"
           :template-id="templateId"
           title="ServiceApi模板"
           type="ServiceApi"

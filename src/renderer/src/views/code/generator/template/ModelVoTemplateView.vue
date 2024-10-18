@@ -14,6 +14,7 @@ import { ElTable } from 'element-plus'
 import MessageBox from '@/utils/MessageBox'
 import CodeTemplateEdit from './CodeTemplateEdit.vue'
 import { TriggerWatch } from '../../keys'
+import { debounce } from 'lodash-es'
 const props = defineProps({
   data: {
     type: Object as PropType<VoCodeView>,
@@ -75,6 +76,7 @@ const editTemlateSuccess = (template: PartitionTempate) => {
     })
     voCodeParams.value.tableFieldColumnMap = tableFieldColumns
   })
+  voCodeParams.value.name = null
 }
 watchEffect(() => {
   voCodeParams.value = props.data
@@ -86,6 +88,9 @@ watch(
     () => voCodeParams.value.useLombok,
     () => voCodeParams.value.useSwagger,
     () => voCodeParams.value.name,
+    () => voCodeParams.value.nameSuffix,
+    () => voCodeParams.value.sourceFolder,
+    () => voCodeParams.value.codeOutPath,
     () => voCodeParams.value.superclassName,
     () => voCodeParams.value.packageName,
     () => voCodeParams.value.tableFieldColumnMap,
@@ -96,7 +101,7 @@ watch(
     }
   }
 )
-const refreshGenCode = (directUseTemplateConfig: boolean) => {
+const refreshGenCode = debounce((directUseTemplateConfig: boolean) => {
   previewCode(
     props.templateInfo.id,
     props.tableData.dataSource?.id,
@@ -108,7 +113,7 @@ const refreshGenCode = (directUseTemplateConfig: boolean) => {
       VoCodeView.replace(res.data.codeGenerationList[0], voCodeParams.value)
     }
   })
-}
+}, 300)
 const clickFieldMap = () => {
   fieldVisible.value = true
   nextTick(() => {
@@ -182,7 +187,7 @@ const toEditTemplate = () => {
         <el-link type="primary" @click="toEditTemplate()">编辑模板</el-link>
         <CodeTemplateEdit
           v-if="templateEditVisible"
-          v-model:visible="templateEditVisible"
+          v-model:is-show="templateEditVisible"
           :template-id="templateId"
           title="VO模板"
           type="VO"

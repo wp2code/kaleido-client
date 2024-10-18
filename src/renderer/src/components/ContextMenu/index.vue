@@ -3,9 +3,9 @@
     <slot></slot>
     <Teleport to="body">
       <Transition
-        @beforeEnter="handleBeforeEnter"
+        @before-enter="handleBeforeEnter"
         @enter="handleEnter"
-        @afterEnter="handleAfterEnter"
+        @after-enter="handleAfterEnter"
       >
         <div
           v-if="showMenu"
@@ -15,12 +15,12 @@
           <div class="menu-list">
             <div
               v-for="(item, _i) in menu"
-              :key="item.name"
+              :key="item?.name"
               class="menu-item"
               @click="handleClick(item)"
             >
               <svg aria-hidden="true" style="width: 14px; height: 14px" color="red">
-                <use :href="`#icon-${item.icon}`" />
+                <use :href="`#icon-${item?.icon}`" />
               </svg>
               <!-- <svg
                 :class="{ 'is-active': isActive }"
@@ -36,7 +36,7 @@
                 />
               </svg> -->
 
-              {{ item.name }}
+              {{ item?.name }}
             </div>
           </div>
         </div>
@@ -44,16 +44,20 @@
     </Teleport>
   </div>
 </template>
-<script setup>
+<script lang="ts" setup>
 import { ref } from 'vue'
-import useContextMenu from './useContextMenu.ts'
+import useContextMenu from './useContextMenu'
+interface MenuInfo {
+  icon?: string
+  name: string
+}
 const props = defineProps({
   data: {
     type: Object,
     default: () => {},
   },
   menu: {
-    type: Array,
+    type: Array<MenuInfo>,
     default: () => [],
   },
 })

@@ -1,5 +1,5 @@
 <template>
-  <el-dialog v-model="visible" draggable append-to-body :title="titleText">
+  <el-dialog v-model="isShow" draggable append-to-body :title="titleText">
     <el-form :model="template" label-width="auto" style="max-width: 600px">
       <el-form-item v-if="type != 'Xml'" label="父类">
         <el-input v-model="template!.superclassName" />
@@ -9,6 +9,9 @@
       </el-form-item>
       <el-form-item label="包路径">
         <el-input v-model="template!.sourceFolder" />
+      </el-form-item>
+      <el-form-item label="类名称后缀">
+        <el-input v-model="template!.nameSuffix" />
       </el-form-item>
       <el-form-item label="代码地址">
         <el-tooltip
@@ -60,7 +63,11 @@ import {
 } from '@/api/code/index'
 import { PartitionTempate } from '@/api/code/types'
 import MessageBox from '@/utils/MessageBox'
-const visible = defineModel('visible')
+const isShow = defineModel('isShow', {
+  type: Boolean,
+  required: true,
+  default: true,
+})
 const emits = defineEmits<{
   success: [template: PartitionTempate]
 }>()
@@ -107,7 +114,7 @@ const handleOpenMenu = async () => {
   }
 }
 const cancel = () => {
-  visible.value = false
+  isShow.value = false
 }
 const save = async () => {
   if (modelFields.value && modelFields.value.length > 0) {

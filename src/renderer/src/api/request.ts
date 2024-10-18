@@ -7,7 +7,7 @@ const Logout = debounce((fullPath) => {
   localStorage.clear()
   window.location.href = fullPath
 }, 600)
-const _BASEURL = import.meta.env.RD_VITE_API_HOST
+const _BASEURL = window._BaseURL || import.meta.env.RD_VITE_API_HOST
 axios.defaults.baseURL = _BASEURL
 // 创建 axios 实例
 const requestInstance = axios.create({

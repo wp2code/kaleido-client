@@ -6,6 +6,7 @@ import { buildCodeParamsWithCodeView } from '@/utils/codeUtil'
 import { useGenCodeParamStore } from '@/store/modules/cache'
 import CodeTemplateEdit from './CodeTemplateEdit.vue'
 import { TriggerWatch } from '../../keys'
+import { debounce } from 'lodash-es'
 const props = defineProps({
   data: {
     type: Object as PropType<CodeGenerationResult>,
@@ -26,6 +27,7 @@ const editTemlateSuccess = (template: PartitionTempate) => {
     ...template,
     name: webCodeView.value.name,
   })
+  webCodeView.value.name = null
 }
 watchEffect(() => {
   templateId.value = props.data.templateInfo ? props.data.templateInfo!.id : ''
@@ -49,9 +51,12 @@ watchEffect(() => {
 watch(
   [
     () => webCodeView.value.name,
+    () => webCodeView.value.nameSuffix,
     () => webCodeView.value.useSwagger,
     () => webCodeView.value.useMybatisPlus,
     () => webCodeView.value.superclassName,
+    () => webCodeView.value.sourceFolder,
+    () => webCodeView.value.codeOutPath,
     () => webCodeView.value.packageName,
   ],
   (_nv, _ov) => {
@@ -60,7 +65,7 @@ watch(
     }
   }
 )
-const refreshGenCode = (directUseTemplateConfig: boolean) => {
+const refreshGenCode = debounce((directUseTemplateConfig: boolean) => {
   const serviceApiCodeParam = useGenCodeParam.getCodeParamCache('ServiceApi')
   const voCodeParam = useGenCodeParam.getCodeParamCache('VO')
   const p = buildCodeParamsWithCodeView([webCodeView.value], props.tableData)
@@ -81,7 +86,7 @@ const refreshGenCode = (directUseTemplateConfig: boolean) => {
       WebCodeView.replace(res.data.codeGenerationList[0], webCodeView.value)
     }
   })
-}
+}, 300)
 const handleOpenMenu = async () => {
   const filePath = await window.winApi.openDirDialog()
   if (filePath) {
@@ -99,7 +104,7 @@ const toEditTemplate = () => {
         <el-link type="primary" @click="toEditTemplate()">编辑模板</el-link>
         <CodeTemplateEdit
           v-if="templateEditVisible"
-          v-model:visible="templateEditVisible"
+          v-model:is-show="templateEditVisible"
           :template-id="templateId"
           title="Controller模板"
           type="Controller"

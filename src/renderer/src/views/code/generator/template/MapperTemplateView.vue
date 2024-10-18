@@ -6,6 +6,7 @@ import { buildCodeParamsWithCodeView, initBuildMapperCodeParams } from '@/utils/
 import { useGenCodeParamStore } from '@/store/modules/cache'
 import CodeTemplateEdit from './CodeTemplateEdit.vue'
 import { TriggerWatch } from '../../keys'
+import { debounce } from 'lodash-es'
 const props = defineProps({
   data: {
     type: Object as PropType<MapperCodeView>,
@@ -50,8 +51,11 @@ watchEffect(() => {
 watch(
   [
     () => mapperCodeView.value.name,
+    () => mapperCodeView.value.nameSuffix,
     () => mapperCodeView.value.useMybatisPlus,
     () => mapperCodeView.value.superclassName,
+    () => mapperCodeView.value.sourceFolder,
+    () => mapperCodeView.value.codeOutPath,
     () => mapperCodeView.value.packageName,
     () => mapperCodeView.value.methodList,
   ],
@@ -66,8 +70,9 @@ const editTemlateSuccess = (template: PartitionTempate) => {
     ...template,
     name: mapperCodeView.value.name,
   })
+  mapperCodeView.value.name = null
 }
-const refreshGenCode = (directUseTemplateConfig: boolean) => {
+const refreshGenCode = debounce((directUseTemplateConfig: boolean) => {
   const entityCodeParam = useGenCodeParam.getCodeParamCache('Entity')
   const p = buildCodeParamsWithCodeView([mapperCodeView.value], props.tableData)
   if (entityCodeParam) {
@@ -81,10 +86,10 @@ const refreshGenCode = (directUseTemplateConfig: boolean) => {
     ['Mapper']
   ).then((res) => {
     if (res.data.codeGenerationList) {
-      mapperCodeView.value.templateCode = res.data.codeGenerationList[0].templateCode
+      MapperCodeView.replace(res.data.codeGenerationList[0], mapperCodeView.value)
     }
   })
-}
+}, 300)
 const clickMethod = () => {
   methodVisible.value = true
 }
@@ -117,7 +122,7 @@ const toEditTemplate = () => {
         <el-link type="primary" @click="toEditTemplate()">编辑模板</el-link>
         <CodeTemplateEdit
           v-if="templateEditVisible"
-          v-model:visible="templateEditVisible"
+          v-model:is-show="templateEditVisible"
           :template-id="templateId"
           title="Mapper模板"
           type="Mapper"

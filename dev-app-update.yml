@@ -1,5 +1,5 @@
 # @format
 
 provider: generic
-url: https://example.com/auto-updates
+url: http://localhost:1027/
 updaterCacheDirName: Kaleido-updater

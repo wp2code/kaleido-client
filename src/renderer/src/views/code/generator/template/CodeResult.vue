@@ -36,7 +36,6 @@ const openClick = async (item) => {
 }
 </script>
 <template>
-  <el-divider>结果</el-divider>
   <el-table :data="codeResultData" border style="width: 100%">
     <el-table-column prop="name" label="代码名称" width="200" show-overflow-tooltip />
     <el-table-column prop="fileSuffix" label="文件后缀" width="100" />

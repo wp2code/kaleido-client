@@ -39,7 +39,7 @@ function handleReady(payload: any) {
   emits('ready', payload)
 }
 const handleCopy = async () => {
-  if (codeValue) {
+  if (codeValue.value && codeValue.value != '') {
     await window.winApi.copy(codeValue.value)
     MessageBox.ok('复制成功')
   }
@@ -77,7 +77,7 @@ watchEffect(() => {
       @mouseover.prevent
       @mouseout.prevent
       @click="handleCopy()"
-      >Copy</el-button
+      >复制</el-button
     >
     <Codemirror
       ref="codemirror"
@@ -98,8 +98,6 @@ watchEffect(() => {
 :deep() {
   .v-codemirror {
     .cm-editor .cm-scroller {
-      // min-height: 580px;
-      // max-height: 70vh;
       min-height: 500px;
       max-height: 70vh;
     }
@@ -114,11 +112,11 @@ watchEffect(() => {
     right: 1px;
     top: 1px;
     z-index: 100;
-    color: #cdd0d6;
+    color: #ddd;
     background-color: transparent;
   }
   .btn-copy:hover {
-    background-color: #e6e8eb;
+    background-color: #ddd;
     color: #303133;
     border-color: #303133;
   }

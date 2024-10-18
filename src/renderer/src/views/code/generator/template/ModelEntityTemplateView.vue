@@ -15,6 +15,7 @@ import { buildCodeParamsWithCodeView } from '@/utils/codeUtil'
 import MessageBox from '@/utils/MessageBox'
 import CodeTemplateEdit from './CodeTemplateEdit.vue'
 import { TriggerWatch } from '../../keys'
+import { debounce } from 'lodash-es'
 const props = defineProps({
   data: {
     type: Object as PropType<EntityCodeView>,
@@ -36,9 +37,6 @@ const props = defineProps({
     required: true,
   },
 })
-const emits = defineEmits<{
-  genCode: [param: EntityCodeView]
-}>()
 const canTriggerWatch = inject(TriggerWatch) as Ref
 const selectTableFieldColumn = ref<TableFieldColumn[]>()
 const tableFieldColumnData = ref<TableFieldColumn[]>()
@@ -79,9 +77,12 @@ watch(
   [
     () => entityCodeParams.value.useLombok,
     () => entityCodeParams.value.codePath,
+    () => entityCodeParams.value.nameSuffix,
     () => entityCodeParams.value.name,
     () => entityCodeParams.value.useMybatisPlus,
     () => entityCodeParams.value.useSwagger,
+    () => entityCodeParams.value.sourceFolder,
+    () => entityCodeParams.value.codeOutPath,
     () => entityCodeParams.value.superclassName,
     () => entityCodeParams.value.packageName,
     () => entityCodeParams.value.tableFieldColumnMap,
@@ -110,9 +111,10 @@ const editTemlateSuccess = (template: PartitionTempate) => {
       name: entityCodeParams.value.name,
     })
     entityCodeParams.value.tableFieldColumnMap = tableFieldColumns
+    entityCodeParams.value.name = null
   })
 }
-const refreshGenCode = (directUseTemplateConfig: boolean) => {
+const refreshGenCode = debounce((directUseTemplateConfig: boolean) => {
   previewCode(
     props.templateInfo.id,
     props.tableData.dataSource?.id,
@@ -124,7 +126,7 @@ const refreshGenCode = (directUseTemplateConfig: boolean) => {
       EntityCodeView.replace(res.data.codeGenerationList[0], entityCodeParams.value)
     }
   })
-}
+}, 300)
 const clickSelectChange = (row: TableFieldColumn) => {
   tableFieldColumnData.value?.forEach((v) => {
     if (v.column == row.column) {
@@ -189,7 +191,7 @@ const toEditTemplate = () => {
         <el-link type="primary" @click="toEditTemplate()">编辑模板</el-link>
         <CodeTemplateEdit
           v-if="templateEditVisible"
-          v-model:visible="templateEditVisible"
+          v-model:is-show="templateEditVisible"
           :template-id="templateId"
           title="Entity模板"
           type="Entity"

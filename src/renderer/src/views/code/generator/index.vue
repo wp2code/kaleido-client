@@ -33,6 +33,8 @@ import {
 } from '@/utils/codeUtil'
 import MessageBox from '@/utils/MessageBox'
 import IoUtil from '@/utils/IoUtil'
+import { ElLoading } from 'element-plus'
+import { debounce } from 'lodash-es'
 const morMenuList = ref<MoreMenu[]>()
 const selectedCodeParams = ref([])
 const allCodeParams = initBuildCodePrams()
@@ -237,6 +239,10 @@ const toPreviewCode = async (
   firstRequest: boolean
 ) => {
   canTriggerWatch.value = false
+  const loadingInstance = ElLoading.service({
+    target: '.conent',
+    lock: true,
+  })
   await previewCode(templateId, connectionId, firstRequest, params)
     .then((res) => {
       codeGenerationResult.value = res.data
@@ -244,11 +250,12 @@ const toPreviewCode = async (
     })
     .finally(() => {
       nextTick(() => {
+        loadingInstance.close()
         canTriggerWatch.value = true
       })
     })
 }
-const refrshClick = (directUseTemplateConfig: boolean) => {
+const refrshClick = debounce((directUseTemplateConfig: boolean) => {
   tpTablsKey.value = Math.random() + 'TB'
   toPreviewCode(
     selectCodeTemplate.value.id,
@@ -256,7 +263,7 @@ const refrshClick = (directUseTemplateConfig: boolean) => {
     buildCodeParamsWithTemplate(selectCodeTemplate.value, selectDbTableData.value),
     directUseTemplateConfig
   )
-}
+}, 300)
 
 provide(TriggerWatch, canTriggerWatch)
 const onChangeConfig = (value: any) => {
@@ -275,12 +282,16 @@ const openBasicCOnfigDialog = () => {
 const cancel = () => {
   codeVisible.value = false
 }
-const saveGenCode = () => {
+const saveGenCode = async () => {
   if (selectedCodeParams.value.length <= 0) {
     MessageBox.fail('请选择需要生成的代码模板')
     return
   }
-  generationCode(
+  const loadingInstance = ElLoading.service({
+    target: '.code-result',
+    lock: true,
+  })
+  await generationCode(
     selectCodeTemplate.value.id,
     selectDbTableData.value.dataSource?.id,
     buildCodeParamsWithCache(
@@ -289,10 +300,16 @@ const saveGenCode = () => {
       selectedCodeParams.value
     ),
     selectedCodeParams.value
-  ).then((res) => {
-    generationCodeFlag.value = true
-    codeGenerationResult.value = res.data
-  })
+  )
+    .then((res) => {
+      generationCodeFlag.value = true
+      codeGenerationResult.value = res.data
+    })
+    .finally(() => {
+      nextTick(() => {
+        loadingInstance.close()
+      })
+    })
 }
 const handleCheckedAllCodeParamChange = (val: boolean) => {
   let checked = allCodeParams.map((item) => {
@@ -318,6 +335,9 @@ const selectMorMenuItem = (item: any) => {
     item.menu.command(item)
   }
 }
+const refrshBasicConfig = (_data: any) => {
+  refrshClick(true)
+}
 </script>
 <template>
   <box-layout layout="column" size="12%" :show-divider="false">
@@ -335,11 +355,11 @@ const selectMorMenuItem = (item: any) => {
         </div>
         <div>
           <el-row>
-            <el-col :offset="6" :span="2" class="col-center"
-              ><label>模板配置：</label></el-col
-            >
-            <el-col :span="6">
-              <div>
+            <el-col :offset="6" :span="12">
+              <div class="header-select">
+                <div>
+                  <label>代码模板：</label>
+                </div>
                 <el-select
                   :key="selectCTKey"
                   v-model="selectCodeTemplate"
@@ -356,10 +376,6 @@ const selectMorMenuItem = (item: any) => {
                     <span style="float: left">{{ item.templateName }}</span>
                   </el-option>
                 </el-select>
-              </div>
-            </el-col>
-            <el-col :span="1" class="col-center col-margin-left">
-              <div>
                 <el-dropdown hide-on-click trigger="click" @command="selectMorMenuItem">
                   <el-icon><Tools /></el-icon>
                   <template #dropdown>
@@ -377,12 +393,13 @@ const selectMorMenuItem = (item: any) => {
                 </el-dropdown>
               </div>
             </el-col>
-            <el-col :span="2" class="col-center">
+            <el-col :offset="1" :span="2" class="col-center">
               <BasicConfig
                 v-if="basicConfigVisible == true"
-                v-model:visible="basicConfigVisible"
+                v-model:is-show="basicConfigVisible"
                 :data="basicConfigInfo"
                 :code-template-list="allCodeTemplateList"
+                @refresh="refrshBasicConfig"
               />
               <el-link class="lable-text" @click.stop="openBasicCOnfigDialog()"
                 >全局配置</el-link
@@ -468,18 +485,28 @@ const selectMorMenuItem = (item: any) => {
               {{ param.description }}
             </el-checkbox>
           </el-checkbox-group>
-          <CodeResult
-            v-if="
-              generationCodeFlag == true &&
-              codeGenerationResult.codeGenerationList.length > 0
-            "
-            :data="codeGenerationResult"
-          />
+          <div class="code-result">
+            <el-divider>结果</el-divider>
+            <CodeResult
+              v-if="
+                generationCodeFlag == true &&
+                codeGenerationResult.codeGenerationList.length > 0
+              "
+              :data="codeGenerationResult"
+            />
+          </div>
         </div>
         <template #footer>
           <span class="dialog-footer">
             <el-button @click="cancel()">取消</el-button>
-            <el-button type="primary" @click="saveGenCode()"> 确认 </el-button>
+            <el-button type="primary" @click="saveGenCode()">
+              {{
+                generationCodeFlag == true &&
+                codeGenerationResult.codeGenerationList.length > 0
+                  ? '重新生成'
+                  : '确认'
+              }}
+            </el-button>
           </span>
         </template>
       </el-dialog>
@@ -493,12 +520,22 @@ const selectMorMenuItem = (item: any) => {
   & > :first-child {
     padding: 0.2rem 0 0.8rem 0.2rem;
   }
+  .header-select {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    & > :first-child {
+      width: 100px;
+    }
+    & > :last-child {
+      padding-left: 0.2rem;
+    }
+  }
 }
 .col-center {
-  margin-top: 0.5rem;
-}
-.col-margin-left {
-  margin-left: 0.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .conent {
   background-color: #fff;
@@ -507,7 +544,7 @@ const selectMorMenuItem = (item: any) => {
   padding: 5px;
 }
 .lable-text {
-  color: #fff;
+  color: #ddd;
 }
 .bottom {
   position: absolute;

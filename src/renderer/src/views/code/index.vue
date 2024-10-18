@@ -16,7 +16,7 @@ import {
 const componentName = ref()
 const componentParams = ref()
 const componentKey = ref()
-const dbTablePanelKey = ref()
+const dbTablePanelKey = ref('dbTable')
 const selectDbTableData = ref<SelectDataTableData>(new SelectDataTableData(null, null))
 const selectDbConfigData = ref<DbConfig>()
 const useGenCodeParam = useGenCodeParamStore()
@@ -36,18 +36,24 @@ const toAddConnect = () => {
 }
 
 //选择数据库连接
-const selectDbConfig = (item: any, isEdit: boolean, isRefresh: boolean) => {
-  if (isEdit) {
+const selectDbConfig = (item: any, event: string, isRefresh: boolean) => {
+  if (event == 'edit') {
     componentKey.value = 'CF_' + new Date()
     componentName.value = DbConnectionBox
     componentParams.value = item
     if (isRefresh) {
       initDbTablePanel()
     }
-  } else {
+  } else if (event == 'connect') {
     dbTablePanelKey.value = item?.id
     selectDbConfigData.value = item
     if (isRefresh) {
+      componentName.value = null
+      componentKey.value = 'INI_' + new Date()
+    }
+  } else if (event == 'refresh') {
+    if (isRefresh) {
+      dbTablePanelKey.value = item?.id + new Date()
       componentName.value = null
       componentKey.value = 'INI_' + new Date()
     }

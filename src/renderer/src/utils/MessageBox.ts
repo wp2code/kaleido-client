@@ -3,11 +3,14 @@ import {
   ElMessage,
   ElNotification,
   messageType,
+  Action,
 } from 'element-plus'
 
 export interface MsgBoxOptions {
   ok: Boolean | Promise<Boolean> | Function
+  cancel?: Function
   successMsg?: string
+  duration?: number
   failMsg?: string
   showElMessage?: Boolean
   confirmButtonText?: string
@@ -19,11 +22,15 @@ const showElMessage = (isSuccess: Boolean, options?: MsgBoxOptions) => {
     ElMessage({
       type: 'success',
       message: options['successMsg'],
+      grouping: true,
+      repeatNum: 1,
     })
   } else {
     ElMessage({
       type: 'error',
       message: options['failMsg'],
+      grouping: true,
+      repeatNum: 1,
     })
   }
 }
@@ -64,34 +71,62 @@ class MsgBox {
    *
    * @param msg
    */
-  fail(msg: string = '操作失败') {
-    showElMessage(false, { failMsg: msg } as MsgBoxOptions)
+  fail(msg: string = '操作失败', duration: number = 3000) {
+    showElMessage(false, { failMsg: msg, duration } as MsgBoxOptions)
   }
-  confirm(message: string, options: MsgBoxOptions) {
-    ElMessageBox.confirm(message, '确认', {
+  confirm(message: string, options: MsgBoxOptions, title: string = '确认') {
+    ElMessageBox.confirm(message, title, {
       confirmButtonText: options.confirmButtonText || '确认',
       cancelButtonText: options.cancelButtonText || '取消',
       type: options.type || 'warning',
-    }).then(() => {
-      const okExe = options.ok
-      const isShowElMessage = options.showElMessage || true
-      if (
-        okExe &&
-        Object.prototype.toString.call(okExe) === '[object Promise]'
-      ) {
-        ;(<Promise<Boolean>>okExe).then((res) => {
-          if (isShowElMessage) {
-            showElMessage(res, options)
-          }
-        })
-      } else if (typeof okExe === 'function') {
-        okExe()
-      } else {
-        if (isShowElMessage) {
-          showElMessage(<Boolean>okExe, options)
-        }
-      }
     })
+      .then((action: Action) => {
+        const cancelExe = options.cancel
+        if (action === 'close') {
+          if (typeof cancelExe === 'function') {
+            cancelExe()
+          }
+        }
+        // 这里虽然是取消按钮的回调 上方按钮互换了名称
+        else if (action === 'cancel') {
+          if (typeof cancelExe === 'function') {
+            cancelExe()
+          }
+        } else {
+          const okExe = options.ok
+          const isShowElMessage = options.showElMessage || true
+          if (
+            okExe &&
+            Object.prototype.toString.call(okExe) === '[object Promise]'
+          ) {
+            ;(<Promise<Boolean>>okExe).then((res) => {
+              if (isShowElMessage) {
+                showElMessage(res, options)
+              }
+            })
+          } else if (typeof okExe === 'function') {
+            okExe()
+          } else {
+            if (isShowElMessage) {
+              showElMessage(<Boolean>okExe, options)
+            }
+          }
+        }
+      })
+      .catch((action: Action) => {
+        const cancelExe = options.cancel
+        if (action === 'close') {
+          if (typeof cancelExe === 'function') {
+            cancelExe()
+          }
+        }
+        // 这里虽然是取消按钮的回调 上方按钮互换了名称
+        else if (action === 'cancel') {
+          if (typeof cancelExe === 'function') {
+            cancelExe()
+          }
+        }
+      })
   }
 }
 export default MsgBox.make()

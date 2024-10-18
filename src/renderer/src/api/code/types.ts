@@ -48,6 +48,7 @@ export class PartitionTempate {
   sourceFolder: string
   packageName: string
   codePath?: string
+  nameSuffix?: string
   superclassName?: string
   useLombok?: boolean
   useMybatisPlus?: boolean
@@ -75,6 +76,7 @@ export interface Superclass {
 }
 export abstract class BaseCodeView {
   name: string
+  nameSuffix?: string
   sourceFolder: string
   packageName: string
   templateCode: string
@@ -88,6 +90,7 @@ export abstract class BaseCodeView {
     param.name = this.name
     param.packageName = this.packageName
     param.sourceFolder = this.sourceFolder
+    param.nameSuffix = this.nameSuffix
     return param
   }
 }
@@ -113,6 +116,7 @@ export class MapperCodeView extends BaseCodeView {
     view.packageName = codeView.packageName
     view.codePath = codeView.codePath
     view.name = codeView.name
+    view.nameSuffix = codeView.nameSuffix
     return view
   }
 }
@@ -318,6 +322,7 @@ export class CodeGenerationParam {
   configName: string
   tableName: string
   name: string
+  nameSuffix?: string
   tableComment: string
   templateName: string
   codePath: string
@@ -364,6 +369,7 @@ export interface CodeGenerationResult {
 
 export interface CodeGenerationView {
   name: string
+  nameSuffix?: string
   sourceFolder: string
   codePath: string
   packageName: string

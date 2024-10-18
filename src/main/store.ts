@@ -13,4 +13,26 @@ const setBaseUrl = (baseUrl: string) => {
 const getBaseUrl = (): string => {
   return store.get('baseUrl') as string
 }
-export { store, setWindowBounds, getWindowBounds, setBaseUrl, getBaseUrl }
+const setUpdateVersion = (version: string) => {
+  store.set('Up-version', version)
+}
+const getUpdateVersion = (): string => {
+  return store.get('Up-version') as string
+}
+const setQuitAndInstall = (isQuitAndInstall: boolean = false) => {
+  return store.set('Up-quitAndInstall', isQuitAndInstall)
+}
+const isQuitAndInstall = () => {
+  return (store.get('Up-quitAndInstall') || false) as boolean
+}
+export {
+  store,
+  setWindowBounds,
+  getWindowBounds,
+  setBaseUrl,
+  getBaseUrl,
+  setUpdateVersion,
+  getUpdateVersion,
+  setQuitAndInstall,
+  isQuitAndInstall,
+}

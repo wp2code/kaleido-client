@@ -4,7 +4,7 @@ const isStarted = ref(false)
 onBeforeMount(async () => {
   const timer = setTimeout(() => {
     window.initApi.stopLoading('>>>timer out<<<')
-  }, 2000)
+  }, 10000)
   await window.initApi
     .startServerForSpawn()
     .then((_res) => {

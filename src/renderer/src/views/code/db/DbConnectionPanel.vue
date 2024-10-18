@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import { deleteMenu, editMenu, type IMenu } from '@/utils/MenuOpions'
+import { deleteMenu, editMenu,refreshMenu,type IMenu } from '@/utils/MenuOpions'
 import { listDataSource, deleteDataSource ,checkConnectDataSourceIsOpen,closeCurrentConnectDataSource} from '@/api/datasource/index'
 import { DataSource } from '@/api/datasource/types'
 const { proxy } = getCurrentInstance()
 const list = ref<DataSource[]>([])
 const emits = defineEmits<{
-  select:[dbConfig:DataSource,isEdit:Boolean,isRefresh:Boolean]
+  select:[dbConfig:DataSource,event:String,isRefresh:Boolean]
   refresh:[data:Object,eventName:string]
 }>()
 const activeItemId=ref()
@@ -35,22 +35,27 @@ const selectEditConnect=async (item:any)=>{
       proxy.$msgBoxUtil.confirm('要编辑连接，必须将其关闭 。你确认要继续吗？', {
         ok: () => {
           closeCurrentConnectDataSource(connectionId).then((_res)=>{
-            emits('select', item, true,true)
+            emits('select', item, 'edit',true)
           })
         },
         confirmButtonText:"关闭 & 编辑",
         showElMessage: false
       })
     }else{
-      emits('select', item, true,false)
+      emits('select', item, 'edit',false)
     }
   })
-
+}
+//选择刷新
+const selectRefreshConnect=async (item:any)=>{
+  const isRefresh=activeItemId.value==item.id
+  emits('select', item, 'refresh', isRefresh)
 }
 //选择连接
 const selectToConnect = (item: any) => {
+  const isRefresh=activeItemId.value!=item.id
   activeItemId.value=item.id
-  emits('select', item, false, true)
+  emits('select', item, 'connect', isRefresh)
 }
 //下拉菜单 选择事件
 const selectMorMenuItem = (menu: IMenu) => {
@@ -58,7 +63,6 @@ const selectMorMenuItem = (menu: IMenu) => {
     menu.exeCommand(menu.bindData)
   }
 }
-
 async function queryList(_params?: any) {
     await listDataSource().then(response=>{
     list.value=response.data||[]
@@ -68,7 +72,7 @@ const menuBindData=(menu:IMenu,data:any):IMenu=>{
   menu.bindData=data||{}
   return menu;
 }
-const morMenuList: IMenu[] = [editMenu(selectEditConnect), deleteMenu(selectDeleteConnect)]
+const morMenuList: IMenu[] = [editMenu(selectEditConnect), deleteMenu(selectDeleteConnect),refreshMenu(selectRefreshConnect)]
 onMounted(() => {
   queryList()
 })
@@ -122,11 +126,11 @@ defineExpose({ queryList })
 .panel {
   width: 100%;
   height: 100%;
+  color: #ddd;
 }
 .header {
   font-size: large;
   font-weight: bold;
-  color: #ddd;
   height: 15%;
   z-index: 1;
   padding: 10px 0 0px 10px;
@@ -142,9 +146,10 @@ defineExpose({ queryList })
   padding: 10px 20px;
   overflow: hidden;
   margin-bottom: 10px;
+  width: 100%;
 }
 .item {
-  width: 210px;
+  width: 80%;
   padding: 10px 10px;
   display: flex;
   flex-direction: row;
@@ -158,7 +163,6 @@ defineExpose({ queryList })
     div {
       overflow: hidden;
       text-overflow: ellipsis;
-      color: #ddd;
       margin: 0 4px 0 0;
     }
   }

@@ -20,11 +20,13 @@ interface IProps {
   layout?: 'row' | 'column'
   callback?: Function
   showLine?: boolean
+  dividerColor?: string
 }
 const props = withDefaults(defineProps<IProps>(), {
   showLine: true,
   layout: 'row',
   initSize: '38%',
+  dividerColor: '#ddd',
 })
 // const attrs = useAttrs()
 const VolatileRef = ref<HTMLDivElement | null>(null)
@@ -36,6 +38,9 @@ const dividerLineStyle = computed(() => {
   const style = {}
   style[isRow.value ? 'width' : 'height'] = props.showLine ? '1px' : '0px'
   style['display'] = props.showLine ? 'block' : 'none'
+  if (props.dividerColor) {
+    style['background-color'] = props.dividerColor
+  }
   return style
 })
 onMounted(() => {

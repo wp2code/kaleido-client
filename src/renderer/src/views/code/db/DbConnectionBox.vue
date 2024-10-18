@@ -151,7 +151,7 @@ defineExpose({ cancel })
       text-align: center;
       margin-bottom: 20px;
       font-size: 24px;
-      color: #fff;
+      color: #ddd;
       font-weight: bold;
     }
     .box-panel-btn {

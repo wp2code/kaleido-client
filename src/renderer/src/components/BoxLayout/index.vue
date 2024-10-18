@@ -4,12 +4,14 @@ interface IProps {
   size?: string
   layout?: 'row' | 'column'
   firstBoxStyle?: any
-  showDivider: boolean
+  showDivider?: boolean
+  dividerColor?: string
 }
 const props = withDefaults(defineProps<IProps>(), {
   layout: 'row',
   size: '30%',
   showDivider: true,
+  dividerColor: '#ddd',
 })
 const isRow = computed(() => {
   return props.layout === 'row'
@@ -22,6 +24,13 @@ watchEffect(() => {
     style.value = Object.assign(style.value, { height: props.size })
   }
 })
+const dividerLineStyle = computed(() => {
+  const style = {}
+  if (props.dividerColor) {
+    style['background-color'] = props.dividerColor
+  }
+  return style
+})
 </script>
 
 <template>
@@ -29,7 +38,7 @@ watchEffect(() => {
     <div class="firstBox" :style="style">
       <slot name="first"></slot>
     </div>
-    <div v-if="props.showDivider" class="divider"></div>
+    <div v-if="props.showDivider" class="divider" :style="[dividerLineStyle]"></div>
     <div class="otherBox">
       <slot></slot>
     </div>

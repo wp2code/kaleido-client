@@ -124,7 +124,7 @@ export class SimpleDatabase {
   dataBaseComment?: string
 }
 
-export class TableFieldColumnParam {
+export class DBTableParam {
   connectionId: string
   tableName: string
   dataBaseName?: string
@@ -134,12 +134,44 @@ export class TableFieldColumnParam {
     tableName: string,
     dataBaseName?: string,
     schemaName?: string
-  ): TableFieldColumnParam {
-    const param = new TableFieldColumnParam()
+  ): DBTableParam {
+    const param = new DBTableParam()
     param.connectionId = connectionId
     param.tableName = tableName
     param.dataBaseName = dataBaseName
     param.schemaName = schemaName
     return param
+  }
+}
+
+export class TableFieldColumnParam extends DBTableParam {
+  static mack(
+    connectionId: string,
+    tableName: string,
+    dataBaseName?: string,
+    schemaName?: string
+  ): TableFieldColumnParam {
+    return super.mack(
+      connectionId,
+      tableName,
+      dataBaseName,
+      schemaName
+    ) as TableFieldColumnParam
+  }
+}
+
+export class TableDDLParam extends DBTableParam {
+  static mack(
+    connectionId: string,
+    tableName: string,
+    dataBaseName?: string,
+    schemaName?: string
+  ): TableDDLParam {
+    return super.mack(
+      connectionId,
+      tableName,
+      dataBaseName,
+      schemaName
+    ) as TableDDLParam
   }
 }

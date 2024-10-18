@@ -7,28 +7,25 @@ import {
   shell,
 } from 'electron'
 import { join } from 'path'
-import { getWindowBounds, setWindowBounds, setBaseUrl } from './store'
+import {
+  getWindowBounds,
+  setWindowBounds,
+  setBaseUrl,
+  getUpdateVersion,
+  isQuitAndInstall,
+} from './store'
 import {
   loadMainResource,
   stopServer,
   confirmQuitApp,
   setIcon,
   isMac,
+  AppTitle,
+  AppId,
 } from './util'
+import updater from './updater'
 let mainWindow = null
 let isStopLoading = false
-const locked = app.requestSingleInstanceLock()
-if (!locked) {
-  app.quit
-} else {
-  app.on('second-instance', (_event, _commandLine, _workingDirectory) => {
-    // 当尝试再次打开一个新实例时，将焦点回到已打开的窗口
-    if (mainWindow) {
-      if (mainWindow.isMinimized()) mainWindow.restore()
-      mainWindow.focus()
-    }
-  })
-}
 function createWindow() {
   const { width, height, x, y } = getWindowBounds()
   const options = {
@@ -50,6 +47,7 @@ function createWindow() {
   }
   mainWindow = new BrowserWindow(options)
   setIcon(mainWindow)
+  mainWindow.setTitle(AppTitle)
   mainWindow.setMenu(null)
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
@@ -68,51 +66,69 @@ function createWindow() {
   })
   mainWindow.on('close', (event) => {
     event.preventDefault()
-    confirmQuitApp(mainWindow)
+    confirmQuitApp(mainWindow, isQuitAndInstall())
   })
 }
-app.whenReady().then(() => {
-  app.setUserTasks([])
-  createWindow()
-})
-
-app.setAppUserModelId('com.lzx.Kaleido')
-app.on('browser-window-created', (_, window) => {
-  // optimizer.watchWindowShortcuts(window)
-  // 注册快捷键Ctrl+Shift+I打开开发者工具
-  globalShortcut.register('CommandOrControl+Shift+I', () => {
-    window.webContents.openDevTools()
-  })
-})
-app.on('activate', () => {
-  if (!mainWindow) {
-    createWindow()
-  } else {
-    if (mainWindow.isMinimized()) {
-      mainWindow.restore()
-    }
-    if (mainWindow.isVisible()) {
+const gotTheLock = app.requestSingleInstanceLock({ AppId })
+if (!gotTheLock) {
+  app.quit
+} else {
+  app.setAppUserModelId(AppId)
+  app.on('second-instance', (_event, _commandLine, _workingDirectory) => {
+    // 当尝试再次打开一个新实例时，将焦点回到已打开的窗口
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore()
+      }
       mainWindow.focus()
-    } else {
-      mainWindow.show()
     }
-  }
-})
-app.on('before-quit', () => {
-  stopServer()
-})
-app.on('window-all-closed', () => {
-  mainWindow = null
-  if (!isMac) {
-    app.quit()
-  }
-})
+  })
+  app.whenReady().then(() => {
+    app.setUserTasks([])
+    createWindow()
+    updater(mainWindow, ipcMain, null)
+  })
+
+  app.on('browser-window-created', (_, window) => {
+    // optimizer.watchWindowShortcuts(window)
+    // 注册快捷键Ctrl+Shift+I打开开发者工具
+    globalShortcut.register('CommandOrControl+Shift+I', () => {
+      window.webContents.openDevTools()
+    })
+  })
+
+  app.on('activate', () => {
+    if (!mainWindow) {
+      createWindow()
+    } else {
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore()
+      }
+      if (mainWindow.isVisible()) {
+        mainWindow.focus()
+      } else {
+        mainWindow.show()
+      }
+    }
+  })
+  app.on('before-quit', () => {
+    stopServer()
+  })
+  app.on('window-all-closed', () => {
+    mainWindow = null
+    if (!isMac) {
+      app.quit()
+    }
+  })
+}
+
 ipcMain.on('stop-loading', (_event, _log) => {
   if (isStopLoading) {
     return
   }
   isStopLoading = true
 })
+
 ipcMain.on('set-base-url', (_event, baseUrl) => {
   setBaseUrl(baseUrl)
 })
@@ -149,4 +165,13 @@ ipcMain.handle('open-dir-dialog', (_event, params): any => {
     ...params.options,
   })
   return filePath === undefined ? undefined : filePath[0]
+})
+ipcMain.handle('get-app-version', (_): string => {
+  const version = app.getVersion()
+  getUpdateVersion()
+  return version.toLowerCase()
+})
+ipcMain.handle('get-app-update-version', (_): string => {
+  const version = getUpdateVersion()
+  return version.toLowerCase()
 })

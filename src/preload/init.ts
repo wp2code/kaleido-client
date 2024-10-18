@@ -14,7 +14,7 @@ const initApi = {
         //模拟启动时间
         setTimeout(() => {
           resolve('isDev')
-        }, 5000)
+        }, 3000)
       }
       try {
         const javaApp = join(

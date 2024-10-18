@@ -29,6 +29,7 @@ watchEffect(() => {
   for (let code of codeGenerationList) {
     if (code.codeType === 'Entity') {
       entityCodeView.value.name = code.name
+      entityCodeView.value.nameSuffix = code.nameSuffix
       entityCodeView.value.codeOutPath = code.codeOutPath
       entityCodeView.value.codePath = code.codePath
       entityCodeView.value.packageName = code.packageName
@@ -43,6 +44,7 @@ watchEffect(() => {
     }
     if (code.codeType === 'VO') {
       voCodeView.value.name = code.name
+      voCodeView.value.nameSuffix = code.nameSuffix
       voCodeView.value.codeOutPath = code.codeOutPath
       voCodeView.value.codePath = code.codePath
       voCodeView.value.packageName = code.packageName

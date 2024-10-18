@@ -6,6 +6,7 @@ import { buildCodeParamsWithCodeView } from '@/utils/codeUtil'
 import { useGenCodeParamStore } from '@/store/modules/cache'
 import CodeTemplateEdit from './CodeTemplateEdit.vue'
 import { TriggerWatch } from '../../keys'
+import { debounce } from 'lodash-es'
 const props = defineProps({
   data: {
     type: Object as PropType<ServiceCodeView>,
@@ -36,6 +37,7 @@ const editTemlateSuccess = (template: PartitionTempate) => {
     ...template,
     name: serviceCodeView.value.name,
   })
+  serviceCodeView.value.name = null
 }
 watchEffect(() => {
   serviceCodeView.value = props.data
@@ -44,9 +46,12 @@ watchEffect(() => {
 watch(
   [
     () => serviceCodeView.value.name,
+    () => serviceCodeView.value.nameSuffix,
     () => serviceCodeView.value.useMybatisPlus,
     () => serviceCodeView.value.superclassName,
     () => serviceCodeView.value.packageName,
+    () => serviceCodeView.value.sourceFolder,
+    () => serviceCodeView.value.codeOutPath,
     () => props.keyValue,
     () => implInterfaceName.value,
     () => selectMode.value,
@@ -57,7 +62,7 @@ watch(
     }
   }
 )
-const refreshGenCode = (directUseTemplateConfig: boolean) => {
+const refreshGenCode = debounce((directUseTemplateConfig: boolean) => {
   const serviceApiCodeParam = useGenCodeParam.getCodeParamCache('ServiceApi')
   serviceCodeView.value.implInterfaceName =
     selectMode.value == '1' ? implInterfaceName.value : null
@@ -86,7 +91,7 @@ const refreshGenCode = (directUseTemplateConfig: boolean) => {
       ServiceCodeView.replace(res.data.codeGenerationList[0], serviceCodeView.value)
     }
   })
-}
+}, 300)
 const handleOpenMenu = async () => {
   const filePath = await window.winApi.openDirDialog()
   if (filePath) {
@@ -105,7 +110,7 @@ const toEditTemplate = () => {
         <el-link type="primary" @click.stop="toEditTemplate()">编辑模板</el-link>
         <CodeTemplateEdit
           v-if="templateEditVisible"
-          v-model:visible="templateEditVisible"
+          v-model:is-show="templateEditVisible"
           :template-id="templateId"
           title="ServiceImpl模板"
           type="Service"

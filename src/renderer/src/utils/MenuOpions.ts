@@ -37,3 +37,11 @@ export function deleteMenu(command?: Function): IMenu {
 export function editMenu(command?: Function): IMenu {
   return new MoreMenu('edit', '编辑', 'Edit', command)
 }
+
+/**
+ *
+ * @param command
+ */
+export function refreshMenu(command?: Function): IMenu {
+  return new MoreMenu('refresh', '刷新', 'Refresh', command)
+}

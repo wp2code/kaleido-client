@@ -5,10 +5,10 @@ import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 // export const Layout = () => import("@/layout/components/AppMain/index.vue");
 // 静态路由
 export const constantRoutes: RouteRecordRaw[] = [
-  // {
-  //   path: '/',
-  //   component: () => import('@/views/welcome/index.vue'),
-  // },
+  {
+    path: '/',
+    component: () => import('@/views/welcome/index.vue'),
+  },
   // {
   //   path: '/website',
   //   children: [
@@ -31,17 +31,17 @@ export const constantRoutes: RouteRecordRaw[] = [
       },
     ],
   },
-  // {
-  //   path: '/container',
-  //   children: [
-  //     {
-  //       path: 'container',
-  //       name: 'container',
-  //       component: () => import('@/views/container/index.vue'),
-  //       meta: { title: '容器', icon: 'container' },
-  //     },
-  //   ],
-  // },
+
+  {
+    path: '/setting',
+    children: [
+      {
+        path: 'setting',
+        component: () => import('@/views/setting/index.vue'),
+        meta: { title: '设置', icon: 'setting' },
+      },
+    ],
+  },
   {
     path: '/github',
     children: [

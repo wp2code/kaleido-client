@@ -4,9 +4,21 @@ import {
   openDataBase,
   closeOtherConnectDataSource,
   getDataSourceByConnectionId,
+  getTableDDL,
 } from '@/api/datasource/index'
-import { Schema, Table, Database, SimpleDatabase } from '@/api/datasource/types'
+import {
+  Schema,
+  Table,
+  Database,
+  SimpleDatabase,
+  TableDDLParam,
+} from '@/api/datasource/types'
+//import Popover from '@/components/Popover/index.vue'
 import type Node from 'element-plus/es/components/tree/src/model/node'
+import { Close, Search } from '@element-plus/icons-vue'
+import { ElTree, ElLoading } from 'element-plus'
+import { type MenuInfoType,type IMenuItemType } from '@/directive/contextmenu/type'
+import MessageBox from '@/utils/MessageBox'
 const emits = defineEmits(['select'])
 interface Tree {
   id: string
@@ -14,8 +26,11 @@ interface Tree {
   data: Table | Schema | Database | SimpleDatabase
   connectionId?: string
   children?: Tree[]
+  isDb?: boolean
+  isTable?: boolean
   leaf: boolean
   disabled?: string
+  iconColor?: string
 }
 const treeProps = {
   value: 'id',
@@ -26,38 +41,75 @@ const treeProps = {
 const props = defineProps({
   data: {
     type: Object,
-    default: null,
+    default: {} as Table,
   },
 })
-const datasourceId = ref<string>(props.data?.id)
-const dataSourceMetaTree = ref<Tree[]>()
+const datasourceId = ref(props.data?.id)
+const dataSourceMetaTree = ref<Tree[]>([])
+const serachSwitch = ref<Boolean>(false)
+const query = ref<string>()
+const tableTreeRef = ref<InstanceType<typeof ElTree>>()
+const serachRef = ref(null)
+const tableDDLName=ref()
+const tableDDL = ref()
+const tableDialogVisible = ref(false)
+const tableContextmenuRef = ref()
 const openConnection = (id: string) => {
   if (!id) {
     return
   }
-  openConnectDataSource(id).then((res) => {
-    const data = res.data
-    if (data) {
-      const treeData = data.databases.map((item) => {
-        return {
-          id: item.dataBaseName,
-          label: item.dataBaseName,
-          data: item,
-          leaf: false,
-          connectionId: data.connectionId,
-          children: [],
-        }
-      })
-      dataSourceMetaTree.value = treeData
-    }
+  const loadingInstance = ElLoading.service({
+    target: '.table-box',
+    lock: true,
+    background: '#1f2d3d',
   })
+  openConnectDataSource(id)
+    .then((res) => {
+      const data = res.data
+      if (data) {
+        const treeData = data.databases.map((item) => {
+          return {
+            id: item.dataBaseName,
+            label: item.dataBaseName,
+            data: item,
+            isDb: true,
+            leaf: false,
+            isTable: false,
+            connectionId: data.connectionId,
+            children: [],
+          }
+        })
+        dataSourceMetaTree.value = treeData
+      }
+    })
+    .finally(() => {
+      nextTick(() => {
+        loadingInstance.close()
+      })
+    })
 }
 const clickSelectTable = async (tree: Tree) => {
   if (tree.leaf) {
     await getDataSourceByConnectionId(tree.connectionId).then((res) => {
-      emits('select', tree.data as Table, res.data)
+      if (tree.data) {
+        emits('select', tree.data as Table, res.data)
+      }
     })
   }
+}
+const onSerachSwitch = (_isOpen: Boolean) => {
+  serachSwitch.value = _isOpen
+  if (_isOpen) {
+    nextTick(() => {
+      serachRef.value.focus()
+    })
+  }
+}
+const onSerach = (value: string) => {
+  tableTreeRef.value!.filter(value)
+}
+const refreshTable = (id: string) => {
+  openConnection(id)
 }
 const selectLoadNode = (node: Node, resolve: (data: Tree[]) => void) => {
   if (node.level == 0) {
@@ -77,6 +129,8 @@ const selectLoadNode = (node: Node, resolve: (data: Tree[]) => void) => {
                   label: item.schemaName,
                   data: item,
                   leaf: false,
+                  isDb: false,
+                  isTable: false,
                   connectionId: data.connectionId,
                   children: [],
                 }
@@ -91,6 +145,8 @@ const selectLoadNode = (node: Node, resolve: (data: Tree[]) => void) => {
                     label: item.tableName,
                     data: item,
                     leaf: true,
+                    isDb: false,
+                    isTable: true,
                     connectionId: data.connectionId,
                     children: [],
                   }
@@ -114,6 +170,8 @@ const selectLoadNode = (node: Node, resolve: (data: Tree[]) => void) => {
             label: item.tableName,
             data: item,
             leaf: true,
+            isDb: false,
+            isTable: true,
             connectionId: data.connectionId,
             children: [],
           }
@@ -124,42 +182,79 @@ const selectLoadNode = (node: Node, resolve: (data: Tree[]) => void) => {
     }
   }
 }
-
-const tableBoxRef = ref<HTMLElement>()
+const filterTable = (value: string, data: Tree) => {
+  if (!value) return true
+  return data.label.includes(value)
+}
 onMounted(() => {
-  openConnection(datasourceId.value)
+  if (props.data.id) {
+    openConnection(props.data.id)
+    datasourceId.value = props.data.id
+  }
 })
 onBeforeUpdate(() => {
-  closeOtherConnectDataSource(datasourceId.value)
+  if (datasourceId.value) {
+    closeOtherConnectDataSource(datasourceId.value)
+  }
 })
-// const headerRef = ref<HTMLElement>()
-const treeHeight = ref()
-watchEffect(async () => {
-  treeHeight.value = tableBoxRef.value?.offsetHeight
-  // treeHeight.value = tableBoxRef.value?.offsetHeight - headerRef.value?.offsetHeight
+watch(query, (val) => {
+  onSerach(val)
 })
+const onNodeExpand = (tree: Tree, _node: Node, _self: any) => {
+  tree.iconColor = '#30ab14'
+}
+const tableContextmenuInfo = ref<MenuInfoType>({
+  items: [{ icon:'ddl', lable:'查看DDL',onclick:(_e,data)=>{
+    console.log('onclick', data)
+    getDDLMetaInfo(data)
+  }
+  } as IMenuItemType],
+} as MenuInfoType)
+const getDDLMetaInfo = (selectNode?:Node) => {
+  if (selectNode && selectNode.data) {
+    const data = selectNode.data
+    getTableDDL(
+      TableDDLParam.mack(
+        data.connectionId,
+        data.data?.tableName,
+        data.data?.dataBaseName,
+        data.data?.schemaName
+      )
+    ).then((res) => {
+      console.log('ddl', res)
+      tableDDLName.value= `表 ${data.data?.tableName} DDL`
+      tableDDL.value = res.data
+      tableDialogVisible.value=true
+    })
+  }
+}
+const handleTableDDLCopy = async () => {
+  if (tableDDL.value && tableDDL.value != '') {
+    await window.winApi.copy(tableDDL.value)
+    MessageBox.ok('复制成功')
+    tableDialogVisible.value=false
+  }
+}
 </script>
 <template>
-  <div ref="tableBoxRef" class="table-tree">
-    <!-- <div
-      ref="headerRef"
-      class="table-tree-header"
-      :style="{ width: '100%', minHeight: '32px' }"
-    >
-      <el-input
-        v-if="serachSwitch"
-        ref="serachRef"
-        v-model="query"
-        v-focus
-        :prefix-icon="Search"
-        class="header-serach"
-        placeholder="搜索"
-        clearable
-        @input="onTableFilter"
-        @blur="onSerachSwitch(false)"
-      />
+  <div ref="tableBoxRef" class="table-box">
+    <div ref="headerRef" :class="['table-box-header', serachSwitch ? 'div-center' : '']">
+      <div v-if="serachSwitch" class="header-serach">
+        <el-input
+          ref="serachRef"
+          v-model="query"
+          v-focus
+          placeholder="输入关键字搜索"
+          clearable
+          class="query-input"
+        >
+          <template #append>
+            <el-button type="primary" :icon="Close" @click="onSerachSwitch(false)" />
+          </template>
+        </el-input>
+      </div>
       <div v-else class="header-options">
-        <div>{{ dataSource?.name }}</div>
+        <div class="header-options-name">{{ data?.name }}</div>
         <div>
           <el-icon class="icon" :size="20" @click="refreshTable(datasourceId)">
             <Refresh />
@@ -169,62 +264,127 @@ watchEffect(async () => {
           </el-icon>
         </div>
       </div>
-    </div> -->
-    <div class="table-tree-content">
-      <el-scrollbar v-if="dataSourceMetaTree" :height="treeHeight">
+    </div>
+    <div class="table-box-content">
+      <el-scrollbar>
         <el-tree
+          ref="tableTreeRef"
           :data="dataSourceMetaTree"
           :props="treeProps"
           :empty-text="'~什么也没有'"
           highlight-current
           lazy
+          :icon="() => {}"
+          node-key="id"
           :load="selectLoadNode"
+          :filter-node-method="filterTable"
           @node-click="clickSelectTable"
+          @node-expand="onNodeExpand"
         >
           <template #default="{ node }">
-            <!-- <span class="prefix" :class="{ 'is-leaf': node.isLeaf }">[ElementPlus]</span> -->
-            <span class="table-tree-lable">{{ node.label }}</span>
+            <SvgIcon v-if="node.isLeaf && node.data?.isTable" icon-name="table" />
+            <SvgIcon
+              v-else-if="node.data?.isDb"
+              icon-name="db"
+              :color="node.data?.iconColor"
+            />
+            <SvgIcon v-else icon-name="schema" :color="node.data?.iconColor" />
+            <span
+              v-if="node.isLeaf && node.data?.isTable"
+              :ref="tableContextmenuRef"
+              v-contextmenu="{ ...tableContextmenuInfo, data: node }"
+              class="table-tree-lable"
+              >{{ node.label }}</span
+            >
+            <span v-else class="table-tree-lable" :node-data="node">{{
+              node.label
+            }}</span>
           </template>
         </el-tree>
       </el-scrollbar>
     </div>
+    <el-dialog
+      v-model="tableDialogVisible"
+      append-to-body
+      :close-on-click-modal="false"
+      :title="tableDDLName"
+      draggable
+      width="60%"
+      align-center
+    >
+      <Codeview v-model:code="tableDDL" dark></Codeview>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="tableDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="handleTableDDLCopy"> 确认&复制 </el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.table-tree {
+$tb-header-width: 40px;
+$tb-color: #ddd;
+.table-box {
   width: 100%;
   height: 100%;
-  color: white;
-  position: relative;
-  .table-tree-header {
+  color: $tb-color;
+  position: absolute;
+  .table-box-header {
+    height: $tb-header-width;
     .header-serach {
-      margin-bottom: 2px;
+      width: 95%;
     }
     .header-options {
       justify-content: space-between;
       flex-direction: row;
       align-items: center;
       display: flex;
+      padding: 0.2rem 0.2rem 0 0.2rem;
+      .header-options-name {
+        width: 80%;
+        font-size: medium;
+        font-weight: 600;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
     }
     .icon {
       cursor: pointer;
       outline: none;
-      margin-right: 2px;
       &:hover {
         color: #409efc;
       }
     }
   }
-  padding: 5px;
+  .table-box-content {
+    width: 100%;
+    height: calc(100% - $tb-header-width);
+  }
+}
+.query-input {
+  :deep() {
+    .el-input__wrapper > .el-input__inner {
+      color: #ddd;
+    }
+  }
+}
+.div-center {
+  display: grid;
+  place-items: center;
 }
 .table-tree-lable {
-  color: aliceblue;
+  color: $tb-color;
   &:hover {
     font-size: medium;
   }
 }
 :deep() {
+  .el-tree-node__expand-icon {
+    padding: 0;
+  }
   .el-input--default > .el-input__wrapper {
     background-color: var(--subMenuBg);
   }

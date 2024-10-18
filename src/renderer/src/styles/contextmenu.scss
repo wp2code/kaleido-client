@@ -1,0 +1,16 @@
+.cm-menu {
+  background-color: #ddd;
+  border: 1px solid #ddd;
+  overflow-wrap: break-word;
+  box-sizing: border-box;
+  .cm-menu-item {
+    padding: 10px;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    &:hover {
+      color: var(--menuActiveText);
+      cursor: pointer;
+    }
+  }
+}

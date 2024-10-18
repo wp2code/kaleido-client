@@ -28,6 +28,29 @@ const winApi = {
   openExternal: (url: string) => {
     shell.openExternal(url)
   },
+  getAppVersion: (): Promise<string> => {
+    return ipcRenderer.invoke('get-app-version')
+  },
+  getAppUpdateVersion: (): Promise<string> => {
+    return ipcRenderer.invoke('get-app-update-version')
+  },
+  //检查版本
+  checkForUpdateVersion: (manual: boolean = true) => {
+    return ipcRenderer.invoke('checkForUpdateVersion', manual)
+  },
+  //手动下载
+  sendDownloadUpdate: (isCancel: boolean = false) => {
+    return ipcRenderer.invoke('sendDownloadUpdate', isCancel)
+  },
+  //退出并且安装应用
+  quitAndInstallApp: () => {
+    ipcRenderer.send('quitAndInstallApp')
+  },
+  watchAppUpdateMessage: (callback) => {
+    ipcRenderer.on('up-app-message', (_event, data) => {
+      callback(data)
+    })
+  },
 }
 if (process.contextIsolated) {
   try {

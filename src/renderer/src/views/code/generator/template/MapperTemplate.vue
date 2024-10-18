@@ -20,6 +20,7 @@ watchEffect(() => {
   for (let code of codeGenerationList) {
     if (code.codeType === 'Mapper') {
       mapperCodeView.value.name = code.name
+      mapperCodeView.value.nameSuffix = code.nameSuffix
       mapperCodeView.value.codeOutPath = code.codeOutPath
       mapperCodeView.value.codePath = code.codePath
       mapperCodeView.value.packageName = code.packageName
@@ -31,6 +32,7 @@ watchEffect(() => {
     }
     if (code.codeType === 'Xml') {
       xmlCodeView.value.name = code.name
+      mapperCodeView.value.nameSuffix = code.nameSuffix
       xmlCodeView.value.codeOutPath = code.codeOutPath
       xmlCodeView.value.codePath = code.codePath
       xmlCodeView.value.packageName = code.packageName

@@ -7,5 +7,6 @@ declare global {
     initApi: initApi
     // db: db
     serverApi: serverApi
+    _BaseURL: string
   }
 }
