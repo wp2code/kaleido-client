@@ -64,9 +64,3 @@ linux:
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
-publish:
-  provider: github
-  owner: wp2code
-  repo: 'kaleido-client'
-  releaseType: 'release'
-  token: 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
