@@ -15,7 +15,7 @@ files:
   - '!server/*'
   - '!store.db'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
-  - '!{.eslintignore,.editorconfig,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,.prettierrc.cjs,dev-app-update.yml,CHANGELOG.md,README.md}'
+  - '!{.eslintignore,.editorconfig,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,.prettierrc.cjs,dev-app-update.yml,electron-builder.yml,CHANGELOG.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
 asar: true
@@ -25,6 +25,13 @@ asarUnpack:
 win:
   publisherName: Kaleido
   icon: build/logo.ico
+  ## 更新不验证代码签名
+  verifyUpdateCodeSignature: false
+  signingHashAlgorithms:
+    - sha256
+    - sha1
+  target:
+    - nsis
 nsis:
   ##是否一键安装
   oneClick: false
@@ -58,5 +65,8 @@ appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
 publish:
-  provider: generic
-  url: https://example.com/auto-updates
+  provider: github
+  owner: wp2code
+  repo: 'kaleido-client'
+  releaseType: 'release'
+  token: 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
