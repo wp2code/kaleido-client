@@ -41,7 +41,7 @@ jobs:
           $githubRef = $env:GITHUB_REF
           $splitRef=$githubRef -split "/"
           $VER=$splitRef[2]
-          echo "VERSION=$VER" >> "$GITHUB_OUTPUT"
+          Write-Host "VERSION=$VER" >> "$GITHUB_OUTPUT"
       - name: show version
         run: |
           echo get version is  ${{steps.get_version.outputs.VERSION}}
