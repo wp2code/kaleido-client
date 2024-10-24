@@ -37,6 +37,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         shell: powershell
         run: |
+          echo "The latest tag is ${{ github.ref }}"
           git fetch --tags
           $latestTag = git describe --tags
           Write-Host "The latest tag is $latestTag"
