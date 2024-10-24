@@ -31,7 +31,7 @@ jobs:
             node_version: '16.4.2'
             architecture: x86
     name: Build And Release
-    runs-on: ${{ matrix.runs-on }}
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Get Version for Windows
         if: matrix.os == 'windows-latest'
