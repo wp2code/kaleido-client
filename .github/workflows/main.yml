@@ -27,7 +27,7 @@ jobs:
       - name: Checkout kaleido-server
         uses: actions/checkout@v4
         with:
-          repository: wp2code/kaleido
+          repository: wp2code/kaleido-repo
           ref: main
           path: server
           token: ${{ secrets.KALEIDO_TOKEN }}
