@@ -39,7 +39,7 @@ jobs:
         shell: pwsh
         run: |
           $githubRef = $env:GITHUB_REF
-          $splitRef==$githubRef -split "/"
+          $splitRef=$githubRef -split "/"
           $VER=$splitRef[2]
           echo "VERSION=$VER" >> "$GITHUB_OUTPUT"
       - name: show version
