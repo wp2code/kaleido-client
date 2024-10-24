@@ -40,7 +40,7 @@ jobs:
 #          path: ./server
 #          github-token: ${{ secrets.KALEIDO_TOKEN }}
       - name: Display structure of downloaded files
-        run: ls -l
+        run: ls -R ./server
             
 
 #      - name: Install NodeJs With 18
