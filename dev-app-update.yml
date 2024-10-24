@@ -2,4 +2,4 @@
 
 provider: generic
 url: http://localhost:1027/
-updaterCacheDirName: Kaleido-updater
+updaterCacheDirName: Kaleido-client-updater

@@ -316,7 +316,7 @@ const handleTableDDLCopy = async () => {
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="tableDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="handleTableDDLCopy"> 确认&复制 </el-button>
+          <el-button type="primary" @click="handleTableDDLCopy"> 确认 & 复制 </el-button>
         </div>
       </template>
     </el-dialog>

@@ -52,6 +52,7 @@ watch(
     () => serviceCodeView.value.packageName,
     () => serviceCodeView.value.sourceFolder,
     () => serviceCodeView.value.codeOutPath,
+    () => serviceCodeView.value.codePath,
     () => props.keyValue,
     () => implInterfaceName.value,
     () => selectMode.value,
@@ -145,7 +146,7 @@ const toEditTemplate = () => {
         </div>
       </div>
       <div>
-        <div class="box-lable">代码地址2：</div>
+        <div class="box-lable">代码地址：</div>
         <div class="box-file">
           <el-tooltip
             :content="serviceCodeView!.codePath"

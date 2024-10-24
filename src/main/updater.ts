@@ -1,4 +1,4 @@
-import { BrowserWindow, IpcMain, Notification } from 'electron'
+import { BrowserWindow, IpcMain } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import { isDev, updaterNotification } from './util'
 import logger from 'electron-log'

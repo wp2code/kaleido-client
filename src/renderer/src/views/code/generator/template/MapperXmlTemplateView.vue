@@ -39,7 +39,8 @@ const apis = initBuildXmlCodeParams()
 const checkAllCodePrams = ref(true)
 const isIndeterminate = ref(true)
 const useGenCodeParam = useGenCodeParamStore()
-const methodList = ref<string[]>()
+const methodList = ref([])
+const initMethodList = ref([])
 const handleCheckedAllCodeParamChange = (val: boolean) => {
   let checked = apis.map((item) => {
     return item
@@ -47,15 +48,25 @@ const handleCheckedAllCodeParamChange = (val: boolean) => {
   methodList.value = val ? checked : []
   isIndeterminate.value = false
 }
-const handleCheckedCodeParamChange = (_value: string[]) => {
+function checkBoxStatusChange(_value: string[]) {
   const checkedCount = _value.length
   checkAllCodePrams.value = checkedCount === apis.length
   isIndeterminate.value = checkedCount > 0 && checkedCount < apis.length
 }
-watchEffect(() => {
-  handleCheckedAllCodeParamChange(true)
+const handleCheckedCodeParamChange = (_value: string[]) => {
+  checkBoxStatusChange(_value)
+}
+
+const { stop } = watchEffect(() => {
+  if (props.templateInfo) {
+    const tpConfig = props.templateInfo!.templateConfigList.filter(
+      (config) => config.name == 'Xml'
+    )[0]
+    initMethodList.value = tpConfig.templateParams?.methodList
+    methodList.value = initMethodList.value
+    templateId.value = props.templateInfo!.id
+  }
   xmlCodeView.value = props.data
-  templateId.value = props.templateInfo ? props.templateInfo!.id : ''
 })
 watch(
   [
@@ -64,6 +75,7 @@ watch(
     () => xmlCodeView.value.useMybatisPlus,
     () => xmlCodeView.value.namespace,
     () => xmlCodeView.value.sourceFolder,
+    () => xmlCodeView.value.codePath,
     () => xmlCodeView.value.codeOutPath,
     () => xmlCodeView.value.packageName,
     () => xmlCodeView.value.methodList,
@@ -97,20 +109,22 @@ const refreshGenCode = debounce((directUseTemplateConfig: boolean) => {
   })
 }, 300)
 const editTemlateSuccess = (template: PartitionTempate) => {
-  console.log('template', template)
   xmlCodeView.value = Object.assign(xmlCodeView.value, {
     ...template,
     name: xmlCodeView.value.name,
   })
   xmlCodeView.value.name = null
+  initMethodList.value = template.methodList
+  methodList.value = initMethodList.value
+  checkBoxStatusChange(methodList.value)
+  stop()
 }
 const clickMethod = () => {
   methodVisible.value = true
 }
 const clickReset = () => {
-  methodList.value = apis
-  checkAllCodePrams.value = true
-  isIndeterminate.value = false
+  methodList.value = initMethodList.value
+  checkBoxStatusChange(initMethodList.value)
 }
 const clickCancel = () => {
   methodVisible.value = false

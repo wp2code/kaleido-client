@@ -2,7 +2,10 @@
 import { CodeGenerationResult, PartitionTempate, WebCodeView } from '@/api/code/types'
 import { SelectDataTableData } from '@/api/datasource/types'
 import { previewCode } from '@/api/code/index'
-import { buildCodeParamsWithCodeView } from '@/utils/codeUtil'
+import {
+  buildCodeParamsWithCodeView,
+  initBuildControllerCodeParams,
+} from '@/utils/codeUtil'
 import { useGenCodeParamStore } from '@/store/modules/cache'
 import CodeTemplateEdit from './CodeTemplateEdit.vue'
 import { TriggerWatch } from '../../keys'
@@ -22,14 +25,44 @@ const canTriggerWatch = inject(TriggerWatch) as Ref
 const useGenCodeParam = useGenCodeParamStore()
 const webCodeView = ref<WebCodeView>(new WebCodeView())
 const templateId = ref('')
+const methodVisible = ref(false)
+const isIndeterminate = ref(true)
+const checkAllCodePrams = ref(true)
+const methodList = ref([])
+const initMethodList = ref([])
+const apis = initBuildControllerCodeParams()
+const handleCheckedAllCodeParamChange = (val: boolean) => {
+  let checked = apis.map((item) => {
+    return item
+  })
+  methodList.value = val ? checked : []
+  isIndeterminate.value = false
+}
+function checkBoxStatusChange(_value: string[]) {
+  const checkedCount = _value.length
+  checkAllCodePrams.value = checkedCount === apis.length
+  isIndeterminate.value = checkedCount > 0 && checkedCount < apis.length
+}
 const editTemlateSuccess = (template: PartitionTempate) => {
   webCodeView.value = Object.assign(webCodeView.value, {
     ...template,
     name: webCodeView.value.name,
+    webMethodList: template.methodList,
   })
   webCodeView.value.name = null
+  initMethodList.value = template.methodList
+  methodList.value = initMethodList.value
+  checkBoxStatusChange(methodList.value)
+  stop()
 }
-watchEffect(() => {
+const { stop } = watchEffect(() => {
+  if (props.data.templateInfo) {
+    const tpConfig = props.data.templateInfo!.templateConfigList.filter(
+      (config) => config.name == 'Controller'
+    )[0]
+    initMethodList.value = tpConfig.templateParams?.methodList
+    methodList.value = initMethodList.value
+  }
   templateId.value = props.data.templateInfo ? props.data.templateInfo!.id : ''
   const codeGenerationList = props.data!.codeGenerationList || []
   for (let code of codeGenerationList) {
@@ -56,8 +89,10 @@ watch(
     () => webCodeView.value.useMybatisPlus,
     () => webCodeView.value.superclassName,
     () => webCodeView.value.sourceFolder,
+    () => webCodeView.value.codePath,
     () => webCodeView.value.codeOutPath,
     () => webCodeView.value.packageName,
+    () => webCodeView.value.webMethodList,
   ],
   (_nv, _ov) => {
     if (canTriggerWatch!.value == true && _nv !== _ov && _ov[0] != undefined) {
@@ -87,6 +122,12 @@ const refreshGenCode = debounce((directUseTemplateConfig: boolean) => {
     }
   })
 }, 300)
+const handleCheckedCodeParamChange = (_value: string[]) => {
+  // const checkedCount = _value.length
+  // checkAllCodePrams.value = checkedCount === apis.length
+  // isIndeterminate.value = checkedCount > 0 && checkedCount < apis.length
+  checkBoxStatusChange(_value)
+}
 const handleOpenMenu = async () => {
   const filePath = await window.winApi.openDirDialog()
   if (filePath) {
@@ -95,6 +136,20 @@ const handleOpenMenu = async () => {
 }
 const toEditTemplate = () => {
   templateEditVisible.value = true
+}
+
+const clickMethod = () => {
+  methodVisible.value = true
+}
+const clickReset = () => {
+  methodList.value = initMethodList.value
+  checkBoxStatusChange(initMethodList.value)
+}
+const clickCancel = () => {
+  methodVisible.value = false
+}
+const clickConfirm = () => {
+  webCodeView.value.webMethodList = methodList.value
 }
 </script>
 <template>
@@ -150,12 +205,46 @@ const toEditTemplate = () => {
           <el-checkbox v-model="webCodeView!.useSwagger">Swagger</el-checkbox>
           <el-checkbox v-model="webCodeView!.useMybatisPlus">Mybatis-puls</el-checkbox>
         </div>
+        <div>
+          <el-link type="primary" @click="clickMethod()">生成方法</el-link>
+        </div>
       </div>
     </div>
     <div class="right">
       <Codeview v-model:code="webCodeView.templateCode" dark></Codeview>
     </div>
   </div>
+  <el-dialog
+    v-model="methodVisible"
+    title="Web(Controller)方法"
+    draggable
+    width="60%"
+    append-to-body
+    :close-on-click-modal="true"
+    :close-on-press-escape="true"
+  >
+    <el-checkbox
+      v-model="checkAllCodePrams"
+      :indeterminate="isIndeterminate"
+      @change="handleCheckedAllCodeParamChange"
+    >
+      全选
+    </el-checkbox>
+    <el-checkbox-group v-model="methodList" @change="handleCheckedCodeParamChange">
+      <div class="method-list">
+        <el-checkbox v-for="item in apis" :key="item" :label="item" :value="item">
+          {{ item }}
+        </el-checkbox>
+      </div>
+    </el-checkbox-group>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="clickCancel()">取消</el-button>
+        <el-button @click="clickReset()">重置</el-button>
+        <el-button type="primary" @click="clickConfirm()"> 确认 </el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
 <style lang="scss" scoped>

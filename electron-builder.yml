@@ -6,8 +6,9 @@ directories:
   buildResources: build
   output: dist
 files:
-  - 'build/*.ico'
+  - 'build/*'
   - 'out/**/*'
+  - '!build/logo.png'
   - '!**/.vscode/*'
   - '!src/*'
   - '!electron'

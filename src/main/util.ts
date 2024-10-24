@@ -79,13 +79,19 @@ const createTrayIfAbent = (mainWindow: BrowserWindow) => {
     const trayIcon = new Tray(icon)
     const contextMenu = Menu.buildFromTemplate([
       {
+        icon: nativeImage.createFromPath(
+          join(__dirname, '../../build/open.png')
+        ),
         label: '打开',
         click: () => {
           winShow(mainWindow)
         },
       },
       {
-        label: '退出',
+        icon: nativeImage.createFromPath(
+          join(__dirname, '../../build/quit.png')
+        ),
+        label: '强制退出',
         click: () => {
           mainWindow.destroy()
         },

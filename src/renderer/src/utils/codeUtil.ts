@@ -95,9 +95,12 @@ const initBuildCodePrams = () => {
 const initBuildXmlCodeParams = () => {
   return [
     'insertSelective',
+    'insertOne',
+    'insertList',
     'insertOrUpdateSelective',
     'updateByPrimaryKey',
     'updateByPrimaryKeySelective',
+    'selectPage',
     'selectByEntity',
     'selectByPrimaryKey',
     'deleteByPrimaryKey',
@@ -106,13 +109,33 @@ const initBuildXmlCodeParams = () => {
 const initBuildMapperCodeParams = () => {
   return [
     'insertSelective',
+    'insertOne',
+    'insertList',
     'insertOrUpdateSelective',
     'updateByPrimaryKey',
     'updateByPrimaryKeySelective',
+    'selectPage',
     'selectByEntity',
     'selectByPrimaryKey',
     'deleteByPrimaryKey',
   ]
+}
+
+const initBuildControllerCodeParams = () => {
+  return ['search', 'page', 'detail', 'save', 'update', 'delete']
+}
+
+export function getInitApiCodeParams(type: string): Array<string> {
+  if (type == 'Mapper') {
+    return initBuildMapperCodeParams()
+  }
+  if (type == 'Xml') {
+    return initBuildXmlCodeParams()
+  }
+  if (type == 'Controller') {
+    return initBuildControllerCodeParams()
+  }
+  return []
 }
 export {
   initBuildCodePrams,
@@ -121,4 +144,5 @@ export {
   buildCodeParamsWithCodeView,
   buildCodeParamsWithTemplate,
   buildCodeParamsWithCache,
+  initBuildControllerCodeParams,
 }

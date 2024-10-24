@@ -30,21 +30,35 @@ const templateId = ref('')
 const checkAllCodePrams = ref(true)
 const isIndeterminate = ref(true)
 const apis = initBuildMapperCodeParams()
-const methodList = ref<string[]>()
+const initMethodList = ref([])
+const methodList = ref([])
 const handleCheckedAllCodeParamChange = (val: boolean) => {
   let checked = apis.map((item) => {
     return item
   })
+  console.log('handleCheckedAllCodeParamChange', checked)
   methodList.value = val ? checked : []
   isIndeterminate.value = false
 }
-const handleCheckedCodeParamChange = (_value: string[]) => {
+function checkBoxStatusChange(_value: string[]) {
   const checkedCount = _value.length
   checkAllCodePrams.value = checkedCount === apis.length
   isIndeterminate.value = checkedCount > 0 && checkedCount < apis.length
 }
-watchEffect(() => {
-  handleCheckedAllCodeParamChange(true)
+const handleCheckedCodeParamChange = (_value: string[]) => {
+  console.log('handleCheckedCodeParamChange', _value)
+  methodList.value = _value
+  checkBoxStatusChange(_value)
+}
+const { stop } = watchEffect(() => {
+  if (props.templateInfo) {
+    const tpConfig = props.templateInfo!.templateConfigList.filter(
+      (config) => config.name == 'Mapper'
+    )[0]
+    initMethodList.value = tpConfig.templateParams?.methodList
+    methodList.value = initMethodList.value
+    templateId.value = props.templateInfo!.id
+  }
   mapperCodeView.value = props.data
   templateId.value = props.templateInfo ? props.templateInfo!.id : ''
 })
@@ -55,6 +69,7 @@ watch(
     () => mapperCodeView.value.useMybatisPlus,
     () => mapperCodeView.value.superclassName,
     () => mapperCodeView.value.sourceFolder,
+    () => mapperCodeView.value.codePath,
     () => mapperCodeView.value.codeOutPath,
     () => mapperCodeView.value.packageName,
     () => mapperCodeView.value.methodList,
@@ -71,6 +86,10 @@ const editTemlateSuccess = (template: PartitionTempate) => {
     name: mapperCodeView.value.name,
   })
   mapperCodeView.value.name = null
+  initMethodList.value = template.methodList
+  methodList.value = initMethodList.value
+  checkBoxStatusChange(methodList.value)
+  stop()
 }
 const refreshGenCode = debounce((directUseTemplateConfig: boolean) => {
   const entityCodeParam = useGenCodeParam.getCodeParamCache('Entity')
@@ -94,10 +113,8 @@ const clickMethod = () => {
   methodVisible.value = true
 }
 const clickReset = () => {
-  mapperCodeView.value.methodList = apis
-  methodList.value = apis
-  checkAllCodePrams.value = true
-  isIndeterminate.value = false
+  methodList.value = initMethodList.value
+  checkBoxStatusChange(initMethodList.value)
 }
 const clickCancel = () => {
   methodVisible.value = false

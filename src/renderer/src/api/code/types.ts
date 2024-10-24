@@ -53,6 +53,7 @@ export class PartitionTempate {
   useLombok?: boolean
   useMybatisPlus?: boolean
   useSwagger?: boolean
+  methodList?: Array<string>
   defaultIgFields?: Array<string>
 }
 export interface TemplateConfig {
@@ -69,6 +70,7 @@ export interface TemplateConfig {
   useMybatisPlus?: boolean
   useSwagger?: boolean
   defaultIgFields?: Array<string>
+  methodList?: Array<string>
 }
 export interface Superclass {
   name: string
@@ -196,10 +198,12 @@ export class WebCodeView extends BaseCodeView {
   superclassName: string
   useMybatisPlus: boolean
   useSwagger: boolean
+  webMethodList?: Array<string>
   toCodeGenerationParam(): CodeGenerationParam {
     const param = super.toCodeGenerationParam()
     param.superclassName = this.superclassName
     param.useMybatisPlus = this.useMybatisPlus
+    param.webMethodList = this.webMethodList
     param.useSwagger = this.useSwagger
     return param
   }
@@ -385,6 +389,7 @@ export interface CodeGenerationView {
   useLombok: boolean
   useSwagger: boolean
   useMybatisPlus: boolean
+  methodList?: Array<string>
   tableFieldColumnMap?: TableFieldColumn[]
 }
 

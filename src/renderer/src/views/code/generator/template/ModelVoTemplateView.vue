@@ -91,6 +91,7 @@ watch(
     () => voCodeParams.value.nameSuffix,
     () => voCodeParams.value.sourceFolder,
     () => voCodeParams.value.codeOutPath,
+    () => voCodeParams.value.codePath,
     () => voCodeParams.value.superclassName,
     () => voCodeParams.value.packageName,
     () => voCodeParams.value.tableFieldColumnMap,

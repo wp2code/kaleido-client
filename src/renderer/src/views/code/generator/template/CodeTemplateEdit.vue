@@ -47,6 +47,28 @@
           >多个用|分割</span
         >
       </el-form-item>
+      <el-form-item
+        v-if="
+          ((type == 'Mapper' || type == 'Xml') && !template?.useMybatisPlus) ||
+          type == 'Controller'
+        "
+        label="模板方法"
+      >
+        <el-checkbox
+          v-model="checkAllCodePrams"
+          :indeterminate="isIndeterminate"
+          @change="handleCheckedAllCodeParamChange"
+        >
+          全选
+        </el-checkbox>
+        <el-checkbox-group v-model="methodList" @change="handleCheckedCodeParamChange">
+          <div class="method-list">
+            <el-checkbox v-for="item in apis" :key="item" :label="item" :value="item">
+              {{ item }}
+            </el-checkbox>
+          </div>
+        </el-checkbox-group>
+      </el-form-item>
     </el-form>
     <template #footer>
       <span class="dialog-footer">
@@ -62,6 +84,7 @@ import {
   updateCodeGenerationTemplateOfPartition,
 } from '@/api/code/index'
 import { PartitionTempate } from '@/api/code/types'
+import { getInitApiCodeParams } from '@/utils/codeUtil'
 import MessageBox from '@/utils/MessageBox'
 const isShow = defineModel('isShow', {
   type: Boolean,
@@ -79,12 +102,41 @@ const props = defineProps<{
 }>()
 const template = ref<PartitionTempate>(new PartitionTempate())
 const modelFields = ref(null)
+const isIndeterminate = ref(true)
+const checkAllCodePrams = ref(true)
+const methodList = ref<string[]>()
+const apis = ref([])
+const checkedApis = ref([])
+const handleCheckedAllCodeParamChange = (val: boolean) => {
+  if (apis.value) {
+    let checked = apis.value.map((item) => {
+      return item
+    })
+    methodList.value = val ? checked : []
+    isIndeterminate.value = false
+  }
+}
+const initChecked = () => {
+  if (checkedApis.value) {
+    const checkedCount = checkedApis.value.length
+    methodList.value = checkedApis.value
+    checkAllCodePrams.value = checkedCount === apis.value.length
+    isIndeterminate.value = checkedCount > 0 && checkedCount < apis.value.length
+  }
+}
+const handleCheckedCodeParamChange = (_value: string[]) => {
+  const checkedCount = _value.length
+  checkAllCodePrams.value = checkedCount === apis.value.length
+  isIndeterminate.value = checkedCount > 0 && checkedCount < apis.value.length
+}
 const getTemplate = async (templateId: string, nameList: String[]) => {
   await getTemplateInfo(templateId, nameList).then((res) => {
     const templateConfigList = res.data.templateConfigList
     if (templateConfigList) {
       const templateConfig = templateConfigList[0]
+      apis.value = getInitApiCodeParams(templateConfig.name)
       const tempateParam = templateConfig.templateParams
+      checkedApis.value = tempateParam.methodList || []
       template.value = {
         templateId: res.data.id,
         codePath: templateConfig.codePath,
@@ -125,6 +177,7 @@ const save = async () => {
   } else {
     template.value.defaultIgFields = []
   }
+  template.value.methodList = methodList.value
   await updateCodeGenerationTemplateOfPartition(template.value).then((res) => {
     if (res.data) {
       emits('success', template.value)
@@ -132,6 +185,10 @@ const save = async () => {
     }
   })
 }
+watchEffect(() => {
+  // handleCheckedAllCodeParamChange(true)
+  initChecked()
+})
 </script>
 <style lang="scss" scoped>
 .my-header {

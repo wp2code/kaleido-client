@@ -44,6 +44,7 @@ watch(
     () => serviceApiCodeView.value.useMybatisPlus,
     () => serviceApiCodeView.value.superclassName,
     () => serviceApiCodeView.value.sourceFolder,
+    () => serviceApiCodeView.value.codePath,
     () => serviceApiCodeView.value.codeOutPath,
     () => serviceApiCodeView.value.packageName,
   ],
