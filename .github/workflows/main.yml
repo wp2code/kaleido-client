@@ -20,40 +20,75 @@ jobs:
           - windows-latest
           - macos-latest
           - ubuntu-latest
-        node_version:
-          - '16.4.2'
-          - '17'
-          - '17'
-        architecture:
-          - x64
-        include:
-          - os: windows-2016
-            node_version: '16.4.2'
-            architecture: x86
     name: Build And Release
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Get Version for Windows
-        if: matrix.os == 'windows-latest'
-        id: get_version
-        shell: pwsh
-        run: |
-          $githubRef = $env:GITHUB_REF
-          $splitRef=$githubRef -split "/"
-          $VER=$splitRef[2]
-          Write-Host "VERSION=$VER" >> "$GITHUB_OUTPUT"
       - name: show version
         run: |
           echo get version is  ${{steps.get_version.outputs.VERSION}}
-      - name: Get Version2
+      - name: Get Version
         if: matrix.os != 'windows-latest'
-        id: get_version2
+        id: get_version
         run: |
-          VER=${GITHUB_REF##*/}
+          VER=$(git describe --tags)
+          echo version is $VER
           echo "VERSION=$VER" >> "$GITHUB_OUTPUT"
-      - name: show version2
-        run: |
-          echo get version2 is  ${{steps.get_version2.outputs.VERSION}}
-
-   
-  
+      # - name: Checkout kaleido-repo
+      #   uses: actions/checkout@v4
+      #   with:
+      #     repository: wp2code/kaleido-repo
+      #     ref: main
+      #     path: server
+      #     token: ${{ secrets.KALEIDO_TOKEN }}
+      #     sparse-checkout: |
+      #       jre
+      #       app
+      # - name: Checkout kaleido-client
+      #   uses: actions/checkout@v4
+      # - uses: pnpm/action-setup@v2
+      #   with:
+      #     version: 8.6.7
+      # - name: Install NodeJs With 17
+      #   uses: actions/setup-node@v4
+      #   with:
+      #     node-version: 17
+      #     cache: 'npm'
+      # - name: Install Dependencies
+      #   run: |
+      #     pnpm install
+      # - name: Build App For Windows
+      #   if: matrix.os == 'windows-latest'
+      #   run: pnpm run build:win
+      #      - name: Build App For Macos
+      #        if: matrix.os == 'macos-latest'
+      #        run: |
+      #          pnpm run build:mac
+      #          pnpm run build:mac-arm
+      # - name: Cleanup Artifacts for Windows
+      #   if: matrix.os == 'windows-latest'
+      #   run: |
+      #     npx del-cli "dist/*" "!dist/*.exe" "!dist/*.zip" "!dist/*.yml"
+      #      - name: Cleanup Artifacts for MacOS
+      #        if: matrix.os == 'macos-latest'
+      #        run: |
+      #          npx del-cli "dist/*" "!dist/(*.dmg|*.zip|latest*.yml)"
+      # - name: Show dist
+      #   run: ls -R ./dist
+      # - name: upload artifacts
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: ${{ matrix.os }}
+      #     path: dist
+      # - name: Release App
+      #   id: Release
+      #   uses: softprops/action-gh-release@v2
+      #   with:
+      #     token: ${{ secrets.KALEIDO_TOKEN }}
+      #     body_path: ./CHANGELOG.md
+      #     files: |
+      #       dist/*.exe
+      #       LICENSE
+      #     tag_name: ${{steps.get_version.outputs.VERSION}}
+      #     name: Release ${{steps.get_version.outputs.VERSION}}
+      #     prerelease: false
+      #     draft: false
