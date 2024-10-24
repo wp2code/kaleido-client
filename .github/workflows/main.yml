@@ -23,11 +23,7 @@ jobs:
     name: Build And Release
     runs-on: ${{ matrix.os }}
     steps:
-      - name: show version
-        run: |
-          echo get version is  ${{steps.get_version.outputs.VERSION}}
       - name: Get Version
-        if: matrix.os != 'windows-latest'
         id: get_version
         run: |
           VER=$(git describe --tags)
