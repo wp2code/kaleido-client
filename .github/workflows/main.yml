@@ -11,8 +11,6 @@ on:
           - info
           - warning
           - debug
-env:
-  app_server_name: kaleido-server
 jobs:
   release:
     strategy:
