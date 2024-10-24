@@ -28,9 +28,10 @@ jobs:
       - name: Get Version
         id: get_version
         run: |
-          VER=$(git describe --tags)
-          echo version is $VER
-          echo "VERSION=$VER" >> "$GITHUB_OUTPUT"
+          git fetch --tags
+          latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+          echo version is $latest_tag
+          echo "VERSION=$latest_tag" >> "$GITHUB_OUTPUT"
       # - name: Checkout kaleido-repo
       #   uses: actions/checkout@v4
       #   with:
