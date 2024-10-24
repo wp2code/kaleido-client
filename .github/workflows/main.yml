@@ -1,54 +1,83 @@
 name: Deploy Kaleido Client
-permissions:
-  contents: write
 on:
-  push:
-    tags:
-      - v*
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
+        type: choice
+        options:
+          - info
+          - warning
+          - debug
+env:
+  app_server_name: kaleido-server
 jobs:
   release:
-    name: Build And Release
-    runs-on: ${{ matrix.os }}
-    if: startsWith(github.ref, 'refs/tags/')
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest]
+        runs-on: [ ubuntu-latest, macos-latest, windows-latest ]
+    name: Build And Release
+    runs-on: ${{ matrix.runs-on }}
+    if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Check out git repository
         uses: actions/checkout@v4
-      - name: Install NodeJs With 18
-        uses: actions/setup-node@v4
+      - name: Checkout kaleido-server
+        uses: actions/checkout@v4
         with:
-          node-version: 18
-      - name: Install Dependencies
-        run: |
-          npm i -g pnpm
-          pnpm install
-      - name: Build App For Windows
-        if: matrix.os == 'windows-latest'
-        run: pnpm run build:win
+          repository: wp2code/kaleido
+          ref: main
+          path: server
+          token: ${{ secrets.KALEIDO_TOKEN }}
+          sparse-checkout: |
+            jre
+            app
+#      - name: Download App Server Libs
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: ${{ env.app_server_name }}.zip
+#          repo: wp2code/kaleido
+#          path: ./server
+#          github-token: ${{ secrets.KALEIDO_TOKEN }}
+      - name: Display structure of downloaded files
+        run: ls -R ./
+            
+
+#      - name: Install NodeJs With 18
+#        uses: actions/setup-node@v4
+#        with:
+#          node-version: 18
+#      - name: Install Dependencies
+#        run: |
+#          npm i -g pnpm
+#          pnpm install
+#      - name: Build App For Windows
+#        if: matrix.os == 'windows-latest'
+#        run: pnpm run build:win
 #      - name: Build App For Macos
 #        if: matrix.os == 'macos-latest'
 #        run: |
 #          pnpm run build:mac
 #          pnpm run build:mac-arm
-      - name: Cleanup Artifacts for Windows
-        if: matrix.os == 'windows-latest'
-        run: |
-          npx del-cli "dist/*" "!dist/*.exe" "!dist/*.zip" "!dist/*.yml"
+#      - name: Cleanup Artifacts for Windows
+#        if: matrix.os == 'windows-latest'
+#        run: |
+#          npx del-cli "dist/*" "!dist/*.exe" "!dist/*.zip" "!dist/*.yml"
 #      - name: Cleanup Artifacts for MacOS
 #        if: matrix.os == 'macos-latest'
 #        run: |
 #          npx del-cli "dist/*" "!dist/(*.dmg|*.zip|latest*.yml)"
-      - name: upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.os }}
-          path: dist
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          files: 'dist/**'
+#      - name: upload artifacts
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: ${{ matrix.os }}
+#          path: dist
+#      - name: Release
+#        uses: softprops/action-gh-release@v1
+#        if: startsWith(github.ref, 'refs/tags/')
+#        with:
+#          files: 'dist/**'
 
