@@ -38,7 +38,7 @@ jobs:
         shell: powershell
         run: |
           git fetch --tags
-          $latestTag = git describe --tags | git rev-list --tags --max-count=1
+          $latestTag = git describe --tags
           Write-Host "The latest tag is $latestTag"
           echo "VERSION=$latestTag" >> "$GITHUB_ENV"
       - name: show version
