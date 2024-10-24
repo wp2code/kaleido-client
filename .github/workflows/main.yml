@@ -2,6 +2,10 @@ name: Deploy Kaleido Client
 on:
   workflow_dispatch:
     inputs:
+      tags:
+        description: 'Test scenario tags'
+        required: false
+        type: boolean
       logLevel:
         description: 'Log level'
         required: true
@@ -16,69 +20,44 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runs-on: [windows-latest, ubuntu-latest, macos-latest ]
+        os:
+          - windows-latest
+          - macos-latest
+          - ubuntu-latest
+        node_version:
+          - '16.4.2'
+          - '17'
+          - '17'
+        architecture:
+          - x64
+        include:
+          - os: windows-2016
+            node_version: '16.4.2'
+            architecture: x86
     name: Build And Release
     runs-on: ${{ matrix.runs-on }}
     steps:
-      - name: Get Version
+      - name: Get Version for Windows
+        if: matrix.os == 'windows-latest'
         id: get_version
+        shell: pwsh
         run: |
-          VER=`echo $GITHUB_REF | cut -d / -f3`
+          $githubRef = $env:GITHUB_REF
+          $splitRef==$githubRef -split "/"
+          $VER=$splitRef[2]
           echo "VERSION=$VER" >> "$GITHUB_OUTPUT"
-      - name: Checkout kaleido-repo
-        uses: actions/checkout@v4
-        with:
-          repository: wp2code/kaleido-repo
-          ref: main
-          path: server
-          token: ${{ secrets.KALEIDO_TOKEN }}
-          sparse-checkout: |
-            jre
-            app
-      - name: Checkout kaleido-client
-        uses: actions/checkout@v4
-      - name: Install NodeJs With 18+
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18+
-      - name: Install Dependencies
+      - name: show version
         run: |
-          npm i -g pnpm
-          pnpm install
-      - name: Build App For Windows
-        if: matrix.runs-on == 'windows-latest'
-        run: pnpm run build:win
-      #      - name: Build App For Macos
-      #        if: matrix.runs-on == 'macos-latest'
-      #        run: |
-      #          pnpm run build:mac
-      #          pnpm run build:mac-arm
-      - name: Cleanup Artifacts for Windows
-        if: matrix.runs-on == 'windows-latest'
+          echo get version is  ${{steps.get_version.outputs.VERSION}}
+      - name: Get Version2
+        if: matrix.os != 'windows-latest'
+        id: get_version2
         run: |
-          npx del-cli "dist/*" "!dist/*.exe" "!dist/*.zip" "!dist/*.yml"
-      #      - name: Cleanup Artifacts for MacOS
-      #        if: matrix.runs-on == 'macos-latest'
-      #        run: |
-      #          npx del-cli "dist/*" "!dist/(*.dmg|*.zip|latest*.yml)"
-      - name: Show dist
-        run: ls -R ./dist
-      - name: upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.runs-on }}
-          path: dist
-      - name: Release
-        id: Release
-        uses: softprops/action-gh-release@v2
-        with:
-          token: ${{ secrets.KALEIDO_TOKEN }}
-          body_path: ./CHANGELOG.md
-          files: |
-            dist/*.exe
-            LICENSE
-          tag_name: ${{steps.get_version.outputs.VERSION}}
-          name: Release ${{steps.get_version.outputs.VERSION}}
-          prerelease: false
-          draft: false
-      
+          VER=${GITHUB_REF##*/}
+          echo "VERSION=$VER" >> "$GITHUB_OUTPUT"
+      - name: show version2
+        run: |
+          echo get version2 is  ${{steps.get_version2.outputs.VERSION}}
+
+   
+  
