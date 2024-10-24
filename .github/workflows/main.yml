@@ -23,6 +23,8 @@ jobs:
     name: Build And Release
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Checkout kaleido-client
+        uses: actions/checkout@v4
       - name: Get Version
         id: get_version
         run: |
