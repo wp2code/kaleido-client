@@ -35,12 +35,10 @@ jobs:
           echo "VERSION=$latestTag" >> "$GITHUB_ENV"
       - name: Get latest tag
         if: matrix.os == 'windows-latest'
-        shell: powershell
         run: |
           echo "The latest tag is ${{ github.ref }}"
           git fetch --tags
-          $latestTag = $(git describe --tags)
-          Write-Host "The latest tag is $latestTag"
+          $latestTag = $(git describe --tags `git rev-list --tags --max-count=1`)
           echo "VERSION=$latestTag" >> "$GITHUB_ENV"
       - name: show version
         run: echo version is $VERSION
