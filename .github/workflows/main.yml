@@ -37,7 +37,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         shell: powershell
         run: |
-          $latestTag = $(${{ github.ref }} -split "/")[2]
+          $latestTag = $("${{ github.ref }}" -split "/")[2]
           echo "VERSION=$latestTag" >> "$GITHUB_ENV"
       - name: show version
         run: echo version is $VERSION
