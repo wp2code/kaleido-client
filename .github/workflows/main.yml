@@ -1,16 +1,8 @@
 name: Deploy Kaleido Client
 on:
-  workflow_dispatch:
-    inputs:
-      logLevel:
-        description: 'Log level'
-        required: true
-        default: 'warning'
-        type: choice
-        options:
-          - info
-          - warning
-          - debug
+  push:
+    tags:
+      - v*
 jobs:
   release:
     strategy:
@@ -18,11 +10,22 @@ jobs:
       matrix:
         os:
           - windows-latest
+          - macos-latest
+          - ubuntu-latest
     name: Build And Release
     runs-on: ${{ matrix.os }}
+	if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Checkout kaleido-client
         uses: actions/checkout@v4
+	  - name: Get latest tag
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $verSplit = $("${{ github.ref }}" -split "/")
+          $ver=$verSplit[2]
+          echo "latestTag is $ver"
+          echo "VERSION=$ver" >> "$env:GITHUB_ENV"
       - name: Checkout kaleido-repo
         uses: actions/checkout@v4
         with:
@@ -42,7 +45,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 17
-          cache: 'pnpm'
+          cache: 'npm'
       - name: Install Dependencies
         run: |
           pnpm install
@@ -78,7 +81,7 @@ jobs:
           files: |
             dist/*.exe
             LICENSE
-          tag_name:  $env:GITHUB_REF_NAME
-          name: Release  $env:GITHUB_REF_NAME
+          tag_name: $env:VERSION
+          name: Release  $env:VERSION
           prerelease: false
           draft: false
