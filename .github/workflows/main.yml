@@ -37,9 +37,10 @@ jobs:
         if: matrix.os == 'windows-latest'
         shell: powershell
         run: |
-          $latestTag = $("${{ github.ref }}" -split "/")[2]
-          echo latestTag is $latestTag
-          echo "VERSION=$latestTag" >> "$GITHUB_ENV"
+          $verSplit = $("${{ github.ref }}" -split "/")
+          $ver=$verSplit[2]
+          echo latestTag is $ver
+          echo "VERSION=$ver" >> "$GITHUB_ENV"
       - name: show version
         run: echo version is $VERSION
       # - name: Checkout kaleido-repo
