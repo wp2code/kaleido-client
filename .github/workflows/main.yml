@@ -78,7 +78,7 @@ jobs:
           files: |
             dist/*.exe
             LICENSE
-          tag_name:  "${{ matrix.os == 'windows-latest' && '$env:GITHUB_REF_NAME' || '$GITHUB_REF_NAME' }}"
-          name: Release  "${{ matrix.os == 'windows-latest' && '$env:GITHUB_REF_NAME' || '$GITHUB_REF_NAME' }}"
+          tag_name:  $env:GITHUB_REF_NAME
+          name: Release  $env:GITHUB_REF_NAME
           prerelease: false
           draft: false
