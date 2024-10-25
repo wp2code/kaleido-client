@@ -10,15 +10,12 @@ jobs:
       matrix:
         os:
           - windows-latest
-          - macos-latest
-          - ubuntu-latest
     name: Build And Release
     runs-on: ${{ matrix.os }}
-	if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Checkout kaleido-client
         uses: actions/checkout@v4
-	  - name: Get latest tag
+      - name: Get latest tag
         if: matrix.os == 'windows-latest'
         shell: pwsh
         run: |
