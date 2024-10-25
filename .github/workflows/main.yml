@@ -43,4 +43,4 @@ jobs:
       - name: show version 
         run: echo "version is ${{ env.VERSION }}"
       - name: show GITHUB_REF_NAME
-        run: echo "version is $GITHUB_REF_NAME"
+        run: echo "version is $env:GITHUB_REF_NAME"
