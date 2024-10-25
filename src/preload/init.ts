@@ -9,7 +9,6 @@ const initApi = {
   },
   startServerForSpawn: () => {
     return new Promise(async (resolve, reject) => {
-      console.log(`startting..... is development ${isDev}`)
       if (isDev) {
         //模拟启动时间
         setTimeout(() => {
@@ -28,7 +27,7 @@ const initApi = {
           `root path is ${__dirname} javaApp is ${javaApp}  jrePath is ${jrePath} libPath is ${libPath}`
         )
         const child = spawn(jrePath, [
-          '-Xmx1024M',
+          '-Xmx512M',
           `-Dspring.profiles.active=${isDev ? 'dev' : 'prod'}`,
           '-Dserver.address=127.0.0.1',
           '-Djava.awt.headless=true',

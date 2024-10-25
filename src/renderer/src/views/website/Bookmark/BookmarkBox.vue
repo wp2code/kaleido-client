@@ -1,3 +1,4 @@
+<!--
 <script lang="ts" setup>
 import { FormInstance, FormRules } from 'element-plus'
 import { Bookmark } from '~/repositories/entity/Bookmark'
@@ -146,4 +147,4 @@ onMounted(async () => {
   content: ' ';
   margin-right: 10px;
 }
-</style>
+</style>-->
