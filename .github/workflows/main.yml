@@ -29,9 +29,9 @@ jobs:
         id: get_version
         if: matrix.os != 'windows-latest'
         run: |
-          latestTag=$(git describe --tags `git rev-list --tags --max-count=1`)
+          latestTag=${GITHUB_REF/refs\/tags\//}
           echo version is $latestTag
-          echo "$env:VERSION=$latestTag" >> "$GITHUB_ENV"
+          echo "VERSION=$latestTag" >> "GITHUB_ENV"
       - name: Get latest tag
         if: matrix.os == 'windows-latest'
         shell: pwsh
@@ -39,7 +39,7 @@ jobs:
           $verSplit = $("${{ github.ref }}" -split "/")
           $ver=$verSplit[2]
           echo "latestTag is $ver"
-          echo "VERSION=$ver" >> "$GITHUB_ENV"
+          echo "VERSION=$ver" >> "$env:GITHUB_ENV"
       # - name: show version
       #   if: matrix.os != 'windows-latest'
       #   run: echo "version is $VERSION"
