@@ -29,10 +29,18 @@ jobs:
         id: get_version
         if: matrix.os != 'windows-latest'
         run: |
-          git fetch --tags
           latestTag=$(git describe --tags `git rev-list --tags --max-count=1`)
           echo version is $latestTag
           echo "VERSION=$latestTag" >> "$GITHUB_ENV"
+      - name: Get Latest Tag
+        id: get_tag
+        uses: jasonetco/get-tag@v2.1.1
+        with:
+          format: 'v\${VERSION}'
+      - name: Set Output
+        run: echo "The latest version is ${{ steps.get_tag.outputs.tag }}"
+        env:
+          TAG: ${{ steps.get_tag.outputs.tag }}
       - name: Get latest tag
         if: matrix.os == 'windows-latest'
         shell: pwsh
