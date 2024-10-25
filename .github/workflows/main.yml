@@ -25,6 +25,62 @@ jobs:
     steps:
       - name: Checkout kaleido-client
         uses: actions/checkout@v4
-      - name: Show GITHUB_REF_NAME
+      - name: Checkout kaleido-repo
+        uses: actions/checkout@v4
+        with:
+          repository: wp2code/kaleido-repo
+          ref: main
+          path: server
+          token: ${{ secrets.KALEIDO_TOKEN }}
+          sparse-checkout: |
+            jre
+            app
+      - name: Checkout kaleido-client
+        uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8.6.7
+      - name: Install NodeJs With 17
+        uses: actions/setup-node@v4
+        with:
+          node-version: 17
+          cache: 'npm'
+      - name: Install Dependencies
         run: |
-           echo "GITHUB_REF_NAME is ${{ matrix.os == 'windows-latest' && '$env:GITHUB_REF_NAME' || '$GITHUB_REF_NAME' }}"
+          pnpm install
+      - name: Build App For Windows
+        if: matrix.os == 'windows-latest'
+        run: pnpm run build:win
+      # - name: Build App For Macos
+      #   if: matrix.os == 'macos-latest'
+      #   run: |
+      #     pnpm run build:mac
+      #     pnpm run build:mac-arm
+      - name: Cleanup Artifacts for Windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          npx del-cli "dist/*" "!dist/*.exe" "!dist/*.zip" "!dist/*.yml"
+      # - name: Cleanup Artifacts for MacOS
+      #   if: matrix.os == 'macos-latest'
+      #   run: |
+      #     npx del-cli "dist/*" "!dist/(*.dmg|*.zip|latest*.yml)"
+      - name: Show dist
+        run: ls -R ./dist
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}
+          path: dist
+      - name: Release App
+        id: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ secrets.KALEIDO_TOKEN }}
+          body_path: ./CHANGELOG.md
+          files: |
+            dist/*.exe
+            LICENSE
+          tag_name:  ${{ matrix.os == 'windows-latest' && '$env:GITHUB_REF_NAME' || '$GITHUB_REF_NAME' }}
+          name: Release  ${{ matrix.os == 'windows-latest' && '$env:GITHUB_REF_NAME' || '$GITHUB_REF_NAME' }}
+          prerelease: false
+          draft: false
