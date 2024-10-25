@@ -31,7 +31,7 @@ jobs:
         run: |
           latestTag=$(git describe --tags `git rev-list --tags --max-count=1`)
           echo version is $latestTag
-          echo "VERSION=$latestTag" >> "$GITHUB_ENV"
+          echo "$env:VERSION=$latestTag" >> "$GITHUB_ENV"
       - name: Get latest tag
         if: matrix.os == 'windows-latest'
         shell: pwsh
