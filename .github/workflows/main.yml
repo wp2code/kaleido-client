@@ -18,8 +18,6 @@ jobs:
       matrix:
         os:
           - windows-latest
-          - macos-latest
-          - ubuntu-latest
     name: Build And Release
     runs-on: ${{ matrix.os }}
     steps:
