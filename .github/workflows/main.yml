@@ -14,7 +14,6 @@ jobs:
           - ubuntu-latest
     name: Build And Release
     runs-on: ${{ matrix.os }}
-	if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Checkout kaleido-client
         uses: actions/checkout@v4
