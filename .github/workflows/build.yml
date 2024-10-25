@@ -1,0 +1,84 @@
+name: Deploy Kaleido Client
+on:
+  push:
+    tags:
+      - v*
+jobs:
+  release:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - windows-latest
+    name: Build And Release
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout kaleido-client
+        uses: actions/checkout@v4
+      - name: Get latest tag
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $verSplit = $("${{ github.ref }}" -split "/")
+          $ver=$verSplit[2]
+          echo "latestTag is $ver"
+          echo "VERSION=$ver" >> "$env:GITHUB_ENV"
+      - name: Checkout kaleido-repo
+        uses: actions/checkout@v4
+        with:
+          repository: wp2code/kaleido-repo
+          ref: main
+          path: server
+          token: ${{ secrets.KALEIDO_TOKEN }}
+          sparse-checkout: |
+            jre
+            app
+      - name: Checkout kaleido-client
+        uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8.6.7
+      - name: Install NodeJs With 17
+        uses: actions/setup-node@v4
+        with:
+          node-version: 17
+          cache: 'npm'
+      - name: Install Dependencies
+        run: |
+          pnpm install
+      - name: Build App For Windows
+        if: matrix.os == 'windows-latest'
+        run: pnpm run build:win
+      # - name: Build App For Macos
+      #   if: matrix.os == 'macos-latest'
+      #   run: |
+      #     pnpm run build:mac
+      #     pnpm run build:mac-arm
+      - name: Cleanup Artifacts for Windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          npx del-cli "dist/*" "!dist/*.exe" "!dist/*.zip" "!dist/*.yml"
+      # - name: Cleanup Artifacts for MacOS
+      #   if: matrix.os == 'macos-latest'
+      #   run: |
+      #     npx del-cli "dist/*" "!dist/(*.dmg|*.zip|latest*.yml)"
+      - name: Show dist
+        run: ls -R ./dist
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}
+          path: dist
+      - name: Release App
+        id: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ secrets.KALEIDO_TOKEN }}
+          body_path: ./CHANGELOG.md
+          files: |
+            dist/*.exe
+            LICENSE
+          tag_name: $env:VERSION
+          name: Release  $env:VERSION
+          prerelease: false
+          draft: false
