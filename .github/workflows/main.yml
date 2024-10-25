@@ -39,7 +39,7 @@ jobs:
         run: |
           echo "The latest tag is ${{ github.ref }}"
           git fetch --tags
-          $latestTag = git describe --tags
+          $latestTag = $(git describe --tags)
           Write-Host "The latest tag is $latestTag"
           echo "VERSION=$latestTag" >> "$GITHUB_ENV"
       - name: show version
