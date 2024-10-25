@@ -38,6 +38,7 @@ jobs:
         shell: powershell
         run: |
           $latestTag = $("${{ github.ref }}" -split "/")[2]
+          echo latestTag is $latestTag
           echo "VERSION=$latestTag" >> "$GITHUB_ENV"
       - name: show version
         run: echo version is $VERSION
