@@ -6,4 +6,4 @@ server
 *.build.yml
 *.db
 ### Github ###
-.github/
+# .github/
