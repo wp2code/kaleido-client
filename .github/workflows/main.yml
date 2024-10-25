@@ -42,7 +42,7 @@ jobs:
           echo "latestTag is $ver"
           echo "VERSION=$ver" >> "$GITHUB_ENV"
       - name: show version
-        run: echo version is $VERSION
+        run: echo "version is ${{ VERSION }}"
       # - name: Checkout kaleido-repo
       #   uses: actions/checkout@v4
       #   with:
