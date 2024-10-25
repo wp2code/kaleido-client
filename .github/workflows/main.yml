@@ -39,7 +39,7 @@ jobs:
         run: |
           $verSplit = $("${{ github.ref }}" -split "/")
           $ver=$verSplit[2]
-          echo latestTag is $ver
+          echo "latestTag is $ver"
           echo "VERSION=$ver" >> "$GITHUB_ENV"
       - name: show version
         run: echo version is $VERSION
