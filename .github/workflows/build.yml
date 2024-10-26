@@ -11,6 +11,7 @@ jobs:
         os:
           - windows-latest
     name: Build And Release
+    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout kaleido-client
