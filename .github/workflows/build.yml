@@ -78,7 +78,7 @@ jobs:
           files: |
             dist/*.exe
             LICENSE
-          tag_name: $env:VERSION
-          name: Release  $env:VERSION
+          tag_name:  ${{ github.ref }}
+          name: Release   ${{ github.ref }}
           prerelease: false
           draft: false
