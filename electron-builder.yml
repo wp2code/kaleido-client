@@ -1,7 +1,11 @@
 appId: com.lzx.Kaleido
 productName: Kaleido
 extraResources:
-  - server
+  from: server
+  to: server
+  filter:
+    - 'app/**'
+    - 'jre/**'
 directories:
   buildResources: build
   output: dist
