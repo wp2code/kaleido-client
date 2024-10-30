@@ -13,24 +13,24 @@ kaleido工具前端源码 [后端源码](https://github.com/wp2code/kaleido)
 ### Install
 
 ```bash
-$ pnpm install
+$ yarn install
 ```
 
 ### Development
 
 ```bash
-$ pnpm dev
+$ yarn dev
 ```
 
 ### Build
 
 ```bash
 # For windows
-$ pnpm build:win
+$ yarn build:win
 
 # For macOS
-$ pnpm build:mac
+$ yarn build:mac
 
 # For Linux
-$ pnpm build:linux
+$ yarn build:linux
 ```
