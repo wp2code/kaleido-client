@@ -28,7 +28,6 @@ import UnoCSS from 'unocss/vite'
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const pathSrc = resolve(__dirname, 'src/renderer/src')
 export default ({ command, mode }) => {
-  console.info('command', command, 'mode', mode)
   const env = loadEnv(mode, process.cwd(), '')
   const optimizeDepsElementPlusIncludes = [
     'element-plus/es',
@@ -49,6 +48,43 @@ export default ({ command, mode }) => {
       }
     )
   })
+  const silenceSomeSassDeprecationWarnings = {
+    verbose: true,
+    logger: {
+      warn(message, options) {
+        // const { stderr } = process
+        const span = options.span ?? undefined
+        const stack =
+          (options.stack === 'null' ? undefined : options.stack) ?? undefined
+
+        if (options.deprecation) {
+          if (
+            message.startsWith(
+              'Using / for division outside of calc() is deprecated'
+            )
+          ) {
+            // silences above deprecation warning
+            return
+          }
+          // stderr.write('DEPRECATION ')
+        }
+        // stderr.write(`WARNING: ${message}\n`)
+
+        if (span !== undefined) {
+          // output the snippet that is causing this warning
+          // stderr.write(`\n"${span.text}"\n`)
+        }
+
+        if (stack !== undefined) {
+          // indent each line of the stack
+          // stderr.write(
+          //   `    ${stack.toString().trimEnd().replace(/\n/gm, '\n    ')}\n`
+          // )
+        }
+        // stderr.write('\n')
+      },
+    },
+  }
   return defineConfig({
     main: {
       envPrefix: 'M_VITE_',
@@ -88,10 +124,14 @@ export default ({ command, mode }) => {
         preprocessorOptions: {
           //define global scss variable
           scss: {
-            javascriptEnabled: true,
+            ...silenceSomeSassDeprecationWarnings,
+            // javascriptEnabled: true,
             additionalData: `
               @use "@/styles/variables.scss" as *;
             `,
+          },
+          sass: {
+            ...silenceSomeSassDeprecationWarnings,
           },
         },
       },

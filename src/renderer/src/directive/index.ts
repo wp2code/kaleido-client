@@ -9,7 +9,6 @@ import { ClickOutside } from 'element-plus'
 // import Clickoutside from 'element-ui/src/utils/Clickoutside'
 // 全局注册 directive
 export function setupDirective(app: App<Element>): void {
-  console.log('setupDirective', contextmenu)
   app
     .directive('dragSize', dragSize)
     .directive('contextmenu', contextmenu)

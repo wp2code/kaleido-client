@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { DbConfig } from '~/repositories/entity/DbConfig'
+import { DbConfig } from '@/views/code/db/DbConfig'
 import DbConnectionPanel from './db/DbConnectionPanel.vue'
 import DbPanel from './db/DbPanel.vue'
 import DbTablePanel from './db/DbTablePanel.vue'

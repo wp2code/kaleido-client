@@ -33,4 +33,6 @@ module.exports = {
   useTabs: false,
   // vue 文件中是否缩进 <style> 和 <script> 标签，默认 false
   vueIndentScriptAndStyle: false,
+  // //Sass 将不会打印由依赖项引起的警告
+  // quietDeps: true,
 }

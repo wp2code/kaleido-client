@@ -77,6 +77,7 @@ const { stop } = watchEffect(() => {
       webCodeView.value.codeType = code.codeType
       webCodeView.value.useMybatisPlus = code.useMybatisPlus
       webCodeView.value.superclassName = code.superclassName
+      webCodeView.value.webMethodList = code.webMethodList
       break
     }
   }
@@ -103,6 +104,7 @@ watch(
 const refreshGenCode = debounce((directUseTemplateConfig: boolean) => {
   const serviceApiCodeParam = useGenCodeParam.getCodeParamCache('ServiceApi')
   const voCodeParam = useGenCodeParam.getCodeParamCache('VO')
+  console.log('webCodeView', webCodeView.value)
   const p = buildCodeParamsWithCodeView([webCodeView.value], props.tableData)
   if (serviceApiCodeParam) {
     p.push(serviceApiCodeParam)

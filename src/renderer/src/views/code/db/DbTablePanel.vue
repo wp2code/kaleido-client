@@ -13,7 +13,6 @@ import {
   SimpleDatabase,
   TableDDLParam,
 } from '@/api/datasource/types'
-//import Popover from '@/components/Popover/index.vue'
 import type Node from 'element-plus/es/components/tree/src/model/node'
 import { Close, Search } from '@element-plus/icons-vue'
 import { ElTree, ElLoading } from 'element-plus'
@@ -112,12 +111,13 @@ const refreshTable = (id: string) => {
   openConnection(id)
 }
 const selectLoadNode = (node: Node, resolve: (data: Tree[]) => void) => {
+  const data = toRaw(node.data)
   if (node.level == 0) {
     return resolve(dataSourceMetaTree.value)
   }
-  const data = node.data
   if (node.level == 1) {
-    openDataBase(data.connectionId, (data.data as SimpleDatabase).dataBaseName).then(
+    const databaseParam=data.data as SimpleDatabase
+    openDataBase(data.connectionId, databaseParam.dataBaseName).then(
       (res) => {
         if (res.data) {
           const database = res.data as Database
@@ -164,7 +164,7 @@ const selectLoadNode = (node: Node, resolve: (data: Tree[]) => void) => {
     const tableList = data.data.tableList
     if (tableList) {
       resolve(
-        data.data.tableList?.map((item) => {
+        data.tableList?.map((item) => {
           return {
             id: item.tableName,
             label: item.tableName,
@@ -201,11 +201,10 @@ watch(query, (val) => {
   onSerach(val)
 })
 const onNodeExpand = (tree: Tree, _node: Node, _self: any) => {
-  tree.iconColor = '#30ab14'
+  tree.iconColor = '#67C23A'
 }
 const tableContextmenuInfo = ref<MenuInfoType>({
   items: [{ icon:'ddl', lable:'查看DDL',onclick:(_e,data)=>{
-    console.log('onclick', data)
     getDDLMetaInfo(data)
   }
   } as IMenuItemType],
@@ -221,7 +220,6 @@ const getDDLMetaInfo = (selectNode?:Node) => {
         data.data?.schemaName
       )
     ).then((res) => {
-      console.log('ddl', res)
       tableDDLName.value= `表 ${data.data?.tableName} DDL`
       tableDDL.value = res.data
       tableDialogVisible.value=true
@@ -367,7 +365,7 @@ $tb-color: #ddd;
 .query-input {
   :deep() {
     .el-input__wrapper > .el-input__inner {
-      color: #ddd;
+      color: $tb-color;
     }
   }
 }
@@ -377,6 +375,7 @@ $tb-color: #ddd;
 }
 .table-tree-lable {
   color: $tb-color;
+  margin-left: 2px;
   &:hover {
     font-size: medium;
   }

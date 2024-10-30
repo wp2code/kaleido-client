@@ -78,8 +78,7 @@ jobs:
           body_path: ./CHANGELOG.md
           files: |
             dist/*.exe
-            LICENSE
-          tag_name:  ${{ github.ref }}
+          tag_name: ${{ github.ref }}
           name: Release   ${{ github.ref }}
           prerelease: false
           draft: false

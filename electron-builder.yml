@@ -16,7 +16,7 @@ files:
   - '!server/*'
   - '!store.db'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
-  - '!{.eslintignore,.editorconfig,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,.prettierrc.cjs,dev-app-update.yml,electron-builder.yml,CHANGELOG.md,README.md}'
+  - '!{.git,.github,.eslintignore,.editorconfig,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,.prettierrc.cjs,dev-app-update.yml,electron-builder.yml,CHANGELOG.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
 asar: true

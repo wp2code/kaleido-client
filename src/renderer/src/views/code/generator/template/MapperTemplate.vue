@@ -29,6 +29,7 @@ watchEffect(() => {
       mapperCodeView.value.codeType = code.codeType
       mapperCodeView.value.superclassName = code.superclassName
       mapperCodeView.value.useMybatisPlus = code.useMybatisPlus
+      mapperCodeView.value.methodList = code.methodList
     }
     if (code.codeType === 'Xml') {
       xmlCodeView.value.name = code.name
@@ -41,6 +42,7 @@ watchEffect(() => {
       xmlCodeView.value.codeType = code.codeType
       xmlCodeView.value.namespace = code.namespace
       xmlCodeView.value.useMybatisPlus = code.useMybatisPlus
+      xmlCodeView.value.methodList = code.methodList
     }
   }
 })

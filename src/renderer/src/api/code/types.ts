@@ -390,6 +390,7 @@ export interface CodeGenerationView {
   useSwagger: boolean
   useMybatisPlus: boolean
   methodList?: Array<string>
+  webMethodList?: Array<string>
   tableFieldColumnMap?: TableFieldColumn[]
 }
 
