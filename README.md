@@ -1,12 +1,11 @@
 <!-- @format -->
 
-# Kaleido
+# Kaleido-client
+**一个辅助Coding的桌面应用工具。**
 
 kaleido工具前端源码 [后端源码](https://github.com/wp2code/kaleido)
-
-## Recommended IDE Setup
-
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+## Functionality
+- Java代码生成和预览
 
 ## Project Setup
 
