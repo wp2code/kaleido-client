@@ -2,7 +2,7 @@ import { BrowserWindow, IpcMain } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import { isDev, updaterNotification } from './util'
 import logger from 'electron-log'
-import { setUpdateVersion, setQuitAndInstall } from './store'
+import { setUpdateVersion, setQuitAndInstall, deleteByKey } from './store'
 // 自动下载更新
 autoUpdater.autoDownload = false
 // 退出时自动安装更新
@@ -15,6 +15,7 @@ export default (
   ipcMain: IpcMain,
   feedURL?: string
 ) => {
+  deleteByKey('Up-version')
   if (isDev) {
     autoUpdater.forceDevUpdateConfig = true
     return
@@ -75,7 +76,6 @@ export default (
   })
   //退出并且安装应用
   ipcMain.on('quitAndInstallApp', (_event) => {
-    logger.log('退出并且安装应用...')
     setQuitAndInstall(true)
     setTimeout(() => {
       autoUpdater.quitAndInstall()

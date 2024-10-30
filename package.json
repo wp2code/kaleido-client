@@ -1,6 +1,6 @@
 {
   "name": "kaleido-client",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "An Electron application with Vue and TypeScript",
   "main": "./out/main/index.js",
   "author": "wp2code",
@@ -17,7 +17,7 @@
     "build": "electron-vite build --mode production",
     "postinstall": "electron-builder install-app-deps",
     "createSigned": "electron-builder create-self-signed-cert --publisher kaleido",
-    "build:win": "npm run build && electron-builder --config --win --x64 --publish never",
+    "build:win": "npm run build && electron-builder --config  -c.extraMetadata.version=1.0.2 --win --x64 --publish never",
     "build:mac": "npm run build && electron-builder --mac --config --publish never",
     "build:linux": "npm run build && electron-builder --linux --config --publish never",
     "build:help": "electron-builder --help"

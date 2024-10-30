@@ -168,10 +168,9 @@ ipcMain.handle('open-dir-dialog', (_event, params): any => {
 })
 ipcMain.handle('get-app-version', (_): string => {
   const version = app.getVersion()
-  getUpdateVersion()
-  return version.toLowerCase()
+  return version ? version.toLowerCase() : ''
 })
 ipcMain.handle('get-app-update-version', (_): string => {
   const version = getUpdateVersion()
-  return version.toLowerCase()
+  return version ? version.toLowerCase() : null
 })
