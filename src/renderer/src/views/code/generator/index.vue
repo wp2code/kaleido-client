@@ -14,6 +14,7 @@ import {
   copyAddTemplate,
   updateTemplateName,
   deleteCodeGenerationTemplate,
+  updateDefaultTemplate,
   exportTemplate,
   saveUploadTemplate,
   getDefaultGenerateTemplateConfigList,
@@ -74,14 +75,19 @@ const initTemplateList = async (
       if (seleteTemplateId) {
         template = list.find((item) => item.id == seleteTemplateId)
       }
-      if (!template) {
-        template = list.filter((item) => item.isDefault === 1)[0]
+      if (template == undefined || !template) {
+        template = list.filter((item) => item.isDefault == 1)[0]
+        if (template == undefined || !template) {
+          template = list[0]
+        }
       }
       selectCodeTemplate.value = template
-      const config = selectCodeTemplate.value.basicConfig
-      basicConfigInfo.value = config
-        ? (JSON.parse(config) as CodeTemplateBasicConfig)
-        : null
+      const config = selectCodeTemplate.value?.basicConfig
+      if (config) {
+        basicConfigInfo.value = config
+          ? (JSON.parse(config) as CodeTemplateBasicConfig)
+          : null
+      }
       initFilterMoreMenuList()
       refrshClick(directUseTemplateConfig)
     }
@@ -138,9 +144,9 @@ const exoprtTemplate = async (_item: any) => {
       if (response) {
         await IoUtil.exportData(path, response.data, true, (_err) => {
           if (_err) {
-            MessageBox.fail('导出失败！')
+            MessageBox.fail('导出失败')
           } else {
-            MessageBox.ok('导出成功！')
+            MessageBox.ok('导出成功')
           }
         })
       }
@@ -155,16 +161,28 @@ const importTemplate = async (_item: any) => {
   if (filePath) {
     const data = IoUtil.importData(filePath, (_err) => {
       if (_err) {
-        MessageBox.fail('导出失败！')
+        MessageBox.fail('导出失败')
       }
     })
     if (data) {
       saveUploadTemplate(data).then((_res) => {
-        MessageBox.ok('导入成功！')
+        MessageBox.ok('导入成功')
         initTemplateList(true, selectCodeTemplate.value.id)
       })
     }
   }
+}
+const settingDefaultTemplate = async (_item: any) => {
+  if (selectEditCodeTemplate.value.isDefault == 1) {
+    MessageBox.ok('已经是默认模板了')
+    return
+  }
+  updateDefaultTemplate(selectEditCodeTemplate.value.id).then((res) => {
+    if (res) {
+      MessageBox.ok('设置成功')
+      initTemplateList(true, selectCodeTemplate.value.id)
+    }
+  })
 }
 const initFilterMoreMenuList = () => {
   const copyTemplateItem = MoreMenu.mack(
@@ -177,6 +195,12 @@ const initFilterMoreMenuList = () => {
   const deleteTemplateItem = MoreMenu.mack('delete', '删除', 'Delete', deleteTemplate)
   const exportTemplateItem = MoreMenu.mack('export', '导出', 'Download', exoprtTemplate)
   const importTemplateItem = MoreMenu.mack('import', '导入', 'Upload', importTemplate)
+  const settingDefaultItem = MoreMenu.mack(
+    'settingDefault',
+    '设为默认',
+    'Star',
+    settingDefaultTemplate
+  )
   morMenuList.value = initFilterMoreMenu(
     [
       copyTemplateItem,
@@ -184,6 +208,7 @@ const initFilterMoreMenuList = () => {
       deleteTemplateItem,
       exportTemplateItem,
       importTemplateItem,
+      settingDefaultItem,
     ],
     (item: MoreMenu) => {
       if (selectCodeTemplate.value.isInternal == 1) {
@@ -403,7 +428,10 @@ const clickReset = () => {
                     :label="item.templateName"
                     :value="item"
                   >
-                    <span style="float: left">{{ item.templateName }}</span>
+                    <span style="float: left">{{ item.templateName }} </span>
+                    <span v-if="item.isDefault == 1" style="float: right">
+                      <el-icon><Star color="#67C23A" /></el-icon>
+                    </span>
                   </el-option>
                 </el-select>
                 <el-dropdown

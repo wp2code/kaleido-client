@@ -186,6 +186,22 @@ export function updateTemplateName(
     data: { templateName, templateId },
   })
 }
+
+/**
+ * 设备默认模板
+ *
+ * @param id
+ * @param basicConfig
+ * @returns
+ */
+export function updateDefaultTemplate(
+  templateId: string
+): AxiosPromise<Boolean> {
+  return request({
+    url: `/v1/code-tp/default/${templateId}/update`,
+    method: 'put',
+  })
+}
 /**
  *
  * @param id

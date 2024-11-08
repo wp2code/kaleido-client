@@ -62,10 +62,14 @@ const { stop } = watchEffect(() => {
     const tpConfig = props.templateInfo!.templateConfigList.filter(
       (config) => config.name == 'Xml'
     )[0]
-    initMethodList.value = tpConfig.templateParams?.methodList
-    methodList.value = initMethodList.value
+    const methods = tpConfig.templateParams?.methodList || []
+    initMethodList.value = methods
+    methodList.value = methods
     templateId.value = props.templateInfo!.id
     isIndeterminate.value = initMethodList.value.length != apis.length
+    if (methods.length == apis.length) {
+      checkAllCodePrams.value = true
+    }
   }
   xmlCodeView.value = props.data
 })

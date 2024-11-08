@@ -60,9 +60,13 @@ const { stop } = watchEffect(() => {
     const tpConfig = props.data.templateInfo!.templateConfigList.filter(
       (config) => config.name == 'Controller'
     )[0]
-    initMethodList.value = tpConfig.templateParams?.methodList
-    methodList.value = initMethodList.value
+    const methods = tpConfig.templateParams?.methodList || []
+    initMethodList.value = methods
+    methodList.value = methods
     isIndeterminate.value = initMethodList.value.length != apis.length
+    if (methods.length == apis.length) {
+      checkAllCodePrams.value = true
+    }
   }
   templateId.value = props.data.templateInfo ? props.data.templateInfo!.id : ''
   const codeGenerationList = props.data!.codeGenerationList || []
