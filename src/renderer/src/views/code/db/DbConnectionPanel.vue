@@ -8,7 +8,7 @@ const emits = defineEmits<{
   select:[dbConfig:DataSource,event:String,isRefresh:Boolean]
   refresh:[data:Object,eventName:string]
 }>()
-const activeItemId=ref()
+const activeItemId=ref("-1")
 const selectDeleteConnect=(item:any)=>{
   proxy.$msgBoxUtil.confirm('确认删除?', {
     ok:  async () => {
@@ -88,7 +88,7 @@ defineExpose({ queryList })
           v-for="(item, index) of list"
           :key="index"
           :class="['item', item.id == activeItemId ? 'active-item' : '']"
-          @click="selectToConnect(item)"
+          @click.stop="selectToConnect(item)"
         >
           <div class="desc">
             <svg-icon

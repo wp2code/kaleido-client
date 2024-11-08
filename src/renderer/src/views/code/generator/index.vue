@@ -16,6 +16,7 @@ import {
   deleteCodeGenerationTemplate,
   exportTemplate,
   saveUploadTemplate,
+  getDefaultGenerateTemplateConfigList,
 } from '@/api/code/index'
 import { SelectDbable, TriggerWatch } from '../keys'
 import { MoreMenu, initFilterMoreMenu } from './type'
@@ -86,6 +87,15 @@ const initTemplateList = async (
     }
   })
 }
+const initDefaultGenerationTemplateConfig = async () => {
+  await getDefaultGenerateTemplateConfigList(selectCodeTemplate.value.id).then((res) => {
+    if (res) {
+      selectedCodeParams.value = res.data
+      isIndeterminate.value = selectedCodeParams.value.length !== allCodeParams.length
+      checkAllCodePrams.value = !isIndeterminate.value
+    }
+  })
+}
 onMounted(() => {
   initTemplateList(true)
 })
@@ -95,9 +105,11 @@ const copyTemplate = (item: any) => {
   selectEditCodeTemplate.value.templateName =
     selectEditCodeTemplate.value.templateName + 'Copy'
   actionActive.value = (item.menu || {}) as MoreMenu
+  actionActive.value.data = item.template
 }
 const deleteTemplate = (item: any) => {
   actionActive.value = (item.menu || {}) as MoreMenu
+  actionActive.value.data = item.template
   MessageBox.confirm(`确认删除【${selectEditCodeTemplate.value.templateName}】? `, {
     ok: async () => {
       await deleteCodeGenerationTemplate(selectEditCodeTemplate.value.id).then((res) => {
@@ -113,6 +125,7 @@ const renameTemplate = (item: any) => {
   actionTitle.value = '重命名'
   actionVisabel.value = true
   actionActive.value = (item.menu || {}) as MoreMenu
+  actionActive.value.data = item.template
 }
 const exoprtTemplate = async (_item: any) => {
   const path = await window.winApi.openSaveDialog({
@@ -186,6 +199,15 @@ const actionSave = async () => {
     return
   }
   if (actionActiveMenu!.id == 'rename') {
+    if (!selectEditCodeTemplate.value.templateName) {
+      MessageBox.fail('模板名称不能为空')
+      return
+    }
+    const templateName = actionActive.value?.data!.templateName
+    if (selectEditCodeTemplate.value.templateName == templateName) {
+      MessageBox.fail('模板名称一样')
+      return
+    }
     await checkTemplateNameExists(
       selectEditCodeTemplate.value.templateName,
       selectCodeTemplate.value.id
@@ -210,6 +232,10 @@ const actionSave = async () => {
     })
   }
   if (actionActiveMenu!.id == 'copyAdd') {
+    if (!selectEditCodeTemplate.value.templateName) {
+      MessageBox.fail('模板名称不能为空')
+      return
+    }
     await checkTemplateNameExists(selectEditCodeTemplate.value.templateName).then(
       async (res) => {
         if (!res.data) {
@@ -275,6 +301,7 @@ const onChangeConfig = (value: any) => {
 const openCodeDialog = (visible: boolean, title: string) => {
   codeVisible.value = visible
   codeDialogTitle.value = title
+  initDefaultGenerationTemplateConfig()
 }
 const openBasicCOnfigDialog = () => {
   basicConfigVisible.value = true
@@ -329,7 +356,7 @@ watch(codeVisible, (nv, _ov) => {
     codeGenerationResult.value.codeGenerationList = []
   }
 })
-const selectMorMenuItem = (item: any) => {
+const selectMoreMenuItem = (item: any) => {
   if (item) {
     selectEditCodeTemplate.value = { ...item.template } as CodeTemplate
     item.menu.command(item)
@@ -337,6 +364,9 @@ const selectMorMenuItem = (item: any) => {
 }
 const refrshBasicConfig = (_data: any) => {
   refrshClick(true)
+}
+const clickReset = () => {
+  initDefaultGenerationTemplateConfig()
 }
 </script>
 <template>
@@ -376,7 +406,12 @@ const refrshBasicConfig = (_data: any) => {
                     <span style="float: left">{{ item.templateName }}</span>
                   </el-option>
                 </el-select>
-                <el-dropdown hide-on-click trigger="click" @command="selectMorMenuItem">
+                <el-dropdown
+                  hide-on-click
+                  class="more-menu"
+                  trigger="click"
+                  @command="selectMoreMenuItem"
+                >
                   <el-icon><Tools /></el-icon>
                   <template #dropdown>
                     <el-dropdown-menu>
@@ -413,8 +448,12 @@ const refrshBasicConfig = (_data: any) => {
           width="50%"
           append-to-body
           :title="actionTitle"
+          :close-on-click-modal="false"
         >
-          <el-input v-model="selectEditCodeTemplate.templateName" />
+          <el-input
+            v-model="selectEditCodeTemplate.templateName"
+            placeholder="输入模板名称"
+          />
           <template #footer>
             <span class="dialog-footer">
               <el-button @click="actionVisabel = false">取消</el-button>
@@ -460,10 +499,10 @@ const refrshBasicConfig = (_data: any) => {
       <el-dialog
         v-model="codeVisible"
         :title="codeDialogTitle"
-        width="65%"
+        width="70%"
         draggable
+        append-to-body
         :close-on-click-modal="false"
-        :close-on-press-escape="false"
       >
         <div>
           <el-checkbox
@@ -499,6 +538,7 @@ const refrshBasicConfig = (_data: any) => {
         <template #footer>
           <span class="dialog-footer">
             <el-button @click="cancel()">取消</el-button>
+            <el-button @click="clickReset()">重置</el-button>
             <el-button type="primary" @click="saveGenCode()">
               {{
                 generationCodeFlag == true &&
@@ -530,6 +570,11 @@ const refrshBasicConfig = (_data: any) => {
     & > :last-child {
       padding-left: 0.2rem;
     }
+  }
+}
+.more-menu {
+  &:hover {
+    cursor: pointer;
   }
 }
 .col-center {

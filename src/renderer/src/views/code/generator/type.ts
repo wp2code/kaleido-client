@@ -3,6 +3,7 @@ export class MoreMenu {
   name: string
   icon?: string
   command?: (item?: any) => void
+  data?: any
   static mack(
     id: string,
     name: string,

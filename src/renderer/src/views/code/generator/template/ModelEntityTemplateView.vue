@@ -75,10 +75,10 @@ watchEffect(() => {
 })
 watch(
   [
+    () => entityCodeParams.value.name,
     () => entityCodeParams.value.useLombok,
     () => entityCodeParams.value.codePath,
     () => entityCodeParams.value.nameSuffix,
-    () => entityCodeParams.value.name,
     () => entityCodeParams.value.useMybatisPlus,
     () => entityCodeParams.value.useSwagger,
     () => entityCodeParams.value.sourceFolder,
@@ -166,6 +166,7 @@ const clickConfirm = () => {
     v.selected = valMap.has(v.column)
   })
   entityCodeParams.value.tableFieldColumnMap = tableFieldColumnData.value
+  clickCancel()
   refreshGenCode(false)
 }
 const handleSelectionChange = (val: TableFieldColumn[]) => {
@@ -255,8 +256,7 @@ const toEditTemplate = () => {
       draggable
       width="80%"
       append-to-body
-      :close-on-click-modal="true"
-      :close-on-press-escape="true"
+      :close-on-click-modal="false"
     >
       <el-table
         ref="multipleTableRef"

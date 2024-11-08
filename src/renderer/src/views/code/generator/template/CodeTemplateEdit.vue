@@ -1,5 +1,12 @@
 <template>
-  <el-dialog v-model="isShow" draggable append-to-body :title="titleText">
+  <el-dialog
+    v-model="isShow"
+    draggable
+    append-to-body
+    :title="titleText"
+    top="9vh"
+    :close-on-click-modal="false"
+  >
     <el-form :model="template" label-width="auto" style="max-width: 600px">
       <el-form-item v-if="type != 'Xml'" label="父类">
         <el-input v-model="template!.superclassName" />
@@ -27,6 +34,13 @@
             </template>
           </el-input>
         </el-tooltip>
+      </el-form-item>
+      <el-form-item label="默认生成">
+        <el-switch
+          v-model="template!.defaultGenerate"
+          :active-value="true"
+          :inactive-value="false"
+        />
       </el-form-item>
       <el-form-item label="插件">
         <el-checkbox v-if="type != 'VO'" v-model="template!.useMybatisPlus"
@@ -178,6 +192,18 @@ const save = async () => {
     template.value.defaultIgFields = []
   }
   template.value.methodList = methodList.value
+  if (!template.value.codePath) {
+    MessageBox.fail('代码地址不能为空')
+    return
+  }
+  // if (!template.value.packageName) {
+  //   MessageBox.fail('包名称不能为空')
+  //   return
+  // }
+  // if (!template.value.sourceFolder) {
+  //   MessageBox.fail('包路径不能为空')
+  //   return
+  // }
   await updateCodeGenerationTemplateOfPartition(template.value).then((res) => {
     if (res.data) {
       emits('success', template.value)
@@ -186,7 +212,6 @@ const save = async () => {
   })
 }
 watchEffect(() => {
-  // handleCheckedAllCodeParamChange(true)
   initChecked()
 })
 </script>

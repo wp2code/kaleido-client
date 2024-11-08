@@ -65,6 +65,7 @@ const { stop } = watchEffect(() => {
     initMethodList.value = tpConfig.templateParams?.methodList
     methodList.value = initMethodList.value
     templateId.value = props.templateInfo!.id
+    isIndeterminate.value = initMethodList.value.length != apis.length
   }
   xmlCodeView.value = props.data
 })
@@ -212,8 +213,7 @@ const toEditTemplate = () => {
     draggable
     width="80%"
     append-to-body
-    :close-on-click-modal="true"
-    :close-on-press-escape="true"
+    :close-on-click-modal="false"
   >
     <el-checkbox
       v-model="checkAllCodePrams"

@@ -62,6 +62,7 @@ const { stop } = watchEffect(() => {
     )[0]
     initMethodList.value = tpConfig.templateParams?.methodList
     methodList.value = initMethodList.value
+    isIndeterminate.value = initMethodList.value.length != apis.length
   }
   templateId.value = props.data.templateInfo ? props.data.templateInfo!.id : ''
   const codeGenerationList = props.data!.codeGenerationList || []
@@ -104,7 +105,6 @@ watch(
 const refreshGenCode = debounce((directUseTemplateConfig: boolean) => {
   const serviceApiCodeParam = useGenCodeParam.getCodeParamCache('ServiceApi')
   const voCodeParam = useGenCodeParam.getCodeParamCache('VO')
-  console.log('webCodeView', webCodeView.value)
   const p = buildCodeParamsWithCodeView([webCodeView.value], props.tableData)
   if (serviceApiCodeParam) {
     p.push(serviceApiCodeParam)
@@ -125,9 +125,6 @@ const refreshGenCode = debounce((directUseTemplateConfig: boolean) => {
   })
 }, 300)
 const handleCheckedCodeParamChange = (_value: string[]) => {
-  // const checkedCount = _value.length
-  // checkAllCodePrams.value = checkedCount === apis.length
-  // isIndeterminate.value = checkedCount > 0 && checkedCount < apis.length
   checkBoxStatusChange(_value)
 }
 const handleOpenMenu = async () => {
@@ -218,12 +215,11 @@ const clickConfirm = () => {
   </div>
   <el-dialog
     v-model="methodVisible"
-    title="Web(Controller)方法"
+    title="接口(Controller)方法"
     draggable
     width="60%"
     append-to-body
-    :close-on-click-modal="true"
-    :close-on-press-escape="true"
+    :close-on-click-modal="false"
   >
     <el-checkbox
       v-model="checkAllCodePrams"

@@ -94,6 +94,7 @@ onBeforeUnmount(() => {
           />
         </template>
         <DbTablePanel
+          v-if="selectDbConfigData"
           :key="dbTablePanelKey"
           :data="selectDbConfigData"
           @select="selectDbTable"

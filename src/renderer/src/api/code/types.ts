@@ -53,6 +53,7 @@ export class PartitionTempate {
   useLombok?: boolean
   useMybatisPlus?: boolean
   useSwagger?: boolean
+  defaultGenerate?: boolean
   methodList?: Array<string>
   defaultIgFields?: Array<string>
 }
@@ -69,6 +70,7 @@ export interface TemplateConfig {
   useLombok?: boolean
   useMybatisPlus?: boolean
   useSwagger?: boolean
+  defaultGenerate?: boolean
   defaultIgFields?: Array<string>
   methodList?: Array<string>
 }

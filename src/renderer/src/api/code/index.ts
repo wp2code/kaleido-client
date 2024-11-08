@@ -234,7 +234,20 @@ export function getTemplateTableFieldColumnList(
     data: { ...param },
   })
 }
-
+/**
+ * 获取连接的数据源
+ *
+ * @param connectionId
+ * @returns
+ */
+export function getDefaultGenerateTemplateConfigList(
+  templateId: string
+): AxiosPromise<TableFieldColumn[]> {
+  return request({
+    url: `/v1/code-tp/${templateId}/generate/default/list`,
+    method: 'get',
+  })
+}
 /**
  * 导出模板
  *

@@ -2,9 +2,9 @@
 import {
   openConnectDataSource,
   openDataBase,
-  closeOtherConnectDataSource,
   getDataSourceByConnectionId,
   getTableDDL,
+  closeOtherConnectDataSource
 } from '@/api/datasource/index'
 import {
   Schema,
@@ -66,6 +66,8 @@ const openConnection = (id: string) => {
     .then((res) => {
       const data = res.data
       if (data) {
+        //关闭其它连接
+        closeOtherConnectDataSource(data.connectionId)
         const treeData = data.databases.map((item) => {
           return {
             id: item.dataBaseName,
@@ -161,10 +163,10 @@ const selectLoadNode = (node: Node, resolve: (data: Tree[]) => void) => {
     )
   }
   if (node.level == 2) {
-    const tableList = data.data.tableList
+    const tableList = data.data?.tableList
     if (tableList) {
       resolve(
-        data.tableList?.map((item) => {
+        tableList.map((item) => {
           return {
             id: item.tableName,
             label: item.tableName,
@@ -192,13 +194,10 @@ onMounted(() => {
     datasourceId.value = props.data.id
   }
 })
-onBeforeUpdate(() => {
-  if (datasourceId.value) {
-    closeOtherConnectDataSource(datasourceId.value)
+watchPostEffect(() => {
+  if(serachSwitch.value){
+    onSerach(query.value)
   }
-})
-watch(query, (val) => {
-  onSerach(val)
 })
 const onNodeExpand = (tree: Tree, _node: Node, _self: any) => {
   tree.iconColor = '#67C23A'
@@ -235,7 +234,7 @@ const handleTableDDLCopy = async () => {
 }
 </script>
 <template>
-  <div ref="tableBoxRef" class="table-box">
+  <div class="table-box">
     <div ref="headerRef" :class="['table-box-header', serachSwitch ? 'div-center' : '']">
       <div v-if="serachSwitch" class="header-serach">
         <el-input

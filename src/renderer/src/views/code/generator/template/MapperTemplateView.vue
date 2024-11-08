@@ -46,7 +46,6 @@ function checkBoxStatusChange(_value: string[]) {
   isIndeterminate.value = checkedCount > 0 && checkedCount < apis.length
 }
 const handleCheckedCodeParamChange = (_value: string[]) => {
-  console.log('handleCheckedCodeParamChange', _value)
   methodList.value = _value
   checkBoxStatusChange(_value)
 }
@@ -58,6 +57,7 @@ const { stop } = watchEffect(() => {
     initMethodList.value = tpConfig.templateParams?.methodList
     methodList.value = initMethodList.value
     templateId.value = props.templateInfo!.id
+    isIndeterminate.value = initMethodList.value.length != apis.length
   }
   mapperCodeView.value = props.data
   templateId.value = props.templateInfo ? props.templateInfo!.id : ''
@@ -205,8 +205,7 @@ const toEditTemplate = () => {
     draggable
     width="80%"
     append-to-body
-    :close-on-click-modal="true"
-    :close-on-press-escape="true"
+    :close-on-click-modal="false"
   >
     <el-checkbox
       v-model="checkAllCodePrams"

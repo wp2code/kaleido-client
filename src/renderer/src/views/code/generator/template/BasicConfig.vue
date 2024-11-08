@@ -156,6 +156,7 @@ const handleLicense=async (type:string)=>{
     append-to-body
     title="全局配置"
     width="65%"
+    :close-on-click-modal="false"
   >
     <div class="box">
       <div>
