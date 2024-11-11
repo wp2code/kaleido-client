@@ -4,7 +4,7 @@
     draggable
     append-to-body
     :title="titleText"
-    top="9vh"
+    top="6vh"
     :close-on-click-modal="false"
   >
     <el-form :model="template" label-width="auto" style="max-width: 600px">

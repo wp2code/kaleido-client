@@ -151,7 +151,7 @@ const handleLicense=async (type:string)=>{
 <template>
   <el-dialog
     v-model="isShow"
-    top="8vh"
+    top="6vh"
     draggable
     append-to-body
     title="全局配置"

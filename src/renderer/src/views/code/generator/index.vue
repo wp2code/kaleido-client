@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { SelectDataTableData } from '@/api/datasource/types'
+import { SelectDataTableData, TableDDLParam } from '@/api/datasource/types'
+import { getTableDDL } from '@/api/datasource/index'
 import {
   CodeTemplate,
   CodeGenerationParam,
@@ -58,6 +59,9 @@ const selectCTKey = ref()
 const actionVisabel = ref(false)
 const actionTitle = ref('')
 const canTriggerWatch = ref(false)
+const tableDDLName = ref()
+const tableDDL = ref()
+const tableDDLDialogVisible = ref(false)
 const actionActive = ref<MoreMenu>()
 const initTemplateList = async (
   directUseTemplateConfig: boolean,
@@ -161,7 +165,7 @@ const importTemplate = async (_item: any) => {
   if (filePath) {
     const data = IoUtil.importData(filePath, (_err) => {
       if (_err) {
-        MessageBox.fail('导出失败')
+        MessageBox.fail('导入失败')
       }
     })
     if (data) {
@@ -213,6 +217,9 @@ const initFilterMoreMenuList = () => {
     (item: MoreMenu) => {
       if (selectCodeTemplate.value.isInternal == 1) {
         return item.id !== 'delete' && item.id !== 'rename'
+      }
+      if (selectCodeTemplate.value.isDefault == 1) {
+        return item.id !== 'settingDefault'
       }
       return true
     }
@@ -331,6 +338,32 @@ const openCodeDialog = (visible: boolean, title: string) => {
 const openBasicCOnfigDialog = () => {
   basicConfigVisible.value = true
 }
+const openTableDDLDialog = () => {
+  console.log('selectDbTableData', selectDbTableData)
+  if (selectDbTableData.value) {
+    const dataSource = selectDbTableData.value.dataSource
+    const table = selectDbTableData.value.table
+    getTableDDL(
+      TableDDLParam.mack(
+        dataSource.connectionId,
+        table?.tableName,
+        table?.dataBaseName,
+        table?.schemaName
+      )
+    ).then((res) => {
+      tableDDLName.value = `表 ${table?.tableName} DDL`
+      tableDDL.value = res.data
+      tableDDLDialogVisible.value = true
+    })
+  }
+}
+const handleTableDDLCopy = async () => {
+  if (tableDDL.value && tableDDL.value != '') {
+    await window.winApi.copy(tableDDL.value)
+    MessageBox.ok('复制成功')
+    tableDDLDialogVisible.value = false
+  }
+}
 const cancel = () => {
   codeVisible.value = false
 }
@@ -410,7 +443,7 @@ const clickReset = () => {
         </div>
         <div>
           <el-row>
-            <el-col :offset="6" :span="12">
+            <el-col :offset="6" :span="10">
               <div class="header-select">
                 <div>
                   <label>代码模板：</label>
@@ -468,6 +501,33 @@ const clickReset = () => {
                 >全局配置</el-link
               >
             </el-col>
+            <el-col :span="2" class="col-center">
+              <el-dialog
+                v-model="tableDDLDialogVisible"
+                top="6vh"
+                append-to-body
+                :close-on-click-modal="false"
+                :title="tableDDLName"
+                draggable
+                width="60%"
+              >
+                <Codeview v-model:code="tableDDL" dark></Codeview>
+                <template #footer>
+                  <div class="dialog-footer">
+                    <el-button @click="tableDDLDialogVisible = false">取消</el-button>
+                    <el-button type="primary" @click="handleTableDDLCopy">
+                      确认 & 复制
+                    </el-button>
+                  </div>
+                </template>
+              </el-dialog>
+              <el-link
+                class="lable-text"
+                style="color: #909399"
+                @click.stop="openTableDDLDialog()"
+                >查看DDL</el-link
+              ></el-col
+            >
           </el-row>
         </div>
         <el-dialog

@@ -51,7 +51,7 @@ const tableTreeRef = ref<InstanceType<typeof ElTree>>()
 const serachRef = ref(null)
 const tableDDLName=ref()
 const tableDDL = ref()
-const tableDialogVisible = ref(false)
+const tableDDLDialogVisible = ref(false)
 const tableContextmenuRef = ref()
 const openConnection = (id: string) => {
   if (!id) {
@@ -92,7 +92,8 @@ const openConnection = (id: string) => {
 const clickSelectTable = async (tree: Tree) => {
   if (tree.leaf) {
     await getDataSourceByConnectionId(tree.connectionId).then((res) => {
-      if (tree.data) {
+      if (res.data) {
+        res.data.connectionId=tree.connectionId
         emits('select', tree.data as Table, res.data)
       }
     })
@@ -221,7 +222,7 @@ const getDDLMetaInfo = (selectNode?:Node) => {
     ).then((res) => {
       tableDDLName.value= `表 ${data.data?.tableName} DDL`
       tableDDL.value = res.data
-      tableDialogVisible.value=true
+      tableDDLDialogVisible.value=true
     })
   }
 }
@@ -229,7 +230,7 @@ const handleTableDDLCopy = async () => {
   if (tableDDL.value && tableDDL.value != '') {
     await window.winApi.copy(tableDDL.value)
     MessageBox.ok('复制成功')
-    tableDialogVisible.value=false
+    tableDDLDialogVisible.value=false
   }
 }
 </script>
@@ -301,18 +302,18 @@ const handleTableDDLCopy = async () => {
       </el-scrollbar>
     </div>
     <el-dialog
-      v-model="tableDialogVisible"
+      v-model="tableDDLDialogVisible"
       append-to-body
+      top="6vh"
       :close-on-click-modal="false"
       :title="tableDDLName"
       draggable
       width="60%"
-      align-center
     >
       <Codeview v-model:code="tableDDL" dark></Codeview>
       <template #footer>
         <div class="dialog-footer">
-          <el-button @click="tableDialogVisible = false">取消</el-button>
+          <el-button @click="tableDDLDialogVisible = false">取消</el-button>
           <el-button type="primary" @click="handleTableDDLCopy"> 确认 & 复制 </el-button>
         </div>
       </template>
