@@ -1,11 +1,11 @@
 <!-- @format -->
 
 # Kaleido-client
-**一个辅助Coding的桌面应用工具。**
-
-kaleido工具前端源码 [后端源码](https://github.com/wp2code/kaleido)
+Assistant tool developed based on Electron+Vue, supporting functions such as connecting to databases and generating code。  
+[后端传送门](https://github.com/wp2code/kaleido)
 ## Functionality
-- Java代码生成和预览
+- View table DDL
+- Java code preview and generation
 
 ## Project Setup
 
