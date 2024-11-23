@@ -339,7 +339,6 @@ const openBasicCOnfigDialog = () => {
   basicConfigVisible.value = true
 }
 const openTableDDLDialog = () => {
-  console.log('selectDbTableData', selectDbTableData)
   if (selectDbTableData.value) {
     const dataSource = selectDbTableData.value.dataSource
     const table = selectDbTableData.value.table
@@ -501,35 +500,27 @@ const clickReset = () => {
                 >全局配置</el-link
               >
             </el-col>
-            <el-col :span="2" class="col-center">
-              <el-dialog
-                v-model="tableDDLDialogVisible"
-                top="6vh"
-                append-to-body
-                :close-on-click-modal="false"
-                :title="tableDDLName"
-                draggable
-                width="60%"
-              >
-                <Codeview v-model:code="tableDDL" dark></Codeview>
-                <template #footer>
-                  <div class="dialog-footer">
-                    <el-button @click="tableDDLDialogVisible = false">取消</el-button>
-                    <el-button type="primary" @click="handleTableDDLCopy">
-                      确认 & 复制
-                    </el-button>
-                  </div>
-                </template>
-              </el-dialog>
-              <el-link
-                class="lable-text"
-                style="color: #909399"
-                @click.stop="openTableDDLDialog()"
-                >查看DDL</el-link
-              ></el-col
-            >
           </el-row>
         </div>
+        <el-dialog
+          v-model="tableDDLDialogVisible"
+          top="6vh"
+          append-to-body
+          :close-on-click-modal="false"
+          :title="tableDDLName"
+          draggable
+          width="60%"
+        >
+          <Codeview v-model:code="tableDDL" dark></Codeview>
+          <template #footer>
+            <div class="dialog-footer">
+              <el-button @click="tableDDLDialogVisible = false">取消</el-button>
+              <el-button type="primary" @click="handleTableDDLCopy">
+                确认 & 复制
+              </el-button>
+            </div>
+          </template>
+        </el-dialog>
         <el-dialog
           v-model="actionVisabel"
           draggable
@@ -580,6 +571,7 @@ const clickReset = () => {
       </el-tabs>
     </div>
     <div class="bottom">
+      <el-button @click.stop="openTableDDLDialog()">查看表DDL</el-button>
       <el-button @click.stop="refrshClick(true)">一键重置</el-button>
       <el-button type="primary" @click.stop="openCodeDialog(true, '生成代码')"
         >生成代码</el-button

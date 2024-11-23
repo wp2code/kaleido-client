@@ -36,7 +36,6 @@ const handleCheckedAllCodeParamChange = (val: boolean) => {
   let checked = apis.map((item) => {
     return item
   })
-  console.log('handleCheckedAllCodeParamChange', checked)
   methodList.value = val ? checked : []
   isIndeterminate.value = false
 }
