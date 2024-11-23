@@ -21,6 +21,7 @@ const props = defineProps({
   },
 })
 const options=ref()
+const includeCodePath=ref(false)
 const applyTemplteList=ref<[]>()
 const tpProps = { multiple: true }
 const basicConfigView = ref<CodeTemplateBasicConfig>()
@@ -91,11 +92,16 @@ const clickReset = () => {
   basicConfigView.value.author=basicConfigViewBk.value.author
   basicConfigView.value.license=basicConfigViewBk.value.license
   applyTemplteList.value=[]
+  includeCodePath.value=false
 }
 const save = async () => {
-  if(!basicConfigView.value.codePath || basicConfigView.value.codePath.length<=0){
+  let codePath=null
+  if(includeCodePath.value){
+    codePath=basicConfigView.value.codePath;
+    if(!codePath || codePath.length<=0){
     MessageBox.fail('默认代码地址不能为空')
     return
+    }
   }
   const licenseInfo=basicConfigView.value.license
   if(licenseInfo && licenseInfo!=''){
@@ -122,8 +128,10 @@ const save = async () => {
     }
     return result
   },new Map<string,ApplyTemplateParam>())
-    basicConfigView.value.applyTemplateList=[...applyTemplteMap.values()]
-   await  updateGlobalConfig(basicConfigView.value).then((res) => {
+  const {author,license}=reactive(basicConfigView.value)
+    const param={author,license,codePath} as CodeTemplateBasicConfig
+    param.applyTemplateList=[...applyTemplteMap.values()]
+   await  updateGlobalConfig(param).then((res) => {
       if (res) {
         emits('refresh',res)
         MessageBox.ok('更新成功')
@@ -159,16 +167,6 @@ const handleLicense=async (type:string)=>{
     :close-on-click-modal="false"
   >
     <div class="box">
-      <div>
-        <div class="box-lable">默认代码地址：</div>
-        <div class="box-file">
-          <el-input v-model="basicConfigView!.codePath" placeholder="默认代码地址">
-            <template #append>
-              <el-button type="primary" @click="handleOpenMenu">选择地址</el-button>
-            </template>
-          </el-input>
-        </div>
-      </div>
       <div>
         <div class="box-lable">代码作者：</div>
         <div>
@@ -219,6 +217,28 @@ const handleLicense=async (type:string)=>{
             <el-link type="primary" @click="handleLicense('copy')">复制</el-link>
             <el-link type="warning" @click="handleLicense('clear')">清空</el-link>
           </div>
+        </div>
+      </div>
+      <div>
+        <div class="box-lable">
+          代码路径：
+          <el-switch v-model="includeCodePath" inline-prompt />
+        </div>
+        <div class="box-file">
+          <el-input
+            v-model="basicConfigView!.codePath"
+            :disabled="!includeCodePath"
+            placeholder="默认代码地址"
+          >
+            <template #append>
+              <el-button
+                :disabled="!includeCodePath"
+                type="primary"
+                @click="handleOpenMenu"
+                >选择地址</el-button
+              >
+            </template>
+          </el-input>
         </div>
       </div>
       <div>
