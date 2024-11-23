@@ -1,5 +1,3 @@
-<!-- @format -->
-
 # Kaleido-client
  🚀 Assistant tool developed based on Electron+Vue, supporting functions such as connecting to databases and generating code。  
 [后端传送门](https://github.com/wp2code/kaleido)
