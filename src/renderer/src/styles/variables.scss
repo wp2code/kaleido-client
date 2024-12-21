@@ -16,6 +16,7 @@
   --w-e-textarea-selected-border-color: var(--el-color-primary);
   --sideBarWidth: 60px;
   --appMainLeftWidth: 250px;
+  --contextMenuBg: #ffffff;
 }
 
 $menuBg: var(--menuBg);
@@ -31,3 +32,4 @@ $sideBarWidth: var(--sideBarWidth);
 
 $appMainWidth: calc(100% - var(--sideBarWidth));
 $appMainLeftWidth: var(--appMainLeftWidth);
+$contextMenuBg: var(--contextMenuBg);

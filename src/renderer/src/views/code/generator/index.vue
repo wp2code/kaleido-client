@@ -63,6 +63,7 @@ const tableDDLName = ref()
 const tableDDL = ref()
 const tableDDLDialogVisible = ref(false)
 const actionActive = ref<MoreMenu>()
+const activeTab = ref(1)
 const initTemplateList = async (
   directUseTemplateConfig: boolean,
   seleteTemplateId?: string
@@ -313,22 +314,28 @@ const toPreviewCode = async (
       })
     })
 }
-const refrshClick = debounce((directUseTemplateConfig: boolean) => {
-  tpTablsKey.value = Math.random() + 'TB'
-  toPreviewCode(
-    selectCodeTemplate.value.id,
-    selectDbTableData.value.dataSource?.id,
-    buildCodeParamsWithTemplate(selectCodeTemplate.value, selectDbTableData.value),
-    directUseTemplateConfig
-  )
-}, 300)
+const refrshClick = debounce(
+  (directUseTemplateConfig: boolean, forceRefresh: boolean = false) => {
+    if (forceRefresh) {
+      tpTablsKey.value = Math.random() + 'TB'
+      activeTab.value = 1
+    }
+    toPreviewCode(
+      selectCodeTemplate.value.id,
+      selectDbTableData.value.dataSource?.id,
+      buildCodeParamsWithTemplate(selectCodeTemplate.value, selectDbTableData.value),
+      directUseTemplateConfig
+    )
+  },
+  300
+)
 
 provide(TriggerWatch, canTriggerWatch)
 const onChangeConfig = (value: any) => {
   selectCodeTemplate.value = value
   canTriggerWatch.value = false
   initFilterMoreMenuList()
-  refrshClick(true)
+  refrshClick(true, false)
 }
 const openCodeDialog = (visible: boolean, title: string) => {
   codeVisible.value = visible
@@ -420,7 +427,7 @@ const selectMoreMenuItem = (item: any) => {
   }
 }
 const refrshBasicConfig = (_data: any) => {
-  refrshClick(true)
+  refrshClick(true, true)
 }
 const clickReset = () => {
   initDefaultGenerationTemplateConfig()
@@ -543,26 +550,26 @@ const clickReset = () => {
       </div>
     </template>
     <div class="conent">
-      <el-tabs :key="tpTablsKey" class="template-tabs">
-        <el-tab-pane label="模型层（POJO）">
+      <el-tabs :key="tpTablsKey" v-model="activeTab" class="template-tabs">
+        <el-tab-pane label="模型层（POJO）" :name="1">
           <ModelTemplate
             :data="codeGenerationResult"
             :table-data="selectDbTableData"
           ></ModelTemplate>
         </el-tab-pane>
-        <el-tab-pane label="数据持久层（Mapper）">
+        <el-tab-pane label="数据持久层（Mapper）" :name="2">
           <MapperTemplate
             :data="codeGenerationResult"
             :table-data="selectDbTableData"
           ></MapperTemplate>
         </el-tab-pane>
-        <el-tab-pane label="业务层（Service）">
+        <el-tab-pane label="业务层（Service）" :name="3">
           <ServiceTemplate
             :data="codeGenerationResult"
             :table-data="selectDbTableData"
           ></ServiceTemplate>
         </el-tab-pane>
-        <el-tab-pane label="接口层（Controller）">
+        <el-tab-pane label="接口层（Controller）" :name="4">
           <WebTemplate
             :data="codeGenerationResult"
             :table-data="selectDbTableData"
@@ -572,7 +579,7 @@ const clickReset = () => {
     </div>
     <div class="bottom">
       <el-button @click.stop="openTableDDLDialog()">查看表DDL</el-button>
-      <el-button @click.stop="refrshClick(true)">一键重置</el-button>
+      <el-button @click.stop="refrshClick(true, true)">一键重置</el-button>
       <el-button type="primary" @click.stop="openCodeDialog(true, '生成代码')"
         >生成代码</el-button
       >
