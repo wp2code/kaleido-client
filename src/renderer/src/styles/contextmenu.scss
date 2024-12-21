@@ -1,6 +1,8 @@
 .cm-menu {
-  background-color: #ddd;
-  border: 1px solid #ddd;
+  background-color: $contextMenuBg;
+  border: 1px solid $contextMenuBg;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
   overflow-wrap: break-word;
   box-sizing: border-box;
   .cm-menu-item {

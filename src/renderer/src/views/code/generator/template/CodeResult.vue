@@ -40,11 +40,12 @@ const openClick = async (item) => {
   <el-table :data="codeResultData" border style="width: 100%">
     <el-table-column prop="codeType" label="代码层" width="100" fixed="left">
       <template #default="scope">
-        <el-tag effect="dark">{{ scope.row.codeType }}</el-tag>
+        <el-tag type="success" effect="dark">{{ scope.row.codeType }}</el-tag>
       </template>
     </el-table-column>
-    <el-table-column prop="name" label="代码名称" width="200" show-overflow-tooltip />
-    <el-table-column prop="fileSuffix" label="文件后缀" width="100" />
+    <el-table-column prop="name" label="代码名称" width="200" show-overflow-tooltip>
+    </el-table-column>
+    <el-table-column prop="fileSuffix" label="类型" width="55" />
     <el-table-column prop="codePath" label="代码地址" show-overflow-tooltip>
       <template #default="scope">
         <el-link type="success" @click="openDirPath(scope.row)">{{
