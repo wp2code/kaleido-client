@@ -34,7 +34,7 @@ const defaultSettings: DefaultSettings = {
    */
   theme: 'dark',
   size: 'default', // default |large |small
-  language: 'zh-cn', // zh-cn| en
+  language: 'zh', // zh| en
 }
 
 export default defaultSettings

@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import logo from '@/assets/logo/icon.png'
 import MessageBox from '@/utils/MessageBox'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 const currVersion = ref('')
 const newVersion = ref('')
 const dialogVisible = ref(false)
@@ -47,7 +49,7 @@ const clickCheckForUpdateVersion = async () => {
     if (!data.success) {
       isUpdateChecking.value = false
       progress.value.show = false
-      MessageBox.fail(`版本检查异常`)
+      MessageBox.fail(t('version-check-error'))
     }
   }
 }
@@ -79,7 +81,7 @@ const watchUpdate = async () => {
       //发现新版本
       else if (res.cmd == 'up-available') {
         console.log('up-available', res)
-        progress.value.text = `发现新版本（${data.version}）,等待更新。。。`
+        progress.value.text = t('version-new-active', [`${data.version}`])
         const dpRes = await window.winApi.sendDownloadUpdate()
         console.log('sendDownloadUpdate', dpRes)
         if (dpRes && !dpRes.success) {
@@ -90,12 +92,12 @@ const watchUpdate = async () => {
       else if (res.cmd == 'up-unavailable') {
         progress.value.show = false
         isUpdateChecking.value = false
-        MessageBox.ok(`当前版本 ${data.version} 已是最新版本`)
+        MessageBox.ok(t('version-is-last', [`${data.version}`]))
       }
       //更新进度
       else if (res.cmd == 'up-progress') {
         console.log('up-progress', res)
-        progress.value.text = '更新中。。。'
+        progress.value.text = t('version-updating')
         progress.value.color = '#67c23a'
         progress.value.textStyle = { color: progress.value.color }
         progress.value.show = true
@@ -109,17 +111,17 @@ const watchUpdate = async () => {
       else if (res.cmd == 'up-downloaded') {
         console.log('更新完成的数据：', data)
         isUpdateChecking.value = false
-        progress.value.text = '更新完成'
+        progress.value.text = t('version-updated')
         progress.value.downloadSpeed = ''
         progress.value.color = '#67c23a'
         progress.value.textStyle = { color: progress.value.color }
         progress.value.show = true
         dialogInfo.value = {
           type: 'success',
-          title: '版本更新',
-          cancelText: '取消',
-          confirmText: '更新并且重启',
-          desc: '已下载最新的版本,需退出重新安装！',
+          title: t('version-update-btn'),
+          cancelText: t('cancel'),
+          confirmText: t('updated-restart'),
+          desc: t('version-update-desc'),
           icon: 'successiocn',
         } as DialogInfo
         dialogVisible.value = true
@@ -127,14 +129,15 @@ const watchUpdate = async () => {
     } else {
       //更新错误
       if (res.cmd == 'up-error') {
+        console.error('更新错误：', res.error)
         isUpdateChecking.value = false
         progress.value.show = false
         dialogInfo.value = {
           type: 'error',
-          title: '更新错误',
-          cancelText: '取消更新',
-          confirmText: '网站下载',
-          desc: '软件更新过程中发生错误 ！' + res.error || '',
+          title: t('version-updated-error'),
+          cancelText: t('version-updated-cancel'),
+          confirmText: t('website-download'),
+          desc: t('version-updating-error') + '[' + res.error + ']' || '',
           icon: 'warningicon',
         } as DialogInfo
         dialogVisible.value = true
@@ -165,12 +168,12 @@ onMounted(async () => {
       </div>
       <div class="info-desc">
         <div>Kaleido {{ currVersion }}</div>
-        <div v-if="newVersion">检查最新版本 {{ newVersion }}</div>
-        <div v-else>当前版本 {{ currVersion }}</div>
+        <div v-if="newVersion">{{ $t('version-check-new') }} {{ newVersion }}</div>
+        <div v-else>{{ $t('version-current') }} {{ currVersion }}</div>
         <div>
-          <el-button type="success" icon="Upload" @click="clickCheckForUpdateVersion"
-            >检查更新</el-button
-          >
+          <el-button type="success" icon="Upload" @click="clickCheckForUpdateVersion">{{
+            $t('check-upadte')
+          }}</el-button>
         </div>
       </div>
     </div>

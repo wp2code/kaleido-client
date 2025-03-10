@@ -8,19 +8,19 @@
     :close-on-click-modal="false"
   >
     <el-form :model="template" label-width="auto" style="max-width: 600px">
-      <el-form-item v-if="type != 'Xml'" label="父类">
+      <el-form-item v-if="type != 'Xml'" :label="$t('code.superclass-name')">
         <el-input v-model="template!.superclassName" />
       </el-form-item>
-      <el-form-item label="包名称">
+      <el-form-item :label="$t('code.package-name')">
         <el-input v-model="template!.packageName" />
       </el-form-item>
-      <el-form-item label="包路径">
+      <el-form-item :label="$t('code.source-folder')">
         <el-input v-model="template!.sourceFolder" />
       </el-form-item>
-      <el-form-item label="类名称后缀">
+      <el-form-item :label="$t('code.name-suffix')">
         <el-input v-model="template!.nameSuffix" />
       </el-form-item>
-      <el-form-item label="代码地址">
+      <el-form-item :label="$t('code.path')">
         <el-tooltip
           :content="template!.codePath"
           :disabled="
@@ -30,19 +30,21 @@
         >
           <el-input v-model="template!.codePath">
             <template #append>
-              <el-button type="primary" @click="handleOpenMenu">选择地址</el-button>
+              <el-button type="primary" @click="handleOpenMenu">{{
+                $t('code.select-path')
+              }}</el-button>
             </template>
           </el-input>
         </el-tooltip>
       </el-form-item>
-      <el-form-item label="默认生成">
+      <el-form-item :label="$t('code.default-gen')">
         <el-switch
           v-model="template!.defaultGenerate"
           :active-value="true"
           :inactive-value="false"
         />
       </el-form-item>
-      <el-form-item label="插件">
+      <el-form-item :label="$t('plugin')">
         <el-checkbox v-if="type != 'VO'" v-model="template!.useMybatisPlus"
           >Mybatis-puls</el-checkbox
         >
@@ -55,25 +57,30 @@
           >Swagger</el-checkbox
         >
       </el-form-item>
-      <el-form-item v-if="type == 'Entity' || type == 'VO'" label="过滤字段">
-        <el-input v-model="modelFields" placeholder="默认不生成字段" /><span
-          style="color: gray; font-size: small"
-          >多个用|分割</span
-        >
+      <el-form-item
+        v-if="type == 'Entity' || type == 'VO'"
+        :label="$t('code.ignore-fields')"
+      >
+        <el-input
+          v-model="modelFields"
+          :placeholder="$t('code.default-ignore-fields')"
+        /><span style="color: gray; font-size: small">{{
+          $t('code.ignore-fields-rule',['|'])
+        }}</span>
       </el-form-item>
       <el-form-item
         v-if="
           ((type == 'Mapper' || type == 'Xml') && !template?.useMybatisPlus) ||
           type == 'Controller'
         "
-        label="模板方法"
+        :label="$t('code.template-method')"
       >
         <el-checkbox
           v-model="checkAllCodePrams"
           :indeterminate="isIndeterminate"
           @change="handleCheckedAllCodeParamChange"
         >
-          全选
+          {{ $t('select-all') }}
         </el-checkbox>
         <el-checkbox-group v-model="methodList" @change="handleCheckedCodeParamChange">
           <div class="method-list">
@@ -86,8 +93,8 @@
     </el-form>
     <template #footer>
       <span class="dialog-footer">
-        <el-button @click="cancel()">取消</el-button>
-        <el-button type="primary" @click="save()"> 确认 </el-button>
+        <el-button @click="cancel()"> {{ $t('cancel') }}</el-button>
+        <el-button type="primary" @click="save()"> {{ $t('confirm') }} </el-button>
       </span>
     </template>
   </el-dialog>
@@ -100,6 +107,8 @@ import {
 import { PartitionTempate } from '@/api/code/types'
 import { getInitApiCodeParams } from '@/utils/codeUtil'
 import MessageBox from '@/utils/MessageBox'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 const isShow = defineModel('isShow', {
   type: Boolean,
   required: true,
@@ -193,7 +202,7 @@ const save = async () => {
   }
   template.value.methodList = methodList.value
   if (!template.value.codePath) {
-    MessageBox.fail('代码地址不能为空')
+    MessageBox.fail(t('code.path-empty'))
     return
   }
   // if (!template.value.packageName) {
@@ -207,7 +216,7 @@ const save = async () => {
   await updateCodeGenerationTemplateOfPartition(template.value).then((res) => {
     if (res.data) {
       emits('success', template.value)
-      MessageBox.ok('更新成功')
+      MessageBox.ok(t('update-success'))
     }
   })
 }

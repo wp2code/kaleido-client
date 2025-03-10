@@ -108,37 +108,39 @@ const toEditTemplate = () => {
   <div class="modelBox">
     <div class="left">
       <div style="text-align: right">
-        <el-link type="primary" @click.stop="toEditTemplate()">编辑模板</el-link>
+        <el-link type="primary" @click.stop="toEditTemplate()">{{
+          $t('code.template-edit')
+        }}</el-link>
         <CodeTemplateEdit
           v-if="templateEditVisible"
           v-model:is-show="templateEditVisible"
           :template-id="templateId"
-          title="ServiceImpl模板"
+          :title="$t('tmplate-title', ['ServiceImpl'])"
           type="Service"
           @success="editTemlateSuccess"
         ></CodeTemplateEdit>
       </div>
       <div>
-        <div>类名称:</div>
+        <div>{{ $t('code.class-name') }}:</div>
         <div><el-input v-model="serviceCodeView!.name" /></div>
       </div>
       <div>
-        <div>包名称:</div>
+        <div>{{ $t('code.package-name') }}:</div>
         <div><el-input v-model="serviceCodeView!.packageName" /></div>
       </div>
       <div>
-        <div>包路径:</div>
+        <div>{{ $t('code.source-folder') }}:</div>
         <div><el-input v-model="serviceCodeView!.sourceFolder" /></div>
       </div>
       <div>
-        <div>父类:</div>
+        <div>{{ $t('code.superclass-name') }}:</div>
         <div><el-input v-model="serviceCodeView!.superclassName" /></div>
       </div>
       <div>
-        接口:
+        {{ $t('code.api') }}:
         <el-radio-group v-model="selectMode">
-          <el-radio label="0">ServerApi</el-radio>
-          <el-radio label="1">自定义</el-radio>
+          <el-radio value="0">ServerApi</el-radio>
+          <el-radio value="1"> {{ $t('code.custom') }}</el-radio>
         </el-radio-group>
 
         <div>
@@ -146,7 +148,7 @@ const toEditTemplate = () => {
         </div>
       </div>
       <div>
-        <div class="box-lable">代码地址：</div>
+        <div class="box-lable">{{ $t('code.path') }}：</div>
         <div class="box-file">
           <el-tooltip
             :content="serviceCodeView!.codePath"
@@ -158,7 +160,9 @@ const toEditTemplate = () => {
           >
             <el-input v-model="serviceCodeView!.codePath">
               <template #append>
-                <el-button type="primary" @click="handleOpenMenu">选择地址</el-button>
+                <el-button type="primary" @click="handleOpenMenu">{{
+                  $t('code.select-path')
+                }}</el-button>
               </template>
             </el-input>
           </el-tooltip>

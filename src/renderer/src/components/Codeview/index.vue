@@ -4,6 +4,8 @@ import { Codemirror } from 'vue-codemirror'
 import { html } from '@codemirror/lang-html'
 import MessageBox from '@/utils/MessageBox'
 import { oneDark } from '@codemirror/theme-one-dark'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 interface Props {
   codeStyle?: CSSProperties // 代码样式
   dark?: boolean // 是否暗黑主题
@@ -16,7 +18,7 @@ interface Props {
 }
 const showCopy = ref(false)
 const props = withDefaults(defineProps<Props>(), {
-  placeholder: '加载代码...',
+  placeholder: 'loading...',
   codeStyle: () => {
     return {
       height: '100%',
@@ -41,7 +43,7 @@ function handleReady(payload: any) {
 const handleCopy = async () => {
   if (codeValue.value && codeValue.value != '') {
     await window.winApi.copy(codeValue.value)
-    MessageBox.ok('复制成功')
+    MessageBox.ok(t('copy-success'))
   }
 }
 
@@ -77,7 +79,7 @@ watchEffect(() => {
       @mouseover.prevent
       @mouseout.prevent
       @click="handleCopy()"
-      >复制</el-button
+      >{{ $t('copy') }}</el-button
     >
     <Codemirror
       ref="codemirror"

@@ -19,7 +19,7 @@
       "@/*": ["src/renderer/src/*"],
       "~/*": ["src/*"]
     },
-    "types": ["vite/client", "element-plus/global.d.ts", "unplugin-icons/types/vue"],
+    "types": ["vite/client", "element-plus/global.d.ts", "unplugin-icons/types/vue","@intlify/unplugin-vue-i18n/messages"],
     "skipLibCheck": true /* Skip type checking all .d.ts files. */,
     "allowSyntheticDefaultImports": true /* 允许默认导入 */,
     "forceConsistentCasingInFileNames": true, /* Ensure that casing is correct in imports. */
@@ -28,6 +28,7 @@
     "src/renderer/src/env.d.ts",
     "src/renderer/src/**/*",
     "src/renderer/src/**/*.vue",
+    "src/renderer/src/i18n/locale/*",
     "src/preload/*.d.ts",
     "src/**/*.vue",
     "src/settings.ts",

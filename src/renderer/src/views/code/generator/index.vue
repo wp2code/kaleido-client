@@ -38,6 +38,8 @@ import MessageBox from '@/utils/MessageBox'
 import IoUtil from '@/utils/IoUtil'
 import { ElLoading } from 'element-plus'
 import { debounce } from 'lodash-es'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 const morMenuList = ref<MoreMenu[]>()
 const selectedCodeParams = ref([])
 const allCodeParams = initBuildCodePrams()
@@ -110,7 +112,7 @@ onMounted(() => {
   initTemplateList(true)
 })
 const copyTemplate = (item: any) => {
-  actionTitle.value = '复制新增'
+  actionTitle.value = t('copy-add')
   actionVisabel.value = true
   selectEditCodeTemplate.value.templateName =
     selectEditCodeTemplate.value.templateName + 'Copy'
@@ -120,19 +122,24 @@ const copyTemplate = (item: any) => {
 const deleteTemplate = (item: any) => {
   actionActive.value = (item.menu || {}) as MoreMenu
   actionActive.value.data = item.template
-  MessageBox.confirm(`确认删除【${selectEditCodeTemplate.value.templateName}】? `, {
-    ok: async () => {
-      await deleteCodeGenerationTemplate(selectEditCodeTemplate.value.id).then((res) => {
-        initTemplateList(true)
-        return res.data
-      })
-    },
-    successMsg: '删除成功',
-    failMsg: '删除失败',
-  })
+  MessageBox.confirm(
+    t('delete-confirm') + `【${selectEditCodeTemplate.value.templateName}】? `,
+    {
+      ok: async () => {
+        await deleteCodeGenerationTemplate(selectEditCodeTemplate.value.id).then(
+          (res) => {
+            initTemplateList(true)
+            return res.data
+          }
+        )
+      },
+      successMsg: t('delete-success'),
+      failMsg: t('delete-fail'),
+    }
+  )
 }
 const renameTemplate = (item: any) => {
-  actionTitle.value = '重命名'
+  actionTitle.value = t('rename')
   actionVisabel.value = true
   actionActive.value = (item.menu || {}) as MoreMenu
   actionActive.value.data = item.template
@@ -141,16 +148,16 @@ const exoprtTemplate = async (_item: any) => {
   const path = await window.winApi.openSaveDialog({
     defaultPath: selectEditCodeTemplate.value.templateName,
     filters: [{ name: 'Json Template', extensions: ['json'] }],
-    buttonLabel: '导出',
+    buttonLabel: t('export'),
   })
   if (path && path !== undefined) {
     exportTemplate(selectEditCodeTemplate.value.id).then(async (response) => {
       if (response) {
         await IoUtil.exportData(path, response.data, true, (_err) => {
           if (_err) {
-            MessageBox.fail('导出失败')
+            MessageBox.fail(t('export-fail'))
           } else {
-            MessageBox.ok('导出成功')
+            MessageBox.ok(t('export-success'))
           }
         })
       }
@@ -160,17 +167,17 @@ const exoprtTemplate = async (_item: any) => {
 const importTemplate = async (_item: any) => {
   const filePath = await window.winApi.openFileDialog(false, {
     filters: [{ name: 'Json Template', extensions: ['json'] }],
-    buttonLabel: '导入',
+    buttonLabel: t('import'),
   })
   if (filePath) {
     const data = IoUtil.importData(filePath, (_err) => {
       if (_err) {
-        MessageBox.fail('导入失败')
+        MessageBox.fail(t('import-fail'))
       }
     })
     if (data) {
       saveUploadTemplate(data).then((_res) => {
-        MessageBox.ok('导入成功')
+        MessageBox.ok(t('import-success'))
         initTemplateList(true, selectCodeTemplate.value.id)
       })
     }
@@ -178,12 +185,12 @@ const importTemplate = async (_item: any) => {
 }
 const settingDefaultTemplate = async (_item: any) => {
   if (selectEditCodeTemplate.value.isDefault == 1) {
-    MessageBox.ok('已经是默认模板了')
+    MessageBox.ok(t('template-is-default'))
     return
   }
   updateDefaultTemplate(selectEditCodeTemplate.value.id).then((res) => {
     if (res) {
-      MessageBox.ok('设置成功')
+      MessageBox.ok(t('set-success'))
       initTemplateList(true, selectCodeTemplate.value.id)
     }
   })
@@ -191,17 +198,32 @@ const settingDefaultTemplate = async (_item: any) => {
 const initFilterMoreMenuList = () => {
   const copyTemplateItem = MoreMenu.mack(
     'copyAdd',
-    '复制新增',
+    t('copy-add'),
     'CopyDocument',
     copyTemplate
   )
-  const renameTemplateItem = MoreMenu.mack('rename', '重命名', 'SetUp', renameTemplate)
-  const deleteTemplateItem = MoreMenu.mack('delete', '删除', 'Delete', deleteTemplate)
-  const exportTemplateItem = MoreMenu.mack('export', '导出', 'Download', exoprtTemplate)
-  const importTemplateItem = MoreMenu.mack('import', '导入', 'Upload', importTemplate)
+  const renameTemplateItem = MoreMenu.mack('rename', t('rename'), 'SetUp', renameTemplate)
+  const deleteTemplateItem = MoreMenu.mack(
+    'delete',
+    t('delete'),
+    'Delete',
+    deleteTemplate
+  )
+  const exportTemplateItem = MoreMenu.mack(
+    'export',
+    t('export'),
+    'Download',
+    exoprtTemplate
+  )
+  const importTemplateItem = MoreMenu.mack(
+    'import',
+    t('import'),
+    'Upload',
+    importTemplate
+  )
   const settingDefaultItem = MoreMenu.mack(
     'settingDefault',
-    '设为默认',
+    t('set-default'),
     'Star',
     settingDefaultTemplate
   )
@@ -232,12 +254,12 @@ const actionSave = async () => {
   }
   if (actionActiveMenu!.id == 'rename') {
     if (!selectEditCodeTemplate.value.templateName) {
-      MessageBox.fail('模板名称不能为空')
+      MessageBox.fail(t('code.template-name-empty'))
       return
     }
     const templateName = actionActive.value?.data!.templateName
     if (selectEditCodeTemplate.value.templateName == templateName) {
-      MessageBox.fail('模板名称一样')
+      MessageBox.fail(t('code.template-name-exists'))
       return
     }
     await checkTemplateNameExists(
@@ -250,22 +272,22 @@ const actionSave = async () => {
           selectEditCodeTemplate.value.templateName
         ).then((result) => {
           if (result.data) {
-            MessageBox.ok('重命名成功')
+            MessageBox.ok(t('rename-success'))
             selectCodeTemplate.value.templateName =
               selectEditCodeTemplate.value.templateName
             actionVisabel.value = false
           } else {
-            MessageBox.fail('重命名失败')
+            MessageBox.fail(t('rename-fail'))
           }
         })
       } else {
-        MessageBox.fail('模板名称已存在')
+        MessageBox.fail(t('code.template-name-exists'))
       }
     })
   }
   if (actionActiveMenu!.id == 'copyAdd') {
     if (!selectEditCodeTemplate.value.templateName) {
-      MessageBox.fail('模板名称不能为空')
+      MessageBox.fail(t('code.template-name-empty'))
       return
     }
     await checkTemplateNameExists(selectEditCodeTemplate.value.templateName).then(
@@ -276,15 +298,15 @@ const actionSave = async () => {
             selectEditCodeTemplate.value.templateName
           ).then((result) => {
             if (result.data) {
-              MessageBox.ok('复制新增成功')
+              MessageBox.ok(t('copy-add-success'))
               initTemplateList(true, result.data)
               actionVisabel.value = false
             } else {
-              MessageBox.fail('复制新增失败')
+              MessageBox.fail(t('copy-add-fail'))
             }
           })
         } else {
-          MessageBox.fail('模板名称已存在')
+          MessageBox.fail(t('code.template-name-exists'))
         }
       }
     )
@@ -350,7 +372,7 @@ const openTableDDLDialog = () => {
         table?.schemaName
       )
     ).then((res) => {
-      tableDDLName.value = `表 ${table?.tableName} DDL`
+      tableDDLName.value = t('code.query-table-ddl', [`${table?.tableName}`])
       tableDDL.value = res.data
       tableDDLDialogVisible.value = true
     })
@@ -359,7 +381,7 @@ const openTableDDLDialog = () => {
 const handleTableDDLCopy = async () => {
   if (tableDDL.value && tableDDL.value != '') {
     await window.winApi.copy(tableDDL.value)
-    MessageBox.ok('复制成功')
+    MessageBox.ok(t('copy-success'))
     tableDDLDialogVisible.value = false
   }
 }
@@ -368,7 +390,7 @@ const cancel = () => {
 }
 const saveGenCode = async () => {
   if (selectedCodeParams.value.length <= 0) {
-    MessageBox.fail('请选择需要生成的代码模板')
+    MessageBox.fail(t('template-input'))
     return
   }
   const loadingInstance = ElLoading.service({
@@ -445,12 +467,13 @@ const clickReset = () => {
             <el-col :offset="6" :span="10">
               <div class="header-select">
                 <div>
-                  <label>代码模板：</label>
+                  <!-- <label>：</label> -->
+                  {{ $t('code.template') }}：
                 </div>
                 <el-select
                   :key="selectCTKey"
                   v-model="selectCodeTemplate"
-                  placeholder="选择配置"
+                  :placeholder="$t('code.select-template')"
                   value-key="id"
                   @change="onChangeConfig"
                 >
@@ -488,7 +511,7 @@ const clickReset = () => {
                 </el-dropdown>
               </div>
             </el-col>
-            <el-col :offset="1" :span="2" class="col-center">
+            <el-col :offset="1" :span="5" class="col-center">
               <BasicConfig
                 v-if="basicConfigVisible == true"
                 v-model:is-show="basicConfigVisible"
@@ -496,9 +519,9 @@ const clickReset = () => {
                 :code-template-list="allCodeTemplateList"
                 @refresh="refrshBasicConfig"
               />
-              <el-link class="lable-text" @click.stop="openBasicCOnfigDialog()"
-                >全局配置</el-link
-              >
+              <el-link class="lable-text" @click.stop="openBasicCOnfigDialog()">{{
+                $t('code.global-config')
+              }}</el-link>
             </el-col>
           </el-row>
         </div>
@@ -514,9 +537,11 @@ const clickReset = () => {
           <Codeview v-model:code="tableDDL" dark></Codeview>
           <template #footer>
             <div class="dialog-footer">
-              <el-button @click="tableDDLDialogVisible = false">取消</el-button>
+              <el-button @click="tableDDLDialogVisible = false">{{
+                $t('cancel')
+              }}</el-button>
               <el-button type="primary" @click="handleTableDDLCopy">
-                确认 & 复制
+                {{ $t('confirm-copy') }}
               </el-button>
             </div>
           </template>
@@ -531,12 +556,14 @@ const clickReset = () => {
         >
           <el-input
             v-model="selectEditCodeTemplate.templateName"
-            placeholder="输入模板名称"
+            :placeholder="$t('code.template-name-input')"
           />
           <template #footer>
             <span class="dialog-footer">
-              <el-button @click="actionVisabel = false">取消</el-button>
-              <el-button type="primary" @click="actionSave()"> 确认 </el-button>
+              <el-button @click="actionVisabel = false">{{ $t('cancel') }}</el-button>
+              <el-button type="primary" @click="actionSave()">
+                {{ $t('confirm') }}
+              </el-button>
             </span>
           </template>
         </el-dialog>
@@ -544,25 +571,25 @@ const clickReset = () => {
     </template>
     <div class="conent">
       <el-tabs :key="tpTablsKey" class="template-tabs">
-        <el-tab-pane label="模型层（POJO）">
+        <el-tab-pane :label="$t('code.tab-pojo')">
           <ModelTemplate
             :data="codeGenerationResult"
             :table-data="selectDbTableData"
           ></ModelTemplate>
         </el-tab-pane>
-        <el-tab-pane label="数据持久层（Mapper）">
+        <el-tab-pane :label="$t('code.tab-mapper')">
           <MapperTemplate
             :data="codeGenerationResult"
             :table-data="selectDbTableData"
           ></MapperTemplate>
         </el-tab-pane>
-        <el-tab-pane label="业务层（Service）">
+        <el-tab-pane :label="$t('code.tab-service')">
           <ServiceTemplate
             :data="codeGenerationResult"
             :table-data="selectDbTableData"
           ></ServiceTemplate>
         </el-tab-pane>
-        <el-tab-pane label="接口层（Controller）">
+        <el-tab-pane :label="$t('code.tab-controller')">
           <WebTemplate
             :data="codeGenerationResult"
             :table-data="selectDbTableData"
@@ -571,11 +598,11 @@ const clickReset = () => {
       </el-tabs>
     </div>
     <div class="bottom">
-      <el-button @click.stop="openTableDDLDialog()">查看表DDL</el-button>
-      <el-button @click.stop="refrshClick(true)">一键重置</el-button>
-      <el-button type="primary" @click.stop="openCodeDialog(true, '生成代码')"
-        >生成代码</el-button
-      >
+      <el-button @click.stop="openTableDDLDialog()">{{ $t('code.query-ddl') }}</el-button>
+      <el-button @click.stop="refrshClick(true)">{{ $t('btn-reset') }}</el-button>
+      <el-button type="primary" @click.stop="openCodeDialog(true, $t('btn-gen-code'))">{{
+        $t('btn-gen-code')
+      }}</el-button>
       <el-dialog
         v-model="codeVisible"
         :title="codeDialogTitle"
@@ -590,7 +617,7 @@ const clickReset = () => {
             :indeterminate="isIndeterminate"
             @change="handleCheckedAllCodeParamChange"
           >
-            全选
+            {{ $t('select-all') }}
           </el-checkbox>
           <el-checkbox-group
             v-model="selectedCodeParams"
@@ -605,7 +632,7 @@ const clickReset = () => {
             </el-checkbox>
           </el-checkbox-group>
           <div class="code-result">
-            <el-divider>结果</el-divider>
+            <el-divider>{{ $t('result') }}</el-divider>
             <CodeResult
               v-if="
                 generationCodeFlag == true &&
@@ -617,14 +644,14 @@ const clickReset = () => {
         </div>
         <template #footer>
           <span class="dialog-footer">
-            <el-button @click="cancel()">取消</el-button>
-            <el-button @click="clickReset()">重置</el-button>
+            <el-button @click="cancel()">{{ $t('cancel') }}</el-button>
+            <el-button @click="clickReset()">{{ $t('reset') }}</el-button>
             <el-button type="primary" @click="saveGenCode()">
               {{
                 generationCodeFlag == true &&
                 codeGenerationResult.codeGenerationList.length > 0
-                  ? '重新生成'
-                  : '确认'
+                  ? $t('btn-agin-code')
+                  : $t('confirm')
               }}
             </el-button>
           </span>
@@ -645,7 +672,8 @@ const clickReset = () => {
     align-items: center;
     justify-content: space-between;
     & > :first-child {
-      width: 100px;
+      width: 180px;
+      text-align: right;
     }
     & > :last-child {
       padding-left: 0.2rem;

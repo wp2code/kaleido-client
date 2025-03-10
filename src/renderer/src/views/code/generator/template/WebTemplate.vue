@@ -159,7 +159,9 @@ const clickConfirm = () => {
   <div class="modelBox">
     <div class="left">
       <div style="text-align: right">
-        <el-link type="primary" @click="toEditTemplate()">编辑模板</el-link>
+        <el-link type="primary" @click="toEditTemplate()">{{
+          $t('code.template-edit')
+        }}</el-link>
         <CodeTemplateEdit
           v-if="templateEditVisible"
           v-model:is-show="templateEditVisible"
@@ -170,23 +172,23 @@ const clickConfirm = () => {
         ></CodeTemplateEdit>
       </div>
       <div>
-        <div>类名称:</div>
+        <div>{{ $t('code.class-name') }}:</div>
         <div><el-input v-model="webCodeView!.name" /></div>
       </div>
       <div>
-        <div>包名称:</div>
+        <div>{{ $t('code.package-name') }}:</div>
         <div><el-input v-model="webCodeView!.packageName" /></div>
       </div>
       <div>
-        <div>包路径:</div>
+        <div>{{ $t('code.source-folder') }}:</div>
         <div><el-input v-model="webCodeView!.sourceFolder" /></div>
       </div>
       <div>
-        <div>父类:</div>
+        <div>{{ $t('code.superclass-name') }}:</div>
         <div><el-input v-model="webCodeView!.superclassName" /></div>
       </div>
       <div>
-        <div class="box-lable">代码地址：</div>
+        <div class="box-lable">{{ $t('code.path') }}：</div>
         <div class="box-file">
           <el-tooltip
             :content="webCodeView!.codePath"
@@ -197,7 +199,9 @@ const clickConfirm = () => {
           >
             <el-input v-model="webCodeView!.codePath">
               <template #append>
-                <el-button type="primary" @click="handleOpenMenu">选择地址</el-button>
+                <el-button type="primary" @click="handleOpenMenu">{{
+                  $t('code.select-path')
+                }}</el-button>
               </template>
             </el-input>
           </el-tooltip>
@@ -209,7 +213,9 @@ const clickConfirm = () => {
           <el-checkbox v-model="webCodeView!.useMybatisPlus">Mybatis-puls</el-checkbox>
         </div>
         <div>
-          <el-link type="primary" @click="clickMethod()">生成方法</el-link>
+          <el-link type="primary" @click="clickMethod()">{{
+            $t('code.gen-method')
+          }}</el-link>
         </div>
       </div>
     </div>
@@ -219,7 +225,7 @@ const clickConfirm = () => {
   </div>
   <el-dialog
     v-model="methodVisible"
-    title="接口(Controller)方法"
+    :title="$t('gen-tmplate-method', ['Controller'])"
     draggable
     width="60%"
     append-to-body
@@ -230,7 +236,7 @@ const clickConfirm = () => {
       :indeterminate="isIndeterminate"
       @change="handleCheckedAllCodeParamChange"
     >
-      全选
+      {{ $t('select-all') }}
     </el-checkbox>
     <el-checkbox-group v-model="methodList" @change="handleCheckedCodeParamChange">
       <div class="method-list">
@@ -241,9 +247,11 @@ const clickConfirm = () => {
     </el-checkbox-group>
     <template #footer>
       <span class="dialog-footer">
-        <el-button @click="clickCancel()">取消</el-button>
-        <el-button @click="clickReset()">重置</el-button>
-        <el-button type="primary" @click="clickConfirm()"> 确认 </el-button>
+        <el-button @click="clickCancel()">{{ $t('cancel') }}</el-button>
+        <el-button @click="clickReset()">{{ $t('reset') }}</el-button>
+        <el-button type="primary" @click="clickConfirm()">
+          {{ $t('confirm') }}
+        </el-button>
       </span>
     </template>
   </el-dialog>

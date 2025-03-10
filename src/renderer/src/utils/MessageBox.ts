@@ -5,7 +5,8 @@ import {
   messageType,
   Action,
 } from 'element-plus'
-
+import i18n from '@/i18n/index'
+const t = i18n.global.t
 export interface MsgBoxOptions {
   ok: Boolean | Promise<Boolean> | Function
   cancel?: Function
@@ -61,23 +62,27 @@ class MsgBox {
    *
    * @param msg
    */
-  ok(msg: string = '操作成功') {
+  ok(msg: string = t('option-success')) {
     showElMessage(true, { successMsg: msg } as MsgBoxOptions)
   }
-  notify(msg: string = '成功') {
+  notify(msg: string = t('success')) {
     showElNotify(msg, '', false, 'bottom-right')
   }
   /**
    *
    * @param msg
    */
-  fail(msg: string = '操作失败', duration: number = 3000) {
+  fail(msg: string = t('option-failed'), duration: number = 3000) {
     showElMessage(false, { failMsg: msg, duration } as MsgBoxOptions)
   }
-  confirm(message: string, options: MsgBoxOptions, title: string = '确认') {
+  confirm(
+    message: string,
+    options: MsgBoxOptions,
+    title: string = t('confirm')
+  ) {
     ElMessageBox.confirm(message, title, {
-      confirmButtonText: options.confirmButtonText || '确认',
-      cancelButtonText: options.cancelButtonText || '取消',
+      confirmButtonText: options.confirmButtonText || t('confirm'),
+      cancelButtonText: options.cancelButtonText || t('cancel'),
       type: options.type || 'warning',
     })
       .then((action: Action) => {

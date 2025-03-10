@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import About from './about/index.vue'
 import Help from './help/index.vue'
+import General from './general/index.vue'
 const componentName = ref()
 const componentKey = ref()
 const activeComponent = ref('')
@@ -11,6 +12,9 @@ const selecComponent = (cname: string) => {
   }
   if (cname == 'Help') {
     componentName.value = Help
+  }
+  if (cname == 'General') {
+    componentName.value = General
   }
 }
 onMounted(() => {
@@ -23,13 +27,17 @@ onMounted(() => {
   <box-layout layout="row" size="25%" divider-color="#ddd" :show-divider="true">
     <template #first>
       <div class="st-menu">
-        <div :class="['st-menu-item', activeComponent == 'About' ? 'active' : '']">
-          <svg-icon icon-name="about" size="1em" color="#ddd" />
-          <span @click="selecComponent('About')">关于Kaleido</span>
+        <div :class="['st-menu-item', activeComponent == 'General' ? 'active' : '']">
+          <svg-icon icon-name="general" size="1em" color="#ddd" />
+          <span @click="selecComponent('General')">{{ $t('general') }}</span>
         </div>
         <div :class="['st-menu-item', activeComponent == 'Help' ? 'active' : '']">
           <svg-icon icon-name="help" size="1em" color="#ddd" />
-          <span @click="selecComponent('Help')">帮助</span>
+          <span @click="selecComponent('Help')">{{ $t('help') }}</span>
+        </div>
+        <div :class="['st-menu-item', activeComponent == 'About' ? 'active' : '']">
+          <svg-icon icon-name="about" size="1em" color="#ddd" />
+          <span @click="selecComponent('About')">{{ $t('about') }}</span>
         </div>
       </div>
     </template>

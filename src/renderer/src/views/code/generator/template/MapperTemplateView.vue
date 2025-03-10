@@ -139,34 +139,36 @@ const toEditTemplate = () => {
   <div class="modelBox">
     <div class="left">
       <div style="text-align: right">
-        <el-link type="primary" @click="toEditTemplate()">编辑模板</el-link>
+        <el-link type="primary" @click="toEditTemplate()">{{
+          $t('code.template-edit')
+        }}</el-link>
         <CodeTemplateEdit
           v-if="templateEditVisible"
           v-model:is-show="templateEditVisible"
           :template-id="templateId"
-          title="Mapper模板"
+          :title="$t('tmplate-title', ['Mapper'])"
           type="Mapper"
           @success="editTemlateSuccess"
         ></CodeTemplateEdit>
       </div>
       <div>
-        <div>类名称:</div>
+        <div>{{ $t('code.class-name') }}:</div>
         <div><el-input v-model="mapperCodeView!.name" /></div>
       </div>
       <div>
-        <div>包名称:</div>
+        <div>{{ $t('code.package-name') }}:</div>
         <div><el-input v-model="mapperCodeView!.packageName" /></div>
       </div>
       <div>
-        <div>包路径:</div>
+        <div>{{ $t('code.source-folder') }}:</div>
         <div><el-input v-model="mapperCodeView!.sourceFolder" /></div>
       </div>
       <div>
-        <div>父类:</div>
+        <div>{{ $t('code.superclass-name') }}:</div>
         <div><el-input v-model="mapperCodeView!.superclassName" /></div>
       </div>
       <div>
-        <div class="box-lable">代码地址：</div>
+        <div class="box-lable">{{ $t('code.path') }}：</div>
         <div class="box-file">
           <el-tooltip
             :content="mapperCodeView!.codePath"
@@ -178,7 +180,9 @@ const toEditTemplate = () => {
           >
             <el-input v-model="mapperCodeView!.codePath">
               <template #append>
-                <el-button type="primary" @click="handleOpenMenu">选择地址</el-button>
+                <el-button type="primary" @click="handleOpenMenu">{{
+                  $t('code.elect-path')
+                }}</el-button>
               </template>
             </el-input>
           </el-tooltip>
@@ -194,7 +198,7 @@ const toEditTemplate = () => {
           v-show="mapperCodeView.useMybatisPlus == false"
           type="primary"
           @click="clickMethod()"
-          >生成方法</el-link
+          >{{ $t('code.gen-method') }}</el-link
         >
       </div>
     </div>
@@ -204,7 +208,7 @@ const toEditTemplate = () => {
   </div>
   <el-dialog
     v-model="methodVisible"
-    title="Mapper方法"
+    :title="$t('gen-tmplate-method', ['Mapper'])"
     draggable
     width="80%"
     append-to-body
@@ -215,7 +219,7 @@ const toEditTemplate = () => {
       :indeterminate="isIndeterminate"
       @change="handleCheckedAllCodeParamChange"
     >
-      全选
+      {{ $t('select-all') }}
     </el-checkbox>
     <el-checkbox-group v-model="methodList" @change="handleCheckedCodeParamChange">
       <div class="method-list">
@@ -226,9 +230,11 @@ const toEditTemplate = () => {
     </el-checkbox-group>
     <template #footer>
       <span class="dialog-footer">
-        <el-button @click="clickCancel()">取消</el-button>
-        <el-button @click="clickReset()">重置</el-button>
-        <el-button type="primary" @click="clickConfirm()"> 确认 </el-button>
+        <el-button @click="clickCancel()">{{ $t('cancel') }}</el-button>
+        <el-button @click="clickReset()">{{ $t('reset') }}</el-button>
+        <el-button type="primary" @click="clickConfirm()">
+          {{ $t('confirm') }}
+        </el-button>
       </span>
     </template>
   </el-dialog>

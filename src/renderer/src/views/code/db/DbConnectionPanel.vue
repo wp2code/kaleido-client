@@ -2,6 +2,8 @@
 import { deleteMenu, editMenu,refreshMenu,type IMenu } from '@/utils/MenuOpions'
 import { listDataSource, deleteDataSource ,checkConnectDataSourceIsOpen,closeCurrentConnectDataSource} from '@/api/datasource/index'
 import { DataSource } from '@/api/datasource/types'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 const { proxy } = getCurrentInstance()
 const list = ref<DataSource[]>([])
 const emits = defineEmits<{
@@ -10,7 +12,7 @@ const emits = defineEmits<{
 }>()
 const activeItemId=ref("-1")
 const selectDeleteConnect=(item:any)=>{
-  proxy.$msgBoxUtil.confirm('确认删除?', {
+  proxy.$msgBoxUtil.confirm(t('delete-confirm')+'?', {
     ok:  async () => {
       return  await deleteDataSource(item.id).then(response=>{
         if(response){
@@ -21,8 +23,8 @@ const selectDeleteConnect=(item:any)=>{
         return false
       })
     },
-    successMsg: '删除成功',
-    failMsg: '删除失败',
+    successMsg: t('delete-success'),
+    failMsg: t('delete-fail'),
   })
 
 }
@@ -32,13 +34,13 @@ const selectEditConnect=async (item:any)=>{
  await checkConnectDataSourceIsOpen(item.id).then((res)=>{
     if(res.data){
       const connectionId=  res.data
-      proxy.$msgBoxUtil.confirm('要编辑连接，必须将其关闭 。你确认要继续吗？', {
+      proxy.$msgBoxUtil.confirm(t('connection-edit-confirm'), {
         ok: () => {
           closeCurrentConnectDataSource(connectionId).then((_res)=>{
             emits('select', item, 'edit',true)
           })
         },
-        confirmButtonText:"关闭 & 编辑",
+        confirmButtonText: t('close-edit'),
         showElMessage: false
       })
     }else{
@@ -81,7 +83,7 @@ defineExpose({ queryList })
 
 <template>
   <div class="panel">
-    <div class="header">连接</div>
+    <div class="header">{{ $t('code.connections') }}</div>
     <el-scrollbar class="box-scrollbar">
       <div class="box">
         <div

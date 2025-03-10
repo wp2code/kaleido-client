@@ -9,6 +9,8 @@ import { DataSource, getDefault, DbType } from '@/api/datasource/types'
 import { isNumer } from '@/utils'
 import { PropType } from 'vue'
 import { RefreshConnectList, EditConnectData, CancelConnectOps } from '../keys'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 const { proxy } = getCurrentInstance()
 
 const props = defineProps({
@@ -25,21 +27,25 @@ function convert(data: DataSource) {
 }
 const validatePort = (_rule: any, value: any, callback: any) => {
   if (!value || value === '') {
-    callback(new Error('请输入端口号'))
+    callback(new Error(t('connection-port-input')))
   } else {
     if (!isNumer(value)) {
-      callback(new Error('端口号错误'))
+      callback(new Error(t('connection-port-error')))
     }
     callback()
   }
 }
 //表单校验规则
 const rules = reactive<FormRules>({
-  name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
-  url: [{ required: true, message: '请输入主机地址', trigger: 'blur' }],
+  name: [{ required: true, message: t('connection-name-input'), trigger: 'blur' }],
+  url: [{ required: true, message: t('connection-host-input'), trigger: 'blur' }],
   port: [{ required: true, validator: validatePort, trigger: 'blur' }],
-  userName: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-  password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+  userName: [
+    { required: true, message: t('connection-username-input'), trigger: 'blur' },
+  ],
+  password: [
+    { required: true, message: t('connection-password-input'), trigger: 'blur' },
+  ],
 })
 const refreshDbConnectList = inject(RefreshConnectList, () => {})
 //保存或更新连接
@@ -50,14 +56,14 @@ const save = async (formRef: FormInstance | undefined) => {
       if (form.value.id) {
         await updateDataSource(form.value.id, form.value).then((res) => {
           if (res) {
-            proxy.$msgBoxUtil.ok('更新成功')
+            proxy.$msgBoxUtil.ok(t('update-success'))
             refreshDbConnectList()
           }
         })
       } else {
         await addDataSource(form.value).then((res) => {
           if (res) {
-            proxy.$msgBoxUtil.ok('保存成功')
+            proxy.$msgBoxUtil.ok(t('save-success'))
             refreshDbConnectList()
           }
         })
@@ -65,6 +71,7 @@ const save = async (formRef: FormInstance | undefined) => {
     }
   })
 }
+
 // 测试连接
 const testConnect = async (formRef: FormInstance | undefined) => {
   if (!formRef) return
@@ -72,7 +79,7 @@ const testConnect = async (formRef: FormInstance | undefined) => {
     if (valid) {
       await connectTestDataSource(form.value).then((res) => {
         if (res) {
-          proxy.$msgBoxUtil.ok('连接成功')
+          proxy.$msgBoxUtil.ok(t('connection-success'))
         }
       })
     }
@@ -102,36 +109,38 @@ defineExpose({ cancel })
           label-position="right"
           label-width="80px"
         >
-          <el-form-item label="名称" prop="name">
+          <el-form-item :label="$t('code.conn-name')" prop="name">
             <el-input v-model="form.name" placeholder="" />
           </el-form-item>
           <el-row>
             <el-col :span="16"
-              ><el-form-item label="主机" prop="url">
+              ><el-form-item :label="$t('code.conn-host')" prop="url">
                 <el-input v-model="form.url" placeholder="" />
               </el-form-item>
             </el-col>
             <el-col :span="8">
-              <el-form-item label="端口" prop="port">
+              <el-form-item :label="$t('code.conn-port')" prop="port">
                 <el-input v-model="form.port" placeholder="" />
               </el-form-item>
             </el-col>
           </el-row>
-          <el-form-item label="用户名称" prop="userName">
+          <el-form-item :label="$t('code.conn-username')" prop="userName">
             <el-input v-model="form.userName" placeholder="" />
           </el-form-item>
-          <el-form-item label="密码" prop="password">
+          <el-form-item :label="$t('code.conn-passowrd')" prop="password">
             <el-input v-model="form.password" type="password" placeholder="" />
           </el-form-item>
-          <el-form-item label="数据库" prop="dbName">
+          <el-form-item :label="$t('code.conn-db')" prop="dbName">
             <el-input v-model="form.dbName" placeholder="" />
           </el-form-item>
         </el-form>
       </div>
       <div class="box-panel-btn">
-        <el-button @click="testConnect(formRef)">测试连接</el-button>
-        <el-button @click="cancel">取消</el-button>
-        <el-button type="primary" @click="save(formRef)">保存</el-button>
+        <el-button @click="testConnect(formRef)">{{
+          $t('code.test-connection')
+        }}</el-button>
+        <el-button @click="cancel">{{ $t('cancel') }}</el-button>
+        <el-button type="primary" @click="save(formRef)">{{ $t('save') }}</el-button>
       </div>
     </div>
   </div>
