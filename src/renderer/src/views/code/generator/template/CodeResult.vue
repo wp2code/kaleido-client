@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import { CodeGenerationResult } from '@/api/code/types'
 import MessageBox from '@/utils/MessageBox'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 const props = defineProps({
   data: {
     type: Object as PropType<CodeGenerationResult>,
@@ -26,7 +28,7 @@ const codeResultData = computed(() => {
 const copyClick = async (item) => {
   if (item.templateCode) {
     await window.winApi.copy(item.templateCode)
-    MessageBox.ok('复制成功')
+    MessageBox.ok(t('copy-success'))
   }
 }
 const openDirPath = async (item) => {
@@ -38,28 +40,32 @@ const openClick = async (item) => {
 </script>
 <template>
   <el-table :data="codeResultData" border style="width: 100%">
-    <el-table-column prop="codeType" label="代码层" width="100" fixed="left">
+    <el-table-column prop="codeType" :label="$t('code.model')" width="100" fixed="left">
       <template #default="scope">
-        <el-tag type="success" effect="dark">{{ scope.row.codeType }}</el-tag>
+        <el-tag effect="dark">{{ scope.row.codeType }}</el-tag>
       </template>
     </el-table-column>
-    <el-table-column prop="name" label="代码名称" width="200" show-overflow-tooltip>
-    </el-table-column>
-    <el-table-column prop="fileSuffix" label="类型" width="55" />
-    <el-table-column prop="codePath" label="代码地址" show-overflow-tooltip>
+    <el-table-column
+      prop="name"
+      :label="$t('code.name')"
+      width="200"
+      show-overflow-tooltip
+    />
+    <el-table-column prop="fileSuffix" :label="$t('file-suffix')" width="100" />
+    <el-table-column prop="codePath" :label="$t('code.path')" show-overflow-tooltip>
       <template #default="scope">
         <el-link type="success" @click="openDirPath(scope.row)">{{
           scope.row.codePath
         }}</el-link>
       </template>
     </el-table-column>
-    <el-table-column fixed="right" label="操作" width="120">
+    <el-table-column fixed="right" :label="$t('option')" width="120">
       <template #default="scope">
         <el-button link type="primary" size="small" @click="copyClick(scope.row)">
-          复制
+          {{ $t('copy') }}
         </el-button>
         <el-button link type="primary" size="small" @click="openClick(scope.row)">
-          打开
+          {{ $t('open') }}
         </el-button>
       </template>
     </el-table-column>

@@ -105,7 +105,7 @@ onBeforeUnmount(() => {
               icon-name="stars"
               style="width: 2em; height: 2em; margin-right: 0.1em"
             />
-            新增连接
+            {{ $t('code.addConnection') }}
           </el-button>
         </div>
       </box-layout>

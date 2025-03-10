@@ -18,6 +18,8 @@ import { Close, Search } from '@element-plus/icons-vue'
 import { ElTree, ElLoading } from 'element-plus'
 import { type MenuInfoType,type IMenuItemType } from '@/directive/contextmenu/type'
 import MessageBox from '@/utils/MessageBox'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 const emits = defineEmits(['select'])
 interface Tree {
   id: string
@@ -204,7 +206,7 @@ const onNodeExpand = (tree: Tree, _node: Node, _self: any) => {
   tree.iconColor = '#67C23A'
 }
 const tableContextmenuInfo = ref<MenuInfoType>({
-  items: [{ icon:'ddl', lable:'查看DDL',onclick:(_e,data)=>{
+  items: [{ icon:'ddl', lable:t('code.query-ddl'),onclick:(_e,data)=>{
     getDDLMetaInfo(data)
   }
   } as IMenuItemType],
@@ -220,7 +222,7 @@ const getDDLMetaInfo = (selectNode?:Node) => {
         data.data?.schemaName
       )
     ).then((res) => {
-      tableDDLName.value= `表 ${data.data?.tableName} DDL`
+      tableDDLName.value= t('query-table-ddl',[`${data.data?.tableName}`])
       tableDDL.value = res.data
       tableDDLDialogVisible.value=true
     })
@@ -229,7 +231,7 @@ const getDDLMetaInfo = (selectNode?:Node) => {
 const handleTableDDLCopy = async () => {
   if (tableDDL.value && tableDDL.value != '') {
     await window.winApi.copy(tableDDL.value)
-    MessageBox.ok('复制成功')
+    MessageBox.ok(t('copy-success'))
     tableDDLDialogVisible.value=false
   }
 }
@@ -242,7 +244,7 @@ const handleTableDDLCopy = async () => {
           ref="serachRef"
           v-model="query"
           v-focus
-          placeholder="输入关键字搜索"
+          :placeholder="$t('keywords-search')"
           clearable
           class="query-input"
         >
@@ -269,7 +271,7 @@ const handleTableDDLCopy = async () => {
           ref="tableTreeRef"
           :data="dataSourceMetaTree"
           :props="treeProps"
-          :empty-text="'~什么也没有'"
+          :empty-text="$t('nothing')"
           highlight-current
           lazy
           :icon="() => {}"
@@ -313,8 +315,10 @@ const handleTableDDLCopy = async () => {
       <Codeview v-model:code="tableDDL" dark></Codeview>
       <template #footer>
         <div class="dialog-footer">
-          <el-button @click="tableDDLDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="handleTableDDLCopy"> 确认 & 复制 </el-button>
+          <el-button @click="tableDDLDialogVisible = false">{{ $t('cancel') }}</el-button>
+          <el-button type="primary" @click="handleTableDDLCopy">
+            {{ $t('confirm-copy') }}
+          </el-button>
         </div>
       </template>
     </el-dialog>

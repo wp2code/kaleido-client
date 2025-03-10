@@ -6,6 +6,8 @@ import {
 import { BaseCodeView } from '@/api/code/types'
 import { SelectDataTableData } from '@/api/datasource/types'
 import { useGenCodeParamStore } from '@/store/modules/cache'
+import i18n from '@/i18n/index'
+const t = i18n.global.t
 const useGenCodeParam = useGenCodeParamStore()
 /**
  *
@@ -82,13 +84,13 @@ const buildCodeParamsWithCache = (
 
 const initBuildCodePrams = () => {
   return [
-    { name: 'Entity', description: '模型层（Entity）' },
-    { name: 'VO', description: '模型层（VO）' },
-    { name: 'Mapper', description: '数据持久层（Mapper）' },
-    { name: 'Xml', description: '数据持久层（XML）' },
-    { name: 'ServiceApi', description: '业务层（ServiceApi）' },
-    { name: 'Service', description: '业务层（ServiceImpl）' },
-    { name: 'Controller', description: '接口层（Controller）' },
+    { name: 'Entity', description: t('tab-pojo') },
+    { name: 'VO', description: t('tab-pojo') },
+    { name: 'Mapper', description: t('tab-mapper') },
+    { name: 'Xml', description: t('tab-xml') },
+    { name: 'ServiceApi', description: t('tab-service-api') },
+    { name: 'Service', description: t('tab-service') },
+    { name: 'Controller', description: t('tab-controller') },
   ]
 }
 

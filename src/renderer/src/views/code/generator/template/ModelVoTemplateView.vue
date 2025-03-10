@@ -15,6 +15,8 @@ import MessageBox from '@/utils/MessageBox'
 import CodeTemplateEdit from './CodeTemplateEdit.vue'
 import { TriggerWatch } from '../../keys'
 import { debounce } from 'lodash-es'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 const props = defineProps({
   data: {
     type: Object as PropType<VoCodeView>,
@@ -152,7 +154,7 @@ const clickCancel = () => {
 }
 const clickConfirm = () => {
   if (selectTableFieldColumn.value.length <= 0) {
-    MessageBox.fail('请选择字段')
+    MessageBox.fail(t('code.fields-select'))
     return
   }
   const valMap = selectTableFieldColumn.value.reduce((m, v) => {
@@ -186,34 +188,36 @@ const toEditTemplate = () => {
   <div class="modelBox">
     <div class="left">
       <div style="text-align: right">
-        <el-link type="primary" @click="toEditTemplate()">编辑模板</el-link>
+        <el-link type="primary" @click="toEditTemplate()">{{
+          $t('code.template-edit')
+        }}</el-link>
         <CodeTemplateEdit
           v-if="templateEditVisible"
           v-model:is-show="templateEditVisible"
           :template-id="templateId"
-          title="VO模板"
+          :title="$t('code.tmplate-title', ['VO'])"
           type="VO"
           @success="editTemlateSuccess"
         ></CodeTemplateEdit>
       </div>
       <div>
-        <div>类名称:</div>
+        <div>{{ $t('code.class-name') }}:</div>
         <div><el-input v-model="voCodeParams!.name" /></div>
       </div>
       <div>
-        <div>包名称:</div>
+        <div>{{ $t('code.package-name') }}:</div>
         <div><el-input v-model="voCodeParams!.packageName" /></div>
       </div>
       <div>
-        <div>包路径:</div>
+        <div>{{ $t('code.source-folder') }}:</div>
         <div><el-input v-model="voCodeParams!.sourceFolder" /></div>
       </div>
       <div>
-        <div>父类:</div>
+        <div>{{ $t('code.superclass-name') }}:</div>
         <div><el-input v-model="voCodeParams!.superclassName" /></div>
       </div>
       <div>
-        <div class="box-lable">代码地址：</div>
+        <div class="box-lable">{{ $t('code.path') }}：</div>
         <div class="box-file">
           <el-tooltip
             :content="voCodeParams!.codePath"
@@ -225,7 +229,9 @@ const toEditTemplate = () => {
           >
             <el-input v-model="voCodeParams!.codePath">
               <template #append>
-                <el-button type="primary" @click="handleOpenMenu">选择地址</el-button>
+                <el-button type="primary" @click="handleOpenMenu">{{
+                  $t('code.select-path')
+                }}</el-button>
               </template>
             </el-input>
           </el-tooltip>
@@ -241,7 +247,9 @@ const toEditTemplate = () => {
         </div>
       </div>
       <div>
-        <el-link type="primary" @click="clickFieldMap">字段映射</el-link>
+        <el-link type="primary" @click="clickFieldMap">{{
+          $t('code.fields-mapping')
+        }}</el-link>
       </div>
     </div>
     <div class="right">
@@ -249,7 +257,7 @@ const toEditTemplate = () => {
     </div>
     <el-dialog
       v-model="fieldVisible"
-      title="字段映射-Vo"
+      :title="$t('code.fields-mapping') + '-Vo'"
       draggable
       width="80%"
       append-to-body
@@ -306,9 +314,11 @@ const toEditTemplate = () => {
       </el-table>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="clickCancel()">取消</el-button>
-          <el-button @click="clickReset()">重置</el-button>
-          <el-button type="primary" @click="clickConfirm()"> 确认 </el-button>
+          <el-button @click="clickCancel()">{{ $t('cancel') }}</el-button>
+          <el-button @click="clickReset()">{{ $t('reset') }}</el-button>
+          <el-button type="primary" @click="clickConfirm()">
+            {{ $t('confirm') }}
+          </el-button>
         </span>
       </template>
     </el-dialog>

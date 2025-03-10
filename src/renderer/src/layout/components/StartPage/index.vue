@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!props.started">
+  <div v-if="props && !props.started">
     <loading />
   </div>
   <div v-else>

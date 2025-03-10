@@ -5,6 +5,8 @@ import {
 } from '@/api/code/index'
 import MessageBox from '@/utils/MessageBox'
 import {getLicense,LicenseType } from '@/utils/licenseUtil'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 const isShow = defineModel('isShow', {
   type: Boolean,
   required: true,
@@ -55,30 +57,30 @@ watchEffect(()=>{
         label: item.templateName,
         children:[
           {
-            label:'Entity | 模型层（POJO）',value:'Entity'
+            label:'Entity | '+t('code.tab-pojo'),value:'Entity'
            },
            {
-            label:'VO | 模型层（POJO）',value:'VO'
+            label:'VO | '+t('code.tab-pojo'),value:'VO'
            },
           {
-            label:'Mapper | 数据持久层（Mapper）',value:'Mapper'
+            label:'Mapper | '+t('code.tab-mapper'),value:'Mapper'
            },
            {
-            label:'Xml(SQL) | 数据持久层（Mapper）',value:'Xml'
+            label:'Xml(SQL) | '+t('code.tab-mapper'),value:'Xml'
            },
           {
-            label:'ServiceApi | 业务层（Service）',value:'ServiceApi'
+            label:'ServiceApi | '+t('code.tab-service'),value:'ServiceApi'
            },
           {
-            label:'ServiceImpl | 业务层（Service）',value:'Service'
+            label:'ServiceImpl | '+t('code.tab-service'),value:'Service'
            },
           {
-           label:'接口层（Controller）',value:'Controller'
+           label:t('code.tab-controller'),value:'Controller'
           }
         ]
       }
     })
-    options.value=[{value:0, label:'全部',children: list||[] }]
+    options.value=[{value:0, label:t('select-all'),children: list||[] }]
   }
 })
 const handleChange = (_value) => {
@@ -95,24 +97,24 @@ const clickReset = () => {
   includeCodePath.value=false
 }
 const save = async () => {
+  const licenseInfo=basicConfigView.value.license
+  if(licenseInfo && licenseInfo!=''){
+    if(!licenseInfo.startsWith("/*") || !licenseInfo.endsWith("*/")){
+      MessageBox.fail(t('code.license-msg'),4000)
+      return
+    }
+  }
   let codePath=null
   if(includeCodePath.value){
     codePath=basicConfigView.value.codePath;
     if(!codePath || codePath.length<=0){
-    MessageBox.fail('默认代码地址不能为空')
+    MessageBox.fail(t('code.default-path-empty'))
     return
-    }
-  }
-  const licenseInfo=basicConfigView.value.license
-  if(licenseInfo && licenseInfo!=''){
-    if(!licenseInfo.startsWith("/*") || !licenseInfo.endsWith("*/")){
-      MessageBox.fail('代码license格式错误格式：/*开头*/结束',4000)
-      return
     }
   }
   const applyTempltes=applyTemplteList.value
   if(!applyTempltes || applyTempltes.length<=0){
-    MessageBox.fail('请选择应用的模板')
+    MessageBox.fail(t('code.template-select'))
     return
   }
   const applyTemplteMap =applyTempltes.reduce((result,item)=>{
@@ -134,7 +136,7 @@ const save = async () => {
    await  updateGlobalConfig(param).then((res) => {
       if (res) {
         emits('refresh',res)
-        MessageBox.ok('更新成功')
+        MessageBox.ok(t('update-success'))
       }
     })
 }
@@ -149,9 +151,9 @@ const handleLicense=async (type:string)=>{
     const license=basicConfigView.value.license
     if(license){
       await window.winApi.copy(license)
-      MessageBox.ok('复制成功')
+      MessageBox.ok(t('copy-success'))
     }else{
-      MessageBox.fail('license为空')
+      MessageBox.fail(t('is-empty',['license']))
     }
   }
 }
@@ -162,23 +164,23 @@ const handleLicense=async (type:string)=>{
     top="6vh"
     draggable
     append-to-body
-    title="全局配置"
+    :title="$t('code.global-config')"
     width="65%"
     :close-on-click-modal="false"
   >
     <div class="box">
       <div>
-        <div class="box-lable">代码作者：</div>
+        <div class="box-lable">{{ $t('code.author') }}：</div>
         <div>
           <el-input v-model="basicConfigView!.author" placeholder="代码作者" />
         </div>
       </div>
       <div>
-        <div class="box-lable">代码license：</div>
+        <div class="box-lable">{{ $t('code.license') }}：</div>
         <el-input
           v-model="basicConfigView!.license"
           type="textarea"
-          placeholder="代码license，选择标签或自定义，格式：/***/"
+          :placeholder="$t('code.license-placeholder')"
         />
         <div class="box-tag">
           <div class="flex gap-2">
@@ -211,38 +213,42 @@ const handleLicense=async (type:string)=>{
               :content="basicConfigView.license"
             >
               <template #reference>
-                <el-link type="info">查看</el-link>
+                <el-link type="info">{{ $t('search') }}</el-link>
               </template>
             </el-popover>
-            <el-link type="primary" @click="handleLicense('copy')">复制</el-link>
-            <el-link type="warning" @click="handleLicense('clear')">清空</el-link>
+            <el-link type="primary" @click="handleLicense('copy')">{{
+              $t('copy')
+            }}</el-link>
+            <el-link type="warning" @click="handleLicense('clear')">{{
+              $t('clean')
+            }}</el-link>
           </div>
         </div>
       </div>
       <div>
         <div class="box-lable">
-          代码路径：
+          {{ $t('code.path') }}：
           <el-switch v-model="includeCodePath" inline-prompt />
         </div>
         <div class="box-file">
           <el-input
             v-model="basicConfigView!.codePath"
             :disabled="!includeCodePath"
-            placeholder="默认代码地址"
+            :placeholder="$t('code.default-path')"
           >
             <template #append>
               <el-button
                 :disabled="!includeCodePath"
                 type="primary"
                 @click="handleOpenMenu"
-                >选择地址</el-button
+                >{{ $t('code.select-path') }}</el-button
               >
             </template>
           </el-input>
         </div>
       </div>
       <div>
-        <div class="box-lable">应用模板：</div>
+        <div class="box-lable">{{ $t('code.use-template') }}：</div>
         <div>
           <el-cascader-panel
             v-model="applyTemplteList"
@@ -267,9 +273,9 @@ const handleLicense=async (type:string)=>{
     </div>
     <template #footer>
       <span class="dialog-footer">
-        <el-button @click="cancel()">取消</el-button>
-        <el-button @click="clickReset()">重置</el-button>
-        <el-button type="primary" @click="save()"> 确认 </el-button>
+        <el-button @click="cancel()">{{ $t('cancel') }}</el-button>
+        <el-button @click="clickReset()">{{ $t('reset') }}</el-button>
+        <el-button type="primary" @click="save()"> {{ $t('confirm') }} </el-button>
       </span>
     </template>
   </el-dialog>

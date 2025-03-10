@@ -1,3 +1,5 @@
+import i18n from '@/i18n/index'
+const t = i18n.global.t
 export declare interface IMenu {
   readonly id: string
   name: string
@@ -28,14 +30,14 @@ export class MoreMenu implements IMenu {
  * @param command
  */
 export function deleteMenu(command?: Function): IMenu {
-  return new MoreMenu('delete', '删除', 'Delete', command)
+  return new MoreMenu('delete', t('delete'), 'Delete', command)
 }
 /**
  *
  * @param command
  */
 export function editMenu(command?: Function): IMenu {
-  return new MoreMenu('edit', '编辑', 'Edit', command)
+  return new MoreMenu('edit', t('edit'), 'Edit', command)
 }
 
 /**
@@ -43,5 +45,5 @@ export function editMenu(command?: Function): IMenu {
  * @param command
  */
 export function refreshMenu(command?: Function): IMenu {
-  return new MoreMenu('refresh', '刷新', 'Refresh', command)
+  return new MoreMenu('refresh', t('refresh'), 'Refresh', command)
 }

@@ -2,7 +2,7 @@
 
 <template>
   <div class="hp-box">
-    <div class="hp-title">打开开发者工具</div>
+    <div class="hp-title">{{ $t('help-open-dev') }}</div>
     <div class="hp-box-item">
       <div class="devBorder">Window</div>
       <div class="desc devBorder">Control+Shift+I</div>

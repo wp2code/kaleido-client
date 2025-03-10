@@ -14,6 +14,8 @@ import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import ElementPlus from 'unplugin-element-plus/vite'
+// import csp from 'vite-plugin-csp'
+import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
 // import {
 //   createStyleImportPlugin,
 //   ElementPlusResolve,
@@ -150,10 +152,21 @@ export default ({ command, mode }) => {
         },
       },
       plugins: [
+        // csp({
+        //   hashEnabled: {
+        //     'script-src': false,
+        //     'style-src': true,
+        //     'script-src-attr': true,
+        //     'style-src-attr': true,
+        //   },
+        // }),
         vue({
           script: {
             defineModel: true,
           },
+        }),
+        VueI18nPlugin({
+          include: [resolve(pathSrc, './i18n/locale/**')],
         }),
         vueJsx(),
         //解决message和notification引入不生效问题

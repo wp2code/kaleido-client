@@ -89,34 +89,36 @@ const toEditTemplate = () => {
   <div class="modelBox">
     <div class="left">
       <div style="text-align: right">
-        <el-link type="primary" @click="toEditTemplate()">编辑模板</el-link>
+        <el-link type="primary" @click="toEditTemplate()">{{
+          $t('code.template-edit')
+        }}</el-link>
         <CodeTemplateEdit
           v-if="templateEditVisible"
           v-model:is-show="templateEditVisible"
           :template-id="templateId"
-          title="ServiceApi模板"
+          :title="$t('tmplate-title', ['ServiceApi'])"
           type="ServiceApi"
           @success="editTemlateSuccess"
         ></CodeTemplateEdit>
       </div>
       <div>
-        <div>类名称:</div>
+        <div>{{ $t('code.class-name') }}:</div>
         <div><el-input v-model="serviceApiCodeView!.name" /></div>
       </div>
       <div>
-        <div>包名称:</div>
+        <div>{{ $t('code.package-name') }}:</div>
         <div><el-input v-model="serviceApiCodeView!.packageName" /></div>
       </div>
       <div>
-        <div>包路径:</div>
+        <div>{{ $t('code.source-folder') }}:</div>
         <div><el-input v-model="serviceApiCodeView!.sourceFolder" /></div>
       </div>
       <div>
-        <div>父类:</div>
+        <div>{{ $t('code.superclass-name') }}:</div>
         <div><el-input v-model="serviceApiCodeView!.superclassName" /></div>
       </div>
       <div>
-        <div class="box-lable">代码地址：</div>
+        <div class="box-lable">{{ $t('code.path') }}：</div>
         <div class="box-file">
           <el-tooltip
             :content="serviceApiCodeView!.codePath"
@@ -128,7 +130,9 @@ const toEditTemplate = () => {
           >
             <el-input v-model="serviceApiCodeView!.codePath">
               <template #append>
-                <el-button type="primary" @click="handleOpenMenu">选择地址</el-button>
+                <el-button type="primary" @click="handleOpenMenu">{{
+                  $t('code.select-path')
+                }}</el-button>
               </template>
             </el-input>
           </el-tooltip>
