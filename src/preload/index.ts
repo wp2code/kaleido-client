@@ -67,7 +67,7 @@ if (process.contextIsolated) {
   // @ts-ignore (define in dts)
   window.electronApi = electronAPI
   // @ts-ignore (define in dts)
-  window.winApi = api
+  window.winApi = winApi
   //@ts-ignore (define in dts)
   // window.db = db
   //@ts-ignore (define in dts)

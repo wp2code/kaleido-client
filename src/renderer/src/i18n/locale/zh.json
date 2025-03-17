@@ -82,6 +82,7 @@
   "language": "语言",
   "keywords-search": "输入关键字搜索",
   "help-open-dev": "打开开发者工具",
+  "server-starting": "启动中。。。",
   "code": {
     "author": "代码作者",
     "name": "代码名称",

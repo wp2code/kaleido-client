@@ -23,7 +23,7 @@ onMounted(() => {
       <div class="spinner"></div>
       <div class="spinner"></div>
     </div>
-    <div id="timer" class="timer">服务启动中({{ time }})...</div>
+    <div id="timer" class="timer">({{ time }}){{ $t('server-starting') }}</div>
   </div>
 </template>
 
