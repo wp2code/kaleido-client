@@ -97,7 +97,7 @@ function handleAfterEnter(el) {
   // color: #ddd;
   // border: 1px solid #ddd;
   // background-color: $subMenuHover;
-  background-color: #ffffff;
+  background-color: #ddd;
   padding: 10px;
   outline: none;
   overflow: hidden;

@@ -84,13 +84,13 @@ const buildCodeParamsWithCache = (
 
 const initBuildCodePrams = () => {
   return [
-    { name: 'Entity', description: t('tab-pojo') },
-    { name: 'VO', description: t('tab-pojo') },
-    { name: 'Mapper', description: t('tab-mapper') },
-    { name: 'Xml', description: t('tab-xml') },
-    { name: 'ServiceApi', description: t('tab-service-api') },
-    { name: 'Service', description: t('tab-service') },
-    { name: 'Controller', description: t('tab-controller') },
+    { name: 'Entity', description: t('code.tab-pojo') },
+    { name: 'VO', description: t('code.tab-pojo') },
+    { name: 'Mapper', description: t('code.tab-mapper') },
+    { name: 'Xml', description: t('code.tab-xml') },
+    { name: 'ServiceApi', description: t('code.tab-service-api') },
+    { name: 'Service', description: t('code.tab-service') },
+    { name: 'Controller', description: t('code.tab-controller') },
   ]
 }
 

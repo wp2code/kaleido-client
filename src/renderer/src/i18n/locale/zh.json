@@ -31,6 +31,7 @@
   "set-default": "设为默认",
   "copy-add": "复制新增",
   "edit": "编辑",
+  "clone": "克隆",
   "refresh": "刷新",
   "delete": "删除",
   "export": "导出",

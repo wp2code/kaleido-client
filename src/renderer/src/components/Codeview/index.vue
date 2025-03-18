@@ -37,7 +37,6 @@ const extensions = props.dark ? [html(), oneDark] : [html()]
 const codeValue = ref(props.code)
 const emits = defineEmits(['update:code', 'ready', 'change', 'focus', 'blur'])
 function handleReady(payload: any) {
-  console.log('ready')
   emits('ready', payload)
 }
 const handleCopy = async () => {

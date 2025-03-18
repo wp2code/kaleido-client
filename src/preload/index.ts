@@ -4,7 +4,7 @@ import { electronAPI } from '@electron-toolkit/preload'
 import path from 'path'
 import fs from 'fs'
 import os from 'os'
-import initApi from './init'
+import * as init from './init'
 const winApi = {
   openSaveDialog: (options = {}) => {
     return ipcRenderer.invoke('open-save-dialog', { options })
@@ -77,4 +77,4 @@ if (process.contextIsolated) {
   //@ts-ignore (define in dts)
   window.path = path
 }
-export default { electronAPI, winApi, initApi }
+export default { electronAPI, winApi, init }
