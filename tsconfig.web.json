@@ -35,7 +35,6 @@
     "src/renderer/*.d.ts",
     "src/repositories/**/*",
     "src/renderer/auto-imports.d.ts",
-    "src/renderer/global.d.ts"
-  ],
+    "src/renderer/global.d.ts" ],
   "exclude": ["node_modules", "out"]
 }

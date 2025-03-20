@@ -31,6 +31,7 @@
   "set-default": "设为默认",
   "copy-add": "复制新增",
   "edit": "编辑",
+  "clone": "克隆",
   "refresh": "刷新",
   "delete": "删除",
   "export": "导出",
@@ -82,6 +83,7 @@
   "language": "语言",
   "keywords-search": "输入关键字搜索",
   "help-open-dev": "打开开发者工具",
+  "server-starting": "启动中。。。",
   "code": {
     "author": "代码作者",
     "name": "代码名称",
@@ -104,6 +106,7 @@
     "default-path-empty": "默认代码地址为空",
     "select-path": "选择地址",
     "select-template": "选择模板",
+    "addProject": "新增项目",
     "addConnection": "新增连接",
     "connections": "连接",
     "conn-name": "名称",

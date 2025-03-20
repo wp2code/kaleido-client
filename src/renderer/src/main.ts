@@ -5,15 +5,12 @@ import router from '@/router'
 import { setupDirective } from '@/directive'
 // 国际化
 import { setupI18n } from '@/i18n/index'
-// import ElementPlus from 'element-plus'
 //路由守卫
 import '@/permission'
 // 本地SVG图标
 import 'virtual:svg-icons-register'
 
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
-// import zhCn from 'element-plus/es/locale/lang/zh-cn'
-// import zhTw from 'element-plus/es/locale/lang/zh-tw'
 import '@/styles/index.scss'
 import 'uno.css'
 const app = createApp(App)

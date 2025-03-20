@@ -6,6 +6,6 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
   },
-  "include": ["electron.vite.config.*","src/main/*", "src/preload/*","src/settings.ts","src/repositories/**/*", "src/preload/init.ts"],
+  "include": ["electron.vite.config.*","src/main/*", "src/preload/*","src/settings.ts"],
   "exclude": ["node_modules", "out"]
 }

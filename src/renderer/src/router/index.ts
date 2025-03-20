@@ -10,13 +10,13 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: () => import('@/views/welcome/index.vue'),
   },
   // {
-  //   path: '/website',
+  //   path: '/container',
   //   children: [
   //     {
-  //       path: 'website',
-  //       name: 'website',
-  //       component: () => import('@/views/website/index.vue'),
-  //       meta: { title: '网址', icon: 'website' },
+  //       path: 'container',
+  //       name: 'container',
+  //       component: () => import('@/views/container/index.vue'),
+  //       meta: { title: '容器', icon: 'container' },
   //     },
   //   ],
   // },

@@ -31,6 +31,7 @@
   "set-default": "Set as default",
   "copy-add": "Copy and add",
   "edit": "Edit",
+  "clone": "Clone",
   "refresh": "Refresh",
   "delete": "Delete",
   "export": "Export",
@@ -82,6 +83,7 @@
   "language": "language",
   "keywords-search": "Enter keywords to search",
   "help-open-dev": "Open developer tools",
+  "server-starting": "Staring...",
   "code": {
     "author": "Code author",
     "name": "Code name",
