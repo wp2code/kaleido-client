@@ -106,6 +106,7 @@
     "default-path-empty": "默认代码地址为空",
     "select-path": "选择地址",
     "select-template": "选择模板",
+    "addProject": "新增项目",
     "addConnection": "新增连接",
     "connections": "连接",
     "conn-name": "名称",

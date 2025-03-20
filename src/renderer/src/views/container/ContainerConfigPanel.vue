@@ -1,67 +1,58 @@
 <script lang="ts" setup>
-const toLocal = () => {}
-const toRemote = () => {}
-const toGitLab = () => {}
+import { RepositoryType } from '@/api/container/types'
+import ContainerConfigBox from './ContainerConfigBox.vue'
+const showConnentBox = ref(false)
+const repositoryTypeEnum = ref<RepositoryType>()
+const toRepository = (repositoryType: RepositoryType) => {
+  showConnentBox.value = true
+  repositoryTypeEnum.value = repositoryType
+}
 </script>
 
 <template>
-  <div class="box-div">
-    <div class="box-1">
-      <div class="item" @click="toLocal()">
-        <div class="itemBox">
-          <div class="itemBox-desc">
-            <svg-icon
-              icon-name="localdir"
-              size="1.1em"
-              style="margin: 2px 5px 0 0"
-            ></svg-icon>
-            <div>本地仓库</div>
-          </div>
-          <div class="itemBox-ops">+</div>
+  <div v-if="!showConnentBox" class="box-div">
+    <div class="item" @click="toRepository(RepositoryType.Local)">
+      <div class="itemBox">
+        <div class="itemBox-desc">
+          <svg-icon
+            icon-name="localdir"
+            size="1.1em"
+            style="margin: 2px 5px 0 0"
+          ></svg-icon>
+          <div>本地仓库</div>
         </div>
+        <div class="itemBox-ops">+</div>
       </div>
     </div>
-    <div class="box-2">
-      <div class="item" @click="toRemote()">
-        <div class="itemBox">
-          <div class="itemBox-desc">
-            <svg-icon
-              icon-name="gittree"
-              size="1.1em"
-              style="margin: 2px 5px 0 0"
-            ></svg-icon>
-            <div>远程仓库</div>
-          </div>
-          <div class="itemBox-ops">+</div>
+    <div class="item" @click="toRepository(RepositoryType.Remote)">
+      <div class="itemBox">
+        <div class="itemBox-desc">
+          <svg-icon
+            icon-name="gittree"
+            size="1.1em"
+            style="margin: 2px 5px 0 0"
+          ></svg-icon>
+          <div>远程仓库</div>
         </div>
-      </div>
-      <div class="item" @click="toGitLab()">
-        <div class="itemBox">
-          <div class="itemBox-desc">
-            <svg-icon
-              icon-name="gitlab"
-              size="1.1em"
-              style="margin: 2px 5px 0 0"
-            ></svg-icon>
-            <div>GitLab</div>
-          </div>
-          <div class="itemBox-ops">+</div>
-        </div>
+        <div class="itemBox-ops">+</div>
       </div>
     </div>
+  </div>
+  <div v-else class="box-box">
+    <ContainerConfigBox v-model="showConnentBox" :repository-type="repositoryTypeEnum" />
   </div>
 </template>
 <style lang="scss" scoped>
 .box-div {
   width: 100%;
   display: flex;
-  flex-flow: column;
-  align-items: center;
-}
-.box-2 {
-  display: flex;
   flex-flow: row;
-  align-items: center;
+  justify-content: center;
+}
+
+.box-box {
+  // background-color: blue;
+  width: 100%;
 }
 .item {
   color: #ddd;

@@ -9,17 +9,17 @@ export const constantRoutes: RouteRecordRaw[] = [
     path: '/',
     component: () => import('@/views/welcome/index.vue'),
   },
-  {
-    path: '/container',
-    children: [
-      {
-        path: 'container',
-        name: 'container',
-        component: () => import('@/views/container/index.vue'),
-        meta: { title: '容器', icon: 'container' },
-      },
-    ],
-  },
+  // {
+  //   path: '/container',
+  //   children: [
+  //     {
+  //       path: 'container',
+  //       name: 'container',
+  //       component: () => import('@/views/container/index.vue'),
+  //       meta: { title: '容器', icon: 'container' },
+  //     },
+  //   ],
+  // },
   {
     path: '/code',
     children: [

@@ -1,12 +1,13 @@
 <script lang="ts" setup>
 import ContainerConfigPanel from './ContainerConfigPanel.vue'
-const showCloneRepository = ref(false)
+const componentName = ref()
+const componentKey = ref()
 const toAddRepository = () => {
-  showCloneRepository.value = true
+  componentName.value = ContainerConfigPanel
 }
 </script>
 <template>
-  <box-layout layout="row" size="20%" :show-divider="true">
+  <box-layout layout="row" size="30%" :show-divider="true">
     <template #first>
       <div class="bm-btn">
         <el-button type="primary" @click="toAddRepository()">
@@ -14,12 +15,14 @@ const toAddRepository = () => {
             icon-name="stars"
             style="width: 2em; height: 2em; margin-right: 0.1em"
           />
-          {{ $t('code.addConnection') }}
+          {{ $t('code.addProject') }}
         </el-button>
       </div></template
     >
     <div class="box">
-      <ContainerConfigPanel />
+      <keep-alive>
+        <component :is="componentName" :key="componentKey"></component>
+      </keep-alive>
     </div>
   </box-layout>
 </template>
@@ -35,7 +38,7 @@ const toAddRepository = () => {
   position: relative;
 }
 .bm-btn {
-  width: 20%;
+  width: 30%;
   position: absolute;
   text-align: center;
   bottom: 10px;
