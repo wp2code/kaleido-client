@@ -93,6 +93,7 @@ const editTemlateSuccess = (template: PartitionTempate) => {
   methodList.value = initMethodList.value
   checkBoxStatusChange(methodList.value)
   stop()
+  buildCodeParamsWithCodeView([mapperCodeView.value], props.tableData)
 }
 const refreshGenCode = debounce((directUseTemplateConfig: boolean) => {
   const entityCodeParam = useGenCodeParam.getCodeParamCache('Entity')

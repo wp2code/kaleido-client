@@ -6,6 +6,7 @@ import {
   CodeTemplate,
   PartitionTempate,
 } from '@/api/code/types'
+import { useGenCodeParamStore } from '@/store/modules/cache'
 import { SelectDataTableData, TableFieldColumnParam } from '@/api/datasource/types'
 import { getTemplateTableFieldColumnList } from '@/api/code/index'
 import { ElTable } from 'element-plus'
@@ -17,6 +18,7 @@ import CodeTemplateEdit from './CodeTemplateEdit.vue'
 import { TriggerWatch } from '../../keys'
 import { debounce } from 'lodash-es'
 import { useI18n } from 'vue-i18n'
+const useGenCodeParam = useGenCodeParamStore()
 const { t } = useI18n()
 const props = defineProps({
   data: {
@@ -115,6 +117,10 @@ const editTemlateSuccess = (template: PartitionTempate) => {
     entityCodeParams.value.tableFieldColumnMap = tableFieldColumns
     entityCodeParams.value.name = null
   })
+  useGenCodeParam.setCodeParamCache(
+    entityCodeParams.value.name,
+    buildCodeParamsWithCodeView([entityCodeParams.value], props.tableData)[0]
+  )
 }
 const refreshGenCode = debounce((directUseTemplateConfig: boolean) => {
   previewCode(

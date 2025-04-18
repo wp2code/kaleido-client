@@ -125,7 +125,7 @@
     "tab-service-api": "业务层（ServiceApi）",
     "tab-controller": "接口层（Controller）",
     "ignore-fields": "过滤字段",
-    "ignore-fields-rule": "多个用|分割",
+    "ignore-fields-rule": "多个用{0}分割",
     "default-ignore-fields": "默认不生成字段",
     "fields-mapping": "字段映射",
     "superclass-name": "父类",
