@@ -38,6 +38,7 @@ const editTemlateSuccess = (template: PartitionTempate) => {
     name: serviceCodeView.value.name,
   })
   serviceCodeView.value.name = null
+  buildCodeParamsWithCodeView([serviceCodeView.value], props.tableData)
 }
 watchEffect(() => {
   serviceCodeView.value = props.data

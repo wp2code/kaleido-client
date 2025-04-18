@@ -72,6 +72,10 @@ const { stop } = watchEffect(() => {
     }
   }
   xmlCodeView.value = props.data
+  useGenCodeParam.setCodeParamCache(
+    xmlCodeView.value.name,
+    buildCodeParamsWithCodeView([xmlCodeView.value], props.tableData)[0]
+  )
 })
 watch(
   [

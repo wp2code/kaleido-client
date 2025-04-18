@@ -46,7 +46,7 @@ const buildCodeParamsWithTemplate = (
     const p = CodeGenerationParam.mack(
       tableData,
       template,
-      config.name,
+      config,
       tableFieldColumnList
     )
     useGenCodeParam.setCodeParamCache(p.configName, p)
@@ -70,8 +70,9 @@ const buildCodeParamsWithCache = (
   const params = []
   for (let config of configs) {
     const p = useGenCodeParam.getCodeParamCache(config.name)
+    console.log(config.name, p)
     if (!p) {
-      const p = CodeGenerationParam.mack(tableData, template, config.name)
+      const p = CodeGenerationParam.mack(tableData, template, config)
       useGenCodeParam.setCodeParamCache(p.configName, p)
     }
     if (responseTemplateCodeList) {

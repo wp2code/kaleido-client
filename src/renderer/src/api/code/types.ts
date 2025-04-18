@@ -353,7 +353,7 @@ export class CodeGenerationParam {
   static mack(
     tableData: SelectDataTableData,
     selectCodeTemplate: CodeTemplate,
-    configName: string,
+    codeTemplateConfig: CodeTemplateConfig,
     tableFieldColumnList: TableFieldColumn[] = []
   ): CodeGenerationParam {
     const param = new CodeGenerationParam()
@@ -361,7 +361,8 @@ export class CodeGenerationParam {
     param.tableComment = tableData.table?.comment
     param.schemaName = tableData.table?.schemaName
     param.dataBaseName = tableData.table?.dataBaseName
-    param.configName = configName
+    param.configName = codeTemplateConfig.name
+    param.codePath = codeTemplateConfig.codePath
     param.tableFieldColumnList = tableFieldColumnList
     param.dataSource = tableData.dataSource
     param.selectCodeTemplate = selectCodeTemplate

@@ -79,6 +79,7 @@ const editTemlateSuccess = (template: PartitionTempate) => {
     voCodeParams.value.tableFieldColumnMap = tableFieldColumns
   })
   voCodeParams.value.name = null
+  buildCodeParamsWithCodeView([voCodeParams.value], props.tableData)
 }
 watchEffect(() => {
   voCodeParams.value = props.data

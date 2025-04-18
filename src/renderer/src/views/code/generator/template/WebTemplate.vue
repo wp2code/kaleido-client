@@ -54,6 +54,7 @@ const editTemlateSuccess = (template: PartitionTempate) => {
   methodList.value = initMethodList.value
   checkBoxStatusChange(methodList.value)
   stop()
+  buildCodeParamsWithCodeView([webCodeView.value], props.tableData)
 }
 const { stop } = watchEffect(() => {
   if (props.data.templateInfo) {
