@@ -72,10 +72,6 @@ const { stop } = watchEffect(() => {
     }
   }
   xmlCodeView.value = props.data
-  useGenCodeParam.setCodeParamCache(
-    xmlCodeView.value.name,
-    buildCodeParamsWithCodeView([xmlCodeView.value], props.tableData)[0]
-  )
 })
 watch(
   [
@@ -127,6 +123,7 @@ const editTemlateSuccess = (template: PartitionTempate) => {
   methodList.value = initMethodList.value
   checkBoxStatusChange(methodList.value)
   stop()
+  buildCodeParamsWithCodeView([xmlCodeView.value], props.tableData)
 }
 const clickMethod = () => {
   methodVisible.value = true
