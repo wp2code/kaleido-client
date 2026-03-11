@@ -46,6 +46,7 @@ export enum DbType {
   PostgreSQL = 'PostgreSQL',
   Oracle = 'Oracle',
   TDengine = 'TDengine',
+  DM = 'DM',
 }
 export class SelectDataTableData {
   dataSource: DataSource
@@ -60,7 +61,7 @@ export function initDataSource(): DataSource[] {
   return [
     getDefault(DbType.MySQL),
     getDefault(DbType.PostgreSQL),
-    // getDefault(DbType.Oracle),
+    getDefault(DbType.DM),
     // getDefault(DbType.TDengine),
   ]
 }
@@ -107,6 +108,16 @@ export function getDefault(dbType: DbType): DataSource {
         url: 'localhost',
         port: 6030,
         userName: 'root',
+      } as DataSource
+      break
+    case DbType.DM:
+      dbConfig = {
+        type: DbType.DM,
+        icon: 'DM',
+        name: '@localhost',
+        url: 'localhost',
+        port: 5632,
+        userName: 'SYSDMDB',
       } as DataSource
       break
   }

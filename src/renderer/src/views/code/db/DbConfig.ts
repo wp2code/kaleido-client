@@ -3,6 +3,7 @@ export enum DbType {
   PostgreSQL = 'PostgreSQL',
   Oracle = 'Oracle',
   TDengine = 'TDengine',
+  DM = 'DM',
 }
 export function getDefault(dbType: DbType): DbConfig {
   let dbConfig: DbConfig = null
@@ -47,6 +48,18 @@ export function getDefault(dbType: DbType): DbConfig {
         'localhost',
         6030,
         'root'
+      )
+      break
+    case DbType.DM:
+      dbConfig = new DbConfig(
+        DbType.DM,
+        'DM',
+        '@localhost',
+        'localhost',
+        5236,
+        'SYSDBA',
+        '',
+        'DAMENG'
       )
       break
   }
