@@ -62,6 +62,7 @@ export function initDataSource(): DataSource[] {
     getDefault(DbType.MySQL),
     getDefault(DbType.PostgreSQL),
     getDefault(DbType.DM),
+    // getDefault(DbType.Oracle),
     // getDefault(DbType.TDengine),
   ]
 }
@@ -116,8 +117,9 @@ export function getDefault(dbType: DbType): DataSource {
         icon: 'DM',
         name: '@localhost',
         url: 'localhost',
-        port: 5632,
-        userName: 'SYSDMDB',
+        port: 5236,
+        userName: 'SYSDBA',
+        dbName: 'DAMENG',
       } as DataSource
       break
   }

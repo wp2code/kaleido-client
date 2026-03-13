@@ -59,7 +59,7 @@ export function getDefault(dbType: DbType): DbConfig {
         5236,
         'SYSDBA',
         '',
-        'DAMENG'
+        ''
       )
       break
   }
